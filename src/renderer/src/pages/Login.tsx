@@ -37,16 +37,22 @@ function Login(): React.JSX.Element {
       return
     }
 
-    login({
-      uuid: foundUser.uuid,
-      email: foundUser.email,
-      role: foundUser.role as Role
-    })
+    if (role !== foundUser.role) {
+      setError('Selected role does not match user role')
+      return
+    }
 
-    if (foundUser.role === STUDENT_ROLE) {
-      navigate('/studentdashboard')
-    } else if (foundUser.role === INSTRUCTOR_ROLE) {
-      navigate('/instructordashboard')
+    try {
+      const loggedInUser = await login(email, password)
+
+      if (loggedInUser.role === STUDENT_ROLE) {
+        navigate('/studentdashboard')
+      } else if (loggedInUser.role === INSTRUCTOR_ROLE) {
+        navigate('/instructordashboard')
+      }
+    } catch (err) {
+      setError('Login failed. Please check your email and password.')
+      console.error(err)
     }
   }
 

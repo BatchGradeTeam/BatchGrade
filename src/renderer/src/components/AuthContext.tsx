@@ -35,7 +35,7 @@
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react'
 
 import type { User as SupabaseUser } from '@supabase/supabase-js'
-import { STUDENT_ROLE, VALID_ROLES } from 'src/shared/types'
+import { STUDENT_ROLE, VALID_ROLES } from '../../../shared/types'
 import { supabase } from '../lib/supabase'
 
 type AuthUser = {
