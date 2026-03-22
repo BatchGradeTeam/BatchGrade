@@ -16,6 +16,8 @@ extraMetadata:
   main: ./out/main/index.js
 asarUnpack:
   - resources/**
+  # `better-sqlite3` is native code and must stay unpacked so Electron can load
+  # the rebuilt binary that matches the packaged runtime.
   - node_modules/better-sqlite3/**
 win:
   executableName: batchgrade
@@ -44,7 +46,6 @@ linux:
   category: Utility
 appImage:
   artifactName: ${name}-${version}.${ext}
-npmRebuild: false
 publish:
   provider: generic
   url: https://example.com/auto-updates
