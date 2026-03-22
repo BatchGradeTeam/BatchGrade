@@ -1,18 +1,9 @@
 import { sqliteTable, text, integer, blob } from 'drizzle-orm/sqlite-core'
 import { sql } from 'drizzle-orm'
-import { sections } from './academic'
 import { users } from './user'
+import { assignmentsInstrc } from './assignment'
 
-export const assignments = sqliteTable('assignments', {
-  uuid: text('uuid')
-    .primaryKey()
-    .$defaultFn(() => crypto.randomUUID()),
-  sectionId: text('section_id')
-    .notNull()
-    .references(() => sections.uuid),
-  title: text('title').notNull(),
-  dueDate: integer('due_date').notNull() // Change the variable type to date type
-})
+export const assignments = assignmentsInstrc
 
 export const submissions = sqliteTable('submissions', {
   uuid: text('uuid')
