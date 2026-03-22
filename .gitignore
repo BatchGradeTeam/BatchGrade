@@ -3,6 +3,7 @@ dist
 out
 .DS_Store
 .eslintcache
+.vscode
 *.log*
 dev.db
 dev.db-wal

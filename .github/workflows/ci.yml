@@ -1,13 +1,21 @@
 # TODO: Add AI proper citation: https://chatgpt.com/share/69bf9b45-7fa0-800e-8f8a-31b7012f4f40
 name: CI Workflow
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 on:
   push:
   pull_request:
+    branches: ["main"]
 
 jobs:
-  checks:
-    runs-on: ubuntu-latest
+  build: # Mainly for lint & typecheck
+    strategy:
+      fail-fast: false # See all OS results
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+
+    runs-on: ${{ matrix.os }} # Run job instances across the multiple OS in parallel
 
     steps:
       - name: Checkout
@@ -16,9 +24,11 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 22
-          cache: npm
+          cache: npm # Built-in dependency caching for npm
 
+      # Clean install dependencies from package-lock.json
+      # Automatically removes existing node_modules beforehand
+      # Better for automated environments than npm install
       - name: Install dependencies
         run: npm ci
 
@@ -28,16 +38,37 @@ jobs:
       - name: Typecheck
         run: npm run typecheck
 
+  test: # For unit tests
+    strategy:
+      fail-fast: false # See all OS results
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+
+    runs-on: ${{ matrix.os }} # Run job instances across the multiple OS in parallel
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          cache: npm # Built-in dependency caching for npm
+
+      # Clean install dependencies from package-lock.json
+      - name: Install dependencies
+        run: npm ci
+
       - name: Test
-        run: npm test
+        run: npm test # Test coverage >=90 is not enforced yet
 
   package:
-    needs: checks
+    needs: [build, test]
     if: github.event_name == 'push'
     strategy:
       fail-fast: false
       matrix:
-        include: 
+        include:
           - os: windows-latest
             build_script: build:win
             artifact_name: batchgrade-windows
@@ -91,5 +122,5 @@ jobs:
 # Changed from ChatGPT:
 #   - Replaced npm run dist with the actual scripts this repo has
 #   - Added a build_script per OS
-#   - Limited packaging to push so PRs don’t spend time building installers
+#   - Limited packaging to push so PRs don't spend time building installers
 #   - Simplified artifact upload to dist/**, which is less brittle than extension lists
