@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import type { User } from '../../../shared/types'
+// import type { User } from '../../../shared/types'
 import { INSTRUCTOR_ROLE, STUDENT_ROLE } from '../../../shared/types'
 import { useAuth } from '../components/AuthContext'
 
@@ -8,40 +8,37 @@ function Login(): React.JSX.Element {
   const navigate = useNavigate()
   const { login } = useAuth()
 
-  const [role, setRole] = useState<typeof STUDENT_ROLE | typeof INSTRUCTOR_ROLE | null>(null)
+  const [role, setRole] = useState<typeof STUDENT_ROLE | typeof INSTRUCTOR_ROLE | null>(null) // Track role the user selects -> initialized as null
+  
+  // Controlled input state for login form 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [error, setError] = useState<string | null>(null)
+
+  const [error, setError] = useState<string | null>(null) // Store any error message 
 
   async function handleLogin(): Promise<void> {
-    setError(null)
+    setError(null) // Clear any previous errors before attempting login
 
-    const users: User[] = await window.api.users.getAll()
-    const foundUser = users.find((user) => user.email === email)
+    // const users: User[] = await window.api.users.getAll()
+    // const foundUser = users.find((user) => user.email === email)
+    // if (!foundUser) {
+    //   // Check if user exists
+    //   setError('User does not exist.') // FIXME: idk if we would want to keep this (security purposes)
+    //   return
+    // }
 
-    if (!foundUser) {
-      setError('User does not exist')
-      return
-    }
-
+    // All users must have a password
     if (password.length === 0) {
       setError('Password required')
       return
     }
 
-    const validRoles = [STUDENT_ROLE, INSTRUCTOR_ROLE] as const
-    type Role = (typeof validRoles)[number]
+    // if (role !== foundUser.role) {
+    //   setError('Selected role does not match user role') // FIXME: again security issue...
+    //   return
+    // }
 
-    if (!validRoles.includes(foundUser.role as Role)) {
-      setError('Invalid user role')
-      return
-    }
-
-    if (role !== foundUser.role) {
-      setError('Selected role does not match user role')
-      return
-    }
-
+    // Actually try logging in (through AuthContext)
     try {
       const loggedInUser = await login(email, password)
 
@@ -51,7 +48,11 @@ function Login(): React.JSX.Element {
         navigate('/instructordashboard')
       }
     } catch (err) {
-      setError('Login failed. Please check your email and password.')
+      const message =
+        err instanceof Error
+          ? err.message
+          : 'Login failed. Please check your email and password again.'
+      setError(message)
       console.error(err)
     }
   }
