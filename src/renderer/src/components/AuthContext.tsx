@@ -36,6 +36,7 @@ import React, { createContext, useContext, useState, ReactNode, useEffect } from
 import type { User as SupabaseUser } from '@supabase/supabase-js'
 import { STUDENT_ROLE, VALID_ROLES } from '../../../shared/types'
 import { supabase } from '../lib/supabase'
+import { getProfile } from '../lib/profiles'
 
 type AuthUser = {
   uuid: string
@@ -51,6 +52,7 @@ interface AuthContextType {
   user: AuthUser | null // Stores information about the logged-in user
   login: (email: string, password: string) => Promise<AuthUser> // Function used to authenticate a user
   logout: () => Promise<void> // Function used to terminate the user's session
+  refreshProfile: () => Promise<AuthUser | null>
 }
 
 // Create the authentication context.
@@ -104,13 +106,52 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   }
 
+  // Refreshes the user's profile from the database, so we always have the latest role and metadata.
+  const refreshProfile = async() : Promise<AuthUser | null> => {
+    const {
+      data: { user: authUser },
+      error
+    } = await supabase.auth.getUser()
+
+    if (error) {
+      throw error
+    }
+
+    if (!authUser) {
+      setUser(null)
+      setIsLoggedIn(false)
+      return null
+    }
+
+    try {
+      const profile = await getProfile()
+
+      const nextUser: AuthUser = {
+        uuid: authUser.id,
+        email: authUser.email ?? profile?.email ?? '',
+        role: toRole(profile?.role)
+      }
+
+      setUser(nextUser)
+      setIsLoggedIn(true)
+      return nextUser
+    } catch {
+      // Fallback if profile table fails
+      const fallbackUser = mapSupabaseUser(authUser)
+      setUser(fallbackUser)
+      setIsLoggedIn(Boolean(fallbackUser))
+      return fallbackUser
+    }
+
+  }
+
   // Restores any existing Supabase session when the app first loads and subscribes to future authentication state changes
   useEffect(() => {
     let isMounted = true
 
     void supabase.auth
       .getSession()
-      .then(({ data, error }) => {
+      .then(async ({ data, error }) => {
         if (!isMounted) {
           return
         }
@@ -118,9 +159,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           console.error('Error restoring auth session: ', error)
         }
 
-        const restoredUser = mapSupabaseUser(data.session?.user ?? null)
-        setUser(restoredUser)
-        setIsLoggedIn(Boolean(restoredUser))
+        if (data.session?.user) {
+          await refreshProfile()
+        } else {
+          setUser(null)
+          setIsLoggedIn(false)
+        }
+
         setIsAuthLoading(false)
       })
       .catch((error) => {
@@ -132,10 +177,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
     const {
       data: { subscription }
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      const nextUser = mapSupabaseUser(session?.user ?? null)
-      setUser(nextUser)
-      setIsLoggedIn(Boolean(nextUser))
+    } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      if (session?.user) {
+        await refreshProfile()
+      } else {
+        setUser(null)
+        setIsLoggedIn(false)
+      }
+
       setIsAuthLoading(false)
     })
 
@@ -145,9 +194,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   }, [])
 
-  // handles user login by updating authentication state and storing the user's identifying information
+  // Handles user login with Supabase then refreshes the user's profile to update authentication state and user information
   const login = async (email: string, password: string) : Promise<AuthUser> => {
-    const { data, error } = await supabase.auth.signInWithPassword({
+    const { error } = await supabase.auth.signInWithPassword({
       email,
       password
     })
@@ -156,14 +205,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       throw error
     }
 
-    const loggedInUser = mapSupabaseUser(data.user)
+    const loggedInUser = await refreshProfile()
     if (!loggedInUser) {
       throw new Error('Signed in, but no usable user profile was returned.')
     }
-
-    setIsLoggedIn(true)
-    setUser(loggedInUser)
-
     return loggedInUser
   }
 
@@ -182,7 +227,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   // provides authentication state and functions to any component wrapped inside this provider
   return (
-    <AuthContext.Provider value={{ isLoggedIn, isAuthLoading, user, login, logout }}>
+    <AuthContext.Provider value={{ isLoggedIn, isAuthLoading, user, login, logout, refreshProfile }}>
       {children}
     </AuthContext.Provider>
   )
