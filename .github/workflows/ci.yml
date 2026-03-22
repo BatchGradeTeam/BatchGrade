@@ -24,13 +24,14 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
+          node-version: 24
           cache: npm # Built-in dependency caching for npm
 
       # Clean install dependencies from package-lock.json
       # Automatically removes existing node_modules beforehand
       # Better for automated environments than npm install
       - name: Install dependencies
-        run: npm ci
+        run: npm ci --ignore-scripts
 
       - name: Lint
         run: npm run lint
@@ -53,14 +54,18 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
+          node-version: 24
           cache: npm # Built-in dependency caching for npm
 
       # Clean install dependencies from package-lock.json
       - name: Install dependencies
-        run: npm ci
+        run: npm ci --ignore-scripts
+
+      - name: Rebuild native test dependencies
+        run: npm rebuild better-sqlite3
 
       - name: Test
-        run: npm test # Test coverage >=90 is not enforced yet
+        run: npm run test:ci # Test coverage >=90 is not enforced yet
 
   package:
     needs: [build, test]
@@ -90,7 +95,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 24
           cache: npm
 
       - name: Validate build environment
