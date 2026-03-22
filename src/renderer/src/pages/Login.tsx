@@ -6,7 +6,7 @@ import { useAuth } from '../components/AuthContext'
 
 function Login(): React.JSX.Element {
   const navigate = useNavigate()
-  const { login } = useAuth()
+  const { login, logout } = useAuth()
 
   const [role, setRole] = useState<typeof STUDENT_ROLE | typeof INSTRUCTOR_ROLE | null>(null) // Track role the user selects -> initialized as null
 
@@ -41,6 +41,13 @@ function Login(): React.JSX.Element {
     // Actually try logging in (through AuthContext)
     try {
       const loggedInUser = await login(email, password)
+      if (role !== loggedInUser.role) {
+        await logout()
+        setError(
+          `This account is registered as a ${loggedInUser.role}. Please use the ${loggedInUser.role} login option.` // FIXME: Probably need to change for security purposes
+        )
+        return
+      }
 
       if (loggedInUser.role === STUDENT_ROLE) {
         navigate('/studentdashboard')
