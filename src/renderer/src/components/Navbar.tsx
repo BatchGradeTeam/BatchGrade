@@ -9,7 +9,7 @@
  *
  * If the user is logged in, a profile avatar is displayed
  * which currently functions as a logout trigger. If the
- * user is not logged in, a login button is shown instead.
+ * user is not logged in, login and signup buttons are shown instead.
  */
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
@@ -74,10 +74,15 @@ function NavBar(): React.JSX.Element {
           />
         ) : (
           /* Logged-Out State:
-              Display login button */
-          <button className="primary-button" onClick={() => navigate('/login')}>
-            Login
-          </button>
+              Display login and signup buttons */
+          <div className="navbar-auth-actions">
+            <button className="secondary-button" onClick={() => navigate('/signup')}>
+              Sign Up
+            </button>
+            <button className="primary-button" onClick={() => navigate('/login')}>
+              Login
+            </button>
+          </div>
         )}
       </nav>
 

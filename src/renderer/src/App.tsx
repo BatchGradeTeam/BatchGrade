@@ -6,6 +6,7 @@ import Grading from './pages/Grading'
 import Home from './pages/Home'
 import InstructorDashboard from './pages/InstructorDashboard'
 import Login from './pages/Login'
+import SignUp from './pages/SignUp'
 import Gradebook from './pages/Gradebook'
 import StudentDashboard from './pages/StudentDashboard'
 
@@ -16,6 +17,7 @@ function App(): React.JSX.Element {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<SignUp />} />
           <Route
             path="/studentdashboard"
             element={

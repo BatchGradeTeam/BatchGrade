@@ -44,6 +44,11 @@ type AuthUser = {
   role: (typeof VALID_ROLES)[number]
 }
 
+type SignupResult = {
+  user: AuthUser | null
+  hasSession: boolean
+}
+
 // Defines the structure of the authentication context.
 // This ensures all consumers of the context know exactly what data and functions exists
 interface AuthContextType {
@@ -51,6 +56,11 @@ interface AuthContextType {
   isAuthLoading: boolean // Indicates whether authentication state is still being restored
   user: AuthUser | null // Stores information about the logged-in user
   login: (email: string, password: string) => Promise<AuthUser> // Function used to authenticate a user
+  signup: (
+    email: string,
+    password: string,
+    role: (typeof VALID_ROLES)[number]
+  ) => Promise<SignupResult>
   logout: () => Promise<void> // Function used to terminate the user's session
   refreshProfile: () => Promise<AuthUser | null>
 }
@@ -177,15 +187,31 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
     const {
       data: { subscription }
-    } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      if (session?.user) {
-        await refreshProfile()
-      } else {
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      window.setTimeout(() => {
+        if (!isMounted) {
+          return
+        }
+
+        if (session?.user) {
+          void refreshProfile()
+            .catch((error) => {
+              if (isMounted) {
+                console.error('Error refreshing auth session: ', error)
+              }
+            })
+            .finally(() => {
+              if (isMounted) {
+                setIsAuthLoading(false)
+              }
+            })
+          return
+        }
+
         setUser(null)
         setIsLoggedIn(false)
-      }
-
-      setIsAuthLoading(false)
+        setIsAuthLoading(false)
+      }, 0)
     })
 
     return () => {
@@ -211,7 +237,42 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
     return loggedInUser
   }
+  
+  // Handles user signup with Supabase authentication.
+  // This returns as soon as auth confirms the user record was created so the UI
+  // can show a stable success state without waiting on profile restoration.
+  const signup = async (
+    email: string,
+    password: string,
+    role: (typeof VALID_ROLES)[number]
+  ): Promise<SignupResult> => {
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          role
+        }
+      }
+    })
 
+    if (error) {
+      throw error
+    }
+
+    if (!data.user) {
+      return { user: null, hasSession: false }
+    }
+
+    return {
+      user: mapSupabaseUser(data.user) ?? {
+        uuid: data.user.id,
+        email: data.user.email ?? '',
+        role
+      },
+      hasSession: Boolean(data.session)
+    }
+  }
 
   // handles user logout by clearing the Supabase session and removing stored user information
   const logout = async (): Promise<void> => {
@@ -227,7 +288,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   // provides authentication state and functions to any component wrapped inside this provider
   return (
-    <AuthContext.Provider value={{ isLoggedIn, isAuthLoading, user, login, logout, refreshProfile }}>
+    <AuthContext.Provider value={{ isLoggedIn, isAuthLoading, user, login, signup, logout, refreshProfile }}>
       {children}
     </AuthContext.Provider>
   )

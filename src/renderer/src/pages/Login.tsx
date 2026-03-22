@@ -9,12 +9,12 @@ function Login(): React.JSX.Element {
   const { login } = useAuth()
 
   const [role, setRole] = useState<typeof STUDENT_ROLE | typeof INSTRUCTOR_ROLE | null>(null) // Track role the user selects -> initialized as null
-  
-  // Controlled input state for login form 
+
+  // Controlled input state for login form
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
 
-  const [error, setError] = useState<string | null>(null) // Store any error message 
+  const [error, setError] = useState<string | null>(null) // Store any error message
 
   async function handleLogin(): Promise<void> {
     setError(null) // Clear any previous errors before attempting login
@@ -125,6 +125,12 @@ function Login(): React.JSX.Element {
                   }}
                 >
                   Cancel
+                </button>
+              </div>
+
+              <div className="create-account">
+                <button className="secondary-button" onClick={() => navigate('/signup')}>
+                  Create Account
                 </button>
               </div>
             </div>

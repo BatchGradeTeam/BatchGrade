@@ -290,6 +290,16 @@ footer {
   margin: 0;
 }
 
+.navbar .secondary-button {
+  margin: 0;
+}
+
+.navbar-auth-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
 .navbar-title {
   font-size: 1.25rem;
   font-weight: 600;

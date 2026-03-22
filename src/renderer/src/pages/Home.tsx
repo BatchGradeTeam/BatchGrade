@@ -31,6 +31,16 @@ function Home(): React.JSX.Element {
           </div>
 
           <div className="p-6">
+            <p
+              style={{
+                color: '#fca5a5',
+                textAlign: 'center',
+                marginBottom: '1rem',
+                fontWeight: 600
+              }}
+            >
+              This portion is used for development. Use the top right buttons to sign up and login.
+            </p>
             <UserPanel />
           </div>
         </div>
