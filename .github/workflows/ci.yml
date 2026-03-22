@@ -1,3 +1,4 @@
+# TODO: Add AI citation: https://chatgpt.com/share/69bf9b45-7fa0-800e-8f8a-31b7012f4f40
 name: CI Workflow
 
 on:
@@ -29,3 +30,66 @@ jobs:
 
       - name: Test
         run: npm test
+
+  package:
+    needs: checks
+    if: github.event_name == 'push'
+    strategy:
+      fail-fast: false
+      matrix:
+        include: 
+          - os: windows-latest
+            build_script: build:win
+            artifact_name: batchgrade-windows
+          - os: macos-latest
+            build_script: build:mac
+            artifact_name: batchgrade-macos
+          - os: ubuntu-latest
+            build_script: build:linux
+            artifact_name: batchgrade-linux
+    runs-on: ${{ matrix.os }}
+    env:
+      VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
+      VITE_SUPABASE_PUBLISHABLE_DEFAULT_KEY: ${{ vars.VITE_SUPABASE_PUBLISHABLE_DEFAULT_KEY }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Validate build environment
+        shell: bash
+        run: |
+          if [ -z "${VITE_SUPABASE_URL}" ]; then
+            echo "Missing Actions variable: VITE_SUPABASE_URL"
+            exit 1
+          fi
+
+          if [ -z "${VITE_SUPABASE_PUBLISHABLE_DEFAULT_KEY}" ]; then
+            echo "Missing Actions variable: VITE_SUPABASE_PUBLISHABLE_DEFAULT_KEY"
+            exit 1
+          fi
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Package desktop app
+        run: npm run ${{ matrix.build_script }}
+
+      - name: Upload packaged artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact_name }}
+          path: dist/**
+          if-no-files-found: error
+
+# Changed from ChatGPT:
+#   - Replaced npm run dist with the actual scripts this repo has
+#   - Added a build_script per OS
+#   - Limited packaging to push so PRs don’t spend time building installers
+#   - Simplified artifact upload to dist/**, which is less brittle than extension lists

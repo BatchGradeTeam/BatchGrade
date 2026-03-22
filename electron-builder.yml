@@ -9,6 +9,11 @@ files:
   - '!{.eslintcache,eslint.config.mjs,.prettierignore,.prettierrc.yaml,dev-app-update.yml,CHANGELOG.md,README.md}'
   - '!{.env,.env.*,.npmrc,pnpm-lock.yaml}'
   - '!{tsconfig.json,tsconfig.node.json,tsconfig.web.json}'
+extraResources:
+  - from: src/main/database/migrations
+    to: migrations
+extraMetadata:
+  main: ./out/main/index.js
 asarUnpack:
   - resources/**
   - node_modules/better-sqlite3/**
