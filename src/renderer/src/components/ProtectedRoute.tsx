@@ -7,6 +7,10 @@
  * This component checks if the current user is authenticated and,
  * optionally, whether they have the required role(s) to access a route.
  * If not, it redirects them to an appropriate page (login or home).
+ * 
+ * While authentication state is still being restored, the component temporarily
+ * renders a loading message so routes do not redirect prematurely before the user's
+ * session has been checked
  */
 import { ReactElement } from 'react'
 import { Navigate } from 'react-router-dom'
@@ -27,7 +31,12 @@ export default function ProtectedRoute({
   requiredRoles,
   fallbackPath = '/'
 }: ProtectedRouteProps): ReactElement {
-  const { isLoggedIn, user } = useAuth()
+  const { isLoggedIn, isAuthLoading, user } = useAuth()
+
+  // While authentication state is still loading -> prevent premature redirects by showing a temporary message
+  if (isAuthLoading) {
+    return <div>Checking session...</div> // FIXME: change, style however later
+  }
 
   // If the user is not authenticated at all, send them to login
   if (!isLoggedIn || !user) {

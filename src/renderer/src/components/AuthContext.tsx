@@ -31,7 +31,6 @@
  * (see App.tsx) to ensure all pages have access to authentication
  * state.
  */
-// TODO: Testing
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react'
 
 import type { User as SupabaseUser } from '@supabase/supabase-js'
