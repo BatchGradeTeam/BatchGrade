@@ -63,10 +63,13 @@ function NavBar(): React.JSX.Element {
             alt="Profile"
             className="profile-image"
             onClick={() => {
-              // Log the user out of the application
-              logout()
-              // Redirect user to the Home page
-              navigate('/')
+              void logout()
+                .then(() => {
+                  navigate('/')
+                })
+                .catch((error) => {
+                  console.error('Error signing out: ', error)
+                })
             }}
           />
         ) : (
