@@ -15,7 +15,7 @@
 import { useNavigate } from 'react-router-dom'
 import Footer from '../components/Footer'
 import NavBar from '../components/Navbar'
-import { CppWorkflowPanel } from '../components/CppWorkflowPanel'
+import { CppWorkflowPanel } from '../components/compiler/CppWorkflowPanel'
 
 /**
  * Grading Component
