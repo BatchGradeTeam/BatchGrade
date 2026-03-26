@@ -26,8 +26,8 @@ jobs:
           cache: npm  # Built-in dependency caching for npm
         
       # Clean install dependencies from package-lock.json
-        # Automatically removes existing node_modules beforehand
-        # Better for automated environments than npm install
+      # Automatically removes existing node_modules beforehand
+      # Better for automated environments than npm install
       - name: Install dependencies
         run: npm ci
 
@@ -59,4 +59,4 @@ jobs:
         run: npm ci
   
       - name: Test
-        run: npm test # Test coverage >=90 is not enforced yet
+        run: npm test # Statement coverage >=90 is enforced
