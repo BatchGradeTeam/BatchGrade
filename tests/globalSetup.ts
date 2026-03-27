@@ -1,3 +1,5 @@
 export function teardown(): void {
-  process.exit(0)
+  // Commented out because npm run test would give
+  // exit code 0 for failed test coverage too
+  //process.exit(0)
 }
