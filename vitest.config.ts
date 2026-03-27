@@ -26,7 +26,7 @@ export default defineConfig({
     },
 
     pool: 'forks',
-    forceReRunTriggers: [],
+    forceRerunTriggers: [],
     teardownTimeout: 10000
   },
 
