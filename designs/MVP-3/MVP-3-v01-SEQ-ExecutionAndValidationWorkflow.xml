@@ -1,0 +1,278 @@
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36" version="29.6.4">
+  <diagram name="Page-1" id="updated-seq">
+    <mxGraphModel dx="2426" dy="1358" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2200" pageHeight="1700" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="p0" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="User" vertex="1">
+          <mxGeometry height="60" width="150" x="60" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="l0" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;dashed=1;endArrow=none;endFill=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="135" y="100" as="sourcePoint" />
+            <mxPoint x="135" y="1290" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="p1" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="Grading Page" vertex="1">
+          <mxGeometry height="60" width="150" x="280" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="l1" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;dashed=1;endArrow=none;endFill=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="355" y="100" as="sourcePoint" />
+            <mxPoint x="355" y="1280" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="p2" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="CppWorkflowPanel" vertex="1">
+          <mxGeometry height="60" width="150" x="500" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="l2" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;dashed=1;endArrow=none;endFill=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="575" y="100" as="sourcePoint" />
+            <mxPoint x="575" y="1290" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="p3" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="CppJudgePanel" vertex="1">
+          <mxGeometry height="60" width="150" x="720" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="l3" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;dashed=1;endArrow=none;endFill=0;">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="780" y="100" />
+            </Array>
+            <mxPoint x="795" y="100" as="sourcePoint" />
+            <mxPoint x="780" y="1300" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="p4" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="Preload API" vertex="1">
+          <mxGeometry height="60" width="150" x="940" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="l4" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;dashed=1;endArrow=none;endFill=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1015" y="100" as="sourcePoint" />
+            <mxPoint x="1015" y="1300" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="p5" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="Main Process / IPC" vertex="1">
+          <mxGeometry height="60" width="150" x="1160" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="l5" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;dashed=1;endArrow=none;endFill=0;">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1240" y="100" />
+            </Array>
+            <mxPoint x="1235" y="100" as="sourcePoint" />
+            <mxPoint x="1240" y="1300" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="p6" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="compileCppFiles" vertex="1">
+          <mxGeometry height="60" width="150" x="1380" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="l6" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;dashed=1;endArrow=none;endFill=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1455" y="100" as="sourcePoint" />
+            <mxPoint x="1455" y="1310" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="p7" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="judgeCppFiles" vertex="1">
+          <mxGeometry height="60" width="150" x="1600" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="l7" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;dashed=1;endArrow=none;endFill=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1675" y="100" as="sourcePoint" />
+            <mxPoint x="1675" y="1290" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="p8" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="executeCppFiles" vertex="1">
+          <mxGeometry height="60" width="150" x="1820" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="l8" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;dashed=1;endArrow=none;endFill=0;">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1900" y="100" />
+              <mxPoint x="1900" y="1290" />
+            </Array>
+            <mxPoint x="1920" y="100" as="sourcePoint" />
+            <mxPoint x="1900" y="1300" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m0" edge="1" parent="1" style="html=1;verticalAlign=bottom;endArrow=block;curved=0;rounded=0;" value="1. selectCppFiles()">
+          <mxGeometry relative="1" width="80" as="geometry">
+            <mxPoint x="135" y="150" as="sourcePoint" />
+            <mxPoint x="575" y="150" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m1" edge="1" parent="1" style="html=1;verticalAlign=bottom;endArrow=block;curved=0;rounded=0;" value="2. file.selectCppFiles()">
+          <mxGeometry relative="1" width="80" as="geometry">
+            <mxPoint x="575" y="190" as="sourcePoint" />
+            <mxPoint x="1015" y="190" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m2" edge="1" parent="1" style="html=1;verticalAlign=bottom;endArrow=block;curved=0;rounded=0;" value="3. &quot;file:selectCppFiles&quot;">
+          <mxGeometry relative="1" width="80" as="geometry">
+            <mxPoint x="1015" y="230" as="sourcePoint" />
+            <mxPoint x="1240" y="230" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m3" edge="1" parent="1" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;curved=0;rounded=0;" value="4. selected source files">
+          <mxGeometry relative="1" width="80" as="geometry">
+            <mxPoint x="1235" y="270" as="sourcePoint" />
+            <mxPoint x="1015" y="270" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m4" edge="1" parent="1" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;curved=0;rounded=0;" value="5. selected source files">
+          <mxGeometry relative="1" width="80" as="geometry">
+            <mxPoint x="1015" y="310" as="sourcePoint" />
+            <mxPoint x="575" y="310" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m5" edge="1" parent="1" style="html=1;verticalAlign=bottom;endArrow=block;curved=0;rounded=0;" value="6. Compile">
+          <mxGeometry relative="1" width="80" as="geometry">
+            <mxPoint x="135" y="350" as="sourcePoint" />
+            <mxPoint x="575" y="350" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m6" edge="1" parent="1" style="html=1;verticalAlign=bottom;endArrow=block;curved=0;rounded=0;" value="7. compiler.compileCpp({sourceFiles})">
+          <mxGeometry relative="1" width="80" as="geometry">
+            <mxPoint x="575" y="390" as="sourcePoint" />
+            <mxPoint x="1015" y="390" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m7" edge="1" parent="1" style="html=1;verticalAlign=bottom;endArrow=block;curved=0;rounded=0;" value="8. &quot;compiler:compileCpp&quot;">
+          <mxGeometry relative="1" width="80" as="geometry">
+            <mxPoint x="1015" y="430" as="sourcePoint" />
+            <mxPoint x="1240" y="430" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m8" edge="1" parent="1" style="html=1;verticalAlign=bottom;endArrow=block;curved=0;rounded=0;" value="9. compileCppFiles(compilerPath, request)">
+          <mxGeometry relative="1" width="80" as="geometry">
+            <mxPoint x="1240" y="470" as="sourcePoint" />
+            <mxPoint x="1455" y="470" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m9" edge="1" parent="1" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;curved=0;rounded=0;" value="10. CompileCppResult">
+          <mxGeometry relative="1" width="80" as="geometry">
+            <mxPoint x="1455" y="510" as="sourcePoint" />
+            <mxPoint x="1240" y="510" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m10" edge="1" parent="1" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;curved=0;rounded=0;" value="11. CompileCppResult">
+          <mxGeometry relative="1" width="80" as="geometry">
+            <mxPoint x="1235" y="550" as="sourcePoint" />
+            <mxPoint x="1015" y="550" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m11" edge="1" parent="1" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;curved=0;rounded=0;" value="12. CompileCppResult">
+          <mxGeometry relative="1" width="80" as="geometry">
+            <mxPoint x="1015" y="590" as="sourcePoint" />
+            <mxPoint x="575" y="590" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m12" edge="1" parent="1" style="html=1;verticalAlign=bottom;endArrow=block;curved=0;rounded=0;" value="13. onCompileResultChange(result)">
+          <mxGeometry relative="1" width="80" as="geometry">
+            <mxPoint x="575" y="630" as="sourcePoint" />
+            <mxPoint x="355" y="630" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m13" edge="1" parent="1" style="html=1;verticalAlign=bottom;endArrow=block;curved=0;rounded=0;" value="14. pass compileResult prop">
+          <mxGeometry relative="1" width="80" as="geometry">
+            <mxPoint x="355" y="670" as="sourcePoint" />
+            <mxPoint x="780" y="670" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m14" edge="1" parent="1" style="html=1;verticalAlign=bottom;endArrow=block;curved=0;rounded=0;" value="15. select expected output / optional input">
+          <mxGeometry relative="1" width="80" as="geometry">
+            <mxPoint x="135" y="710" as="sourcePoint" />
+            <mxPoint x="780" y="710" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m15" edge="1" parent="1" style="html=1;verticalAlign=bottom;endArrow=block;curved=0;rounded=0;" value="16. file.select() / file.stringify(path)">
+          <mxGeometry relative="1" width="80" as="geometry">
+            <mxPoint x="780" y="750" as="sourcePoint" />
+            <mxPoint x="1015" y="750" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m16" edge="1" parent="1" style="html=1;verticalAlign=bottom;endArrow=block;curved=0;rounded=0;" value="17. &quot;file:select&quot; / &quot;file:stringify&quot;">
+          <mxGeometry relative="1" width="80" as="geometry">
+            <mxPoint x="1015" y="790" as="sourcePoint" />
+            <mxPoint x="1240" y="790" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m17" edge="1" parent="1" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;curved=0;rounded=0;" value="18. path / file contents">
+          <mxGeometry relative="1" width="80" as="geometry">
+            <mxPoint x="1235" y="830" as="sourcePoint" />
+            <mxPoint x="1015" y="830" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m18" edge="1" parent="1" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;curved=0;rounded=0;" value="19. path / file contents">
+          <mxGeometry relative="1" width="80" as="geometry">
+            <mxPoint x="1015" y="870" as="sourcePoint" />
+            <mxPoint x="780" y="870" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m19" edge="1" parent="1" style="html=1;verticalAlign=bottom;endArrow=block;curved=0;rounded=0;" value="20. Run Judge">
+          <mxGeometry relative="1" width="80" as="geometry">
+            <mxPoint x="135" y="910" as="sourcePoint" />
+            <mxPoint x="780" y="910" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m20" edge="1" parent="1" style="html=1;verticalAlign=bottom;endArrow=block;curved=0;rounded=0;" value="21. compiler.judgeCpp({executablePath, stdin, expectedOutput, timeoutMs})">
+          <mxGeometry relative="1" width="80" as="geometry">
+            <mxPoint x="780" y="950" as="sourcePoint" />
+            <mxPoint x="1015" y="950" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m21" edge="1" parent="1" style="html=1;verticalAlign=bottom;endArrow=block;curved=0;rounded=0;" value="22. &quot;compiler:judgeCpp&quot;">
+          <mxGeometry relative="1" width="80" as="geometry">
+            <mxPoint x="1015" y="990" as="sourcePoint" />
+            <mxPoint x="1240" y="990" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m22" edge="1" parent="1" style="html=1;verticalAlign=bottom;endArrow=block;curved=0;rounded=0;" value="23. judgeCppFiles(request)">
+          <mxGeometry relative="1" width="80" as="geometry">
+            <mxPoint x="1240" y="1030" as="sourcePoint" />
+            <mxPoint x="1675" y="1030" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m23" edge="1" parent="1" style="html=1;verticalAlign=bottom;endArrow=block;curved=0;rounded=0;" value="24. executeCppFiles({executablePath, stdin, timeoutMs})">
+          <mxGeometry relative="1" width="80" as="geometry">
+            <mxPoint x="1675" y="1070" as="sourcePoint" />
+            <mxPoint x="1900" y="1070" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m24" edge="1" parent="1" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;curved=0;rounded=0;" value="25. RunCppResult(stdout, timedOut, success)">
+          <mxGeometry relative="1" width="80" as="geometry">
+            <mxPoint x="1900" y="1110" as="sourcePoint" />
+            <mxPoint x="1675" y="1110" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m25" edge="1" parent="1" style="html=1;align=left;spacingLeft=2;endArrow=block;rounded=0;edgeStyle=orthogonalEdgeStyle;curved=0;" value="26. cleanOutput(stdout) == cleanOutput(expectedOutput)?">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1715" y="1165" />
+            </Array>
+            <mxPoint x="1675" y="1150" as="sourcePoint" />
+            <mxPoint x="1675" y="1190" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m26" edge="1" parent="1" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;curved=0;rounded=0;" value="27. JudgeCppResult(passed, timedOut, expectedOutput, actualOutput)">
+          <mxGeometry relative="1" width="80" as="geometry">
+            <mxPoint x="1675" y="1210" as="sourcePoint" />
+            <mxPoint x="1240" y="1210" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m27" edge="1" parent="1" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;curved=0;rounded=0;" value="28. JudgeCppResult">
+          <mxGeometry relative="1" width="80" as="geometry">
+            <mxPoint x="1235" y="1250" as="sourcePoint" />
+            <mxPoint x="1015" y="1250" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m28" edge="1" parent="1" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;curved=0;rounded=0;" value="29. render pass/fail + expected/actual output">
+          <mxGeometry relative="1" width="80" as="geometry">
+            <mxPoint x="1015" y="1290" as="sourcePoint" />
+            <mxPoint x="780" y="1290" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
