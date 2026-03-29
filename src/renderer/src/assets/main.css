@@ -747,7 +747,7 @@ footer {
 
 .panel-header p {
   margin: 0;
-  color: var(--ev-c-text-2);
+  color: var(--ev-c-grey-1);
   line-height: 1.5;
 }
 
@@ -765,7 +765,7 @@ footer {
 .panel-subheader p {
   margin: 0;
   font-size: 0.95rem;
-  color: var(--ev-c-text-2);
+  color: var(--ev-c-grey-1);
   line-height: 1.4;
 }
 
@@ -807,7 +807,7 @@ footer {
   margin-top: 0.5rem;
   margin-bottom: 0;
   font-size: 0.85rem;
-  color: var(--ev-c-text-2);
+  color: var(--ev-c-grey-1);
 }
 
 .panel-success {
