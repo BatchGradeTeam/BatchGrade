@@ -22,6 +22,139 @@ import NavBar from '../components/Navbar' // Import the navigation bar component
 import Footer from '../components/Footer' // Import the footer component
 
 // =============================================================================
+// Helper Types
+// =============================================================================
+type StudentRecord = {
+  id: string
+  name: string
+  score: string
+  submissions: number
+  lastSubmitted: string
+  status: string
+}
+
+type GradeStats = {
+  averageScore: string
+  highestScore: number | string
+  lowestScore: number | string
+}
+
+// =============================================================================
+// Helper Functions
+// =============================================================================
+
+/**
+ * Converts a score string into a numeric value.
+ *
+ * @param score - Score string (e.g., "92%" or "--")
+ * @returns Parsed numeric score, or null if the score is missing
+ */
+const parseScore = (score: string): number | null => {
+  return score === '--' ? null : parseInt(score)
+}
+
+/**
+ * Filters students based on a search term.
+ * Matches against student name (case-insensitive) or student ID.
+ *
+ * @param students - List of student records
+ * @param searchTerm - User input for searching
+ * @returns Filtered list of students
+ */
+const filterStudents = (students: StudentRecord[], searchTerm: string): StudentRecord[] => {
+  const normalizedSearch = searchTerm.toLowerCase()
+
+  return students.filter(
+    (student) =>
+      student.name.toLowerCase().includes(normalizedSearch) || student.id.includes(searchTerm)
+  )
+}
+
+/**
+ * Sorts students based on the selected sort option.
+ *
+ * Supported options:
+ * - "name-asc"
+ * - "name-desc"
+ * - "score-asc"
+ * - "score-desc"
+ *
+ * @param students - List of student records
+ * @param sortOption - Selected sorting option
+ * @returns New sorted array of students
+ */
+const sortStudents = (students: StudentRecord[], sortOption: string): StudentRecord[] => {
+  return [...students].sort((a, b) => {
+    if (sortOption === 'name-asc') return a.name.localeCompare(b.name)
+    if (sortOption === 'name-desc') return b.name.localeCompare(a.name)
+
+    const scoreA = parseScore(a.score) ?? -1
+    const scoreB = parseScore(b.score) ?? -1
+
+    if (sortOption === 'score-asc') return scoreA - scoreB
+    if (sortOption === 'score-desc') return scoreB - scoreA
+
+    return 0
+  })
+}
+
+/**
+ * Calculates class statistics including average, highest, and lowest scores.
+ * Only valid numeric scores are considered.
+ *
+ * @param students - List of student records
+ * @returns Object containing average, highest, and lowest scores
+ */
+const calculateStats = (students: StudentRecord[]): GradeStats => {
+  const validScores = students
+    .map((student) => parseScore(student.score))
+    .filter((score): score is number => score !== null)
+
+  if (validScores.length === 0) {
+    return {
+      averageScore: '--',
+      highestScore: '--',
+      lowestScore: '--'
+    }
+  }
+
+  const averageScore = (
+    validScores.reduce((sum, score) => sum + score, 0) / validScores.length
+  ).toFixed(1)
+
+  return {
+    averageScore,
+    highestScore: Math.max(...validScores),
+    lowestScore: Math.min(...validScores)
+  }
+}
+
+/**
+ * Builds CSV-formatted string content for gradebook export.
+ *
+ * Includes:
+ * - Student ID
+ * - Student Name
+ * - Highest Score
+ * - Submission Count
+ *
+ * @param students - List of student records to export
+ * @returns CSV string content
+ */
+const buildCSVContent = (students: StudentRecord[]): string => {
+  const headers = ['Student ID', 'Student Name', 'Highest Score', 'Submission Count']
+
+  const rows = students.map((student) => [
+    student.id,
+    student.name,
+    student.score,
+    student.submissions.toString()
+  ])
+
+  return [headers, ...rows].map((row) => row.join(',')).join('\n')
+}
+
+// =============================================================================
 // Mock data representing gradebook records for each assignment.
 // This data would come from the backend database (FR-7).
 // =============================================================================
@@ -114,73 +247,19 @@ function Gradebook(): React.JSX.Element {
   const students = gradebookData[selectedAssignment as keyof typeof gradebookData]
 
   // Filter students by name or ID based on search input
-  const filteredStudents = students.filter(
-    (student) =>
-      student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      student.id.includes(searchTerm)
-  )
+  const filteredStudents = filterStudents(students, searchTerm)
 
   // Sort filtered students based on selected sort option
-  const sortedStudents = [...filteredStudents].sort((a, b) => {
-    // name ascending
-    if (sortOption === 'name-asc') {
-      return a.name.localeCompare(b.name)
-    }
+  const sortedStudents = sortStudents(filteredStudents, sortOption)
 
-    // name descending
-    if (sortOption === 'name-desc') {
-      return b.name.localeCompare(a.name)
-    }
-
-    // score ascending
-    if (sortOption === 'score-asc') {
-      const scoreA = a.score === '--' ? -1 : parseInt(a.score)
-      const scoreB = b.score === '--' ? -1 : parseInt(b.score)
-      return scoreA - scoreB
-    }
-
-    // score descending
-    if (sortOption === 'score-desc') {
-      const scoreA = a.score === '--' ? -1 : parseInt(a.score)
-      const scoreB = b.score === '--' ? -1 : parseInt(b.score)
-      return scoreB - scoreA
-    }
-
-    return 0
-  })
-
-  // Keep only students with valid numeric scores for statistics
-  const validScores = students
-    .filter((student) => student.score !== '--')
-    .map((student) => parseInt(student.score))
-
-  const averageScore =
-    validScores.length > 0
-      ? (validScores.reduce((sum, score) => sum + score, 0) / validScores.length).toFixed(1)
-      : '--'
-
-  const highestScore = validScores.length > 0 ? Math.max(...validScores) : '--'
-  const lowestScore = validScores.length > 0 ? Math.min(...validScores) : '--'
-  // end class statistics calculation
+  // Calculate class statistics for the selected assignment
+  const { averageScore, highestScore, lowestScore } = calculateStats(students)
 
   // ai-gen start (ChatGPT-5.3, 1)
   // Export currently displayed gradebook rows to a CSV file
   const handleExportCSV = (): void => {
-    // CSV column headers
-    const headers = ['Student ID', 'Student Name', 'Highest Score', 'Submission Count']
-
-    // Convert displayed students into CSV rows
-    const rows = sortedStudents.map((student) => [
-      student.id,
-      student.name,
-      student.score,
-      student.submissions
-    ])
-
-    // Combine headers and rows
-    // ['Student ID', ...],
-    // ['1001', ...],
-    const csvContent = [headers, ...rows].map((row) => row.join(',')).join('\n')
+    // Build CSV content from the currently displayed students
+    const csvContent = buildCSVContent(sortedStudents)
 
     // Create downloadable file
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
