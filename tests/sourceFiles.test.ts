@@ -12,8 +12,20 @@ describe('getCommonWorkingDirectory', () => {
     expect(getCommonWorkingDirectory([])).toBe(process.cwd())
   })
 
-  it('Returns to the first file\'s folder if the files don\'t share a path', () => {
+  it('Returns to the first file\'s folder if Windows files don\'t share a drive', async () => {
+    vi.doMock('node:path', async () => await import('node:path/win32'))
+    const { getCommonWorkingDirectory } = await import('../src/main/utils/sourceFiles')
+    const { resolve } = await import('node:path/win32')
+
     expect(getCommonWorkingDirectory(['C:/test/test.cpp', 'D:/test/test.cpp'])).toBe(resolve('C:/test'))
+  })
+
+  it('Returns the Windows drive root when files only share the drive letter', async () => {
+    vi.doMock('node:path', async () => await import('node:path/win32'))
+    const { getCommonWorkingDirectory } = await import('../src/main/utils/sourceFiles')
+    const { resolve } = await import('node:path/win32')
+
+    expect(getCommonWorkingDirectory(['C:/test.cpp', 'C:/nested/test.cpp'])).toBe(resolve('C:/'))
   })
 
   it('Returns the filesystem root when files only share the drive root', () => {
