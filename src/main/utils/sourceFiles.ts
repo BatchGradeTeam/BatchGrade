@@ -2,7 +2,7 @@
 import { basename, dirname, extname, relative, resolve, sep } from 'node:path'
 
 // Find and return common working directory
-export function getCommonWorkingDirectory(sourceFiles: string[]): string {
+function getCommonWorkingDirectory(sourceFiles: string[]): string {
   // If no files were selected, just return current folder
   if (sourceFiles.length === 0) {
     return process.cwd()
@@ -55,7 +55,7 @@ export function getCommonWorkingDirectory(sourceFiles: string[]): string {
 }
 
 // Return only the C++ implementation files
-export function getCppImplementationFiles(sourceFiles: string[]): string[] {
+function getCppImplementationFiles(sourceFiles: string[]): string[] {
   return sourceFiles.filter((filePath) => {
     const extension = extname(filePath).toLowerCase()
 
@@ -66,10 +66,12 @@ export function getCppImplementationFiles(sourceFiles: string[]): string[] {
 }
 
 // Build a path to store inside a submission folder
-export function getSubmissionRelativePath(rootDirectory: string, filePath: string): string {
+function getSubmissionRelativePath(rootDirectory: string, filePath: string): string {
   const relativePath = relative(rootDirectory, filePath)
 
   // If file is inside the root directory -> return its relative path
   // If file is outside the root directory -> return its filename
   return relativePath && !relativePath.startsWith('..') ? relativePath : basename(filePath)
 }
+
+export { getCommonWorkingDirectory, getCppImplementationFiles, getSubmissionRelativePath }
