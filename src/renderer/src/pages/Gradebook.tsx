@@ -208,111 +208,115 @@ function Gradebook(): React.JSX.Element {
     <div style={{ color: 'var(--ev-c-gray-1)' }}>
       <NavBar />
       <div style={{ paddingTop: '100px' }}>
-      {/* Page title */}
-      <h1>Assignment Gradebook</h1>
+        <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '0 24px' }}>
+          {/* Page title */}
+          <h1>Assignment Gradebook</h1>
 
-      {/* Assignment selection dropdown */}
-      <div style={{ margin: '16px 0' }}>
-        <label htmlFor="assignment-select">Select Assignment: </label>
+          {/* Assignment selection dropdown */}
+          <div style={{ margin: '16px 0' }}>
+            <label htmlFor="assignment-select">Select Assignment: </label>
 
-        {/* Dropdown that allows instructors to switch assignments (FR-8) */}
-        <select
-          id="assignment-select"
-          value={selectedAssignment}
-          onChange={(e) => setSelectedAssignment(e.target.value)}
-        >
-          <option>Assignment 1</option>
-          <option>Assignment 2</option>
-        </select>
-      </div>
+            {/* Dropdown that allows instructors to switch assignments (FR-8) */}
+            <select
+              id="assignment-select"
+              value={selectedAssignment}
+              onChange={(e) => setSelectedAssignment(e.target.value)}
+            >
+              <option>Assignment 1</option>
+              <option>Assignment 2</option>
+            </select>
+          </div>
 
-      {/* Class statistics summary */}
-      <div style={{ display: 'flex', gap: '24px', margin: '20px 0', fontWeight: 'bold' }}>
-        <div>
-          <span>Class Average: {averageScore === '--' ? '--' : `${averageScore}%`}</span>
-          <span style={{ marginLeft: '24px' }}>
-            Highest Score: {highestScore === '--' ? '--' : `${highestScore}%`}
-          </span>
-          <span style={{ marginLeft: '24px' }}>
-            Lowest Score: {lowestScore === '--' ? '--' : `${lowestScore}%`}
-          </span>
+          {/* Class statistics summary */}
+          <div style={{ display: 'flex', gap: '24px', margin: '20px 0', fontWeight: 'bold' }}>
+            <div>
+              <span>Class Average: {averageScore === '--' ? '--' : `${averageScore}%`}</span>
+              <span style={{ marginLeft: '24px' }}>
+                Highest Score: {highestScore === '--' ? '--' : `${highestScore}%`}
+              </span>
+              <span style={{ marginLeft: '24px' }}>
+                Lowest Score: {lowestScore === '--' ? '--' : `${lowestScore}%`}
+              </span>
+            </div>
+          </div>
+
+          {/* Student search input */}
+          <div style={{ margin: '16px 0' }}>
+            <label htmlFor="student-search">Search Student: </label>
+            <input
+              id="student-search"
+              type="text"
+              placeholder="Enter student name or ID"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              style={{ marginLeft: '8px', padding: '6px', width: '260px' }}
+            />
+          </div>
+
+          {/* Sort dropdown */}
+          <div style={{ margin: '16px 0' }}>
+            <label htmlFor="sort-select">Sort By: </label>
+            <select
+              id="sort-select"
+              value={sortOption}
+              onChange={(e) => setSortOption(e.target.value)}
+              style={{ marginLeft: '8px', padding: '6px' }}
+            >
+              <option value="name-asc">Student Name (A-Z)</option>
+              <option value="name-desc">Student Name (Z-A)</option>
+              <option value="score-asc">Highest Score (Low to High)</option>
+              <option value="score-desc">Highest Score (High to Low)</option>
+            </select>
+          </div>
+
+          {/* Table displaying students and their highest scores */}
+          <div style={{ overflowX: 'auto', marginBottom: '16px' }}>
+            <table style={{ borderCollapse: 'collapse', width: '100%' }}>
+              {/* Table header */}
+              <thead>
+                <tr>
+                  <th style={cellStyle}>Student ID</th>
+                  <th style={cellStyle}>Student Name</th>
+                  <th style={cellStyle}>Highest Score</th>
+                  <th style={cellStyle}>Submission Count</th>
+                  <th style={cellStyle}>Last Submission Time</th>
+                  <th style={cellStyle}>Status</th>
+                </tr>
+              </thead>
+
+              {/* Table body generated dynamically from student data */}
+              <tbody>
+                {sortedStudents.map((student) => (
+                  <tr key={student.id}>
+                    <td style={cellStyle}>{student.id}</td>
+                    <td style={cellStyle}>{student.name}</td>
+                    <td style={cellStyle}>{student.score}</td>
+                    <td style={cellStyle}>{student.submissions}</td>
+                    <td style={cellStyle}>{student.lastSubmitted}</td>
+                    <td style={cellStyle}>{student.status}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Export CSV Button at the bottom-right corner of the table */}
+          <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '8px' }}>
+            <button
+              onClick={handleExportCSV}
+              style={{
+                fontSize: '12px', // smaller text
+                padding: '4px 8px', // smaller button
+                opacity: 0.8, // slightly subtle
+                cursor: 'pointer'
+              }}
+            >
+              Export CSV
+            </button>
+          </div>
         </div>
       </div>
-
-      {/* Student search input */}
-      <div style={{ margin: '16px 0' }}>
-        <label htmlFor="student-search">Search Student: </label>
-        <input
-          id="student-search"
-          type="text"
-          placeholder="Enter student name or ID"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          style={{ marginLeft: '8px', padding: '6px', width: '260px' }}
-        />
-      </div>
-
-      {/* Sort dropdown */}
-      <div style={{ margin: '16px 0' }}>
-        <label htmlFor="sort-select">Sort By: </label>
-        <select
-          id="sort-select"
-          value={sortOption}
-          onChange={(e) => setSortOption(e.target.value)}
-          style={{ marginLeft: '8px', padding: '6px' }}
-        >
-          <option value="name-asc">Student Name (A-Z)</option>
-          <option value="name-desc">Student Name (Z-A)</option>
-          <option value="score-asc">Highest Score (Low to High)</option>
-          <option value="score-desc">Highest Score (High to Low)</option>
-        </select>
-      </div>
-
-      {/* Table displaying students and their highest scores */}
-      <table style={{ borderCollapse: 'collapse', width: '100%' }}>
-        {/* Table header */}
-        <thead>
-          <tr>
-            <th style={cellStyle}>Student ID</th>
-            <th style={cellStyle}>Student Name</th>
-            <th style={cellStyle}>Highest Score</th>
-            <th style={cellStyle}>Submission Count</th>
-            <th style={cellStyle}>Last Submission Time</th>
-            <th style={cellStyle}>Status</th>
-          </tr>
-        </thead>
-
-        {/* Table body generated dynamically from student data */}
-        <tbody>
-          {sortedStudents.map((student) => (
-            <tr key={student.id}>
-              <td style={cellStyle}>{student.id}</td>
-              <td style={cellStyle}>{student.name}</td>
-              <td style={cellStyle}>{student.score}</td>
-              <td style={cellStyle}>{student.submissions}</td>
-              <td style={cellStyle}>{student.lastSubmitted}</td>
-              <td style={cellStyle}>{student.status}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-
-      {/* Export CSV Button at the bottom-right corner of the table */}
-      <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '8px' }}>
-        <button
-          onClick={handleExportCSV}
-          style={{
-            fontSize: '12px', // smaller text
-            padding: '4px 8px', // smaller button
-            opacity: 0.8, // slightly subtle
-            cursor: 'pointer'
-          }}
-        >
-          Export CSV
-        </button>
-      </div>
       <Footer />
-      </div>
     </div>
   )
 }
