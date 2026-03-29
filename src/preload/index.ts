@@ -20,7 +20,8 @@ const compilerApi: CompilerAPI = {
   getGccStatus: () => ipcRenderer.invoke('compiler:getGccStatus'),
   setGccPath: (filePath: string) => ipcRenderer.invoke('compiler:setGccPath', filePath),
   compileCpp: (request) => ipcRenderer.invoke('compiler:compileCpp', request),
-  runCompiledProgram: (request) => ipcRenderer.invoke('compiler:runCompiledProgram', request)
+  runCompiledProgram: (request) => ipcRenderer.invoke('compiler:runCompiledProgram', request),
+  judgeCpp: (request) => ipcRenderer.invoke('compiler:judgeCpp', request)
 }
 
 const fileApi: FileAPI = {

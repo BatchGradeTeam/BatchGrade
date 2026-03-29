@@ -42,3 +42,19 @@ export type RunCppResult = {
   stderr: string
   message: string
 }
+
+// ***********************************************************************
+// Judge
+export type JudgeCppRequest = {
+  executablePath: string
+  stdin: string // Inputs
+  expectedOutput: string // Some output file i.e. output0.txt
+  timeoutMs: number // Alloted execution time
+}
+
+export type JudgeCppResult = {
+  passed: boolean
+  timedOut: boolean
+  expectedOutput: string
+  actualOutput: string  // The actual output from the judged program
+}

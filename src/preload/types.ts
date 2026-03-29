@@ -4,7 +4,9 @@ import type {
   CompileCppRequest,
   CompileCppResult,
   RunCppRequest,
-  RunCppResult
+  RunCppResult,
+  JudgeCppRequest,
+  JudgeCppResult
 } from '../shared/compiler'
 import type { SubmitCppRequest, SubmitCppResult } from '../shared/submission'
 import type { Assignment, NewAssignment, UpdateAssignment } from '../shared/types'
@@ -21,6 +23,7 @@ export type CompilerAPI = {
   setGccPath: (filePath: string) => Promise<GccInstallationInfo>
   compileCpp: (request: CompileCppRequest) => Promise<CompileCppResult>
   runCompiledProgram: (request: RunCppRequest) => Promise<RunCppResult>
+  judgeCpp: (request: JudgeCppRequest) => Promise<JudgeCppResult>
 }
 
 export type AssignmentsAPI = {
