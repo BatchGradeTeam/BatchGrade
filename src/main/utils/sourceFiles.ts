@@ -1,5 +1,5 @@
 // Helper file for commpileCppFiles.ts and submitCppSubmission.ts
-import { dirname, extname, relative, resolve, sep } from 'node:path'
+import { basename, dirname, extname, relative, resolve, sep } from 'node:path'
 
 // Find and return common working directory
 export function getCommonWorkingDirectory(sourceFiles: string[]): string {
@@ -11,7 +11,7 @@ export function getCommonWorkingDirectory(sourceFiles: string[]): string {
   // Convert every file path to absolute directory path
   // For example: dirname("C:\proj\a\main.cpp") -> "C:\proj\a"
   const directories = sourceFiles.map((filePath) => resolve(dirname(filePath)))
-  
+
   // Use the first directory as the starting reference then compare every other directory against it
   const [firstDirectory, ...restDirectories] = directories
 
@@ -71,7 +71,5 @@ export function getSubmissionRelativePath(rootDirectory: string, filePath: strin
 
   // If file is inside the root directory -> return its relative path
   // If file is outside the root directory -> return its filename
-  return relativePath && !relativePath.startsWith('..')
-    ? relativePath
-    : (filePath.split(sep).pop() ?? filePath)
+  return relativePath && !relativePath.startsWith('..') ? relativePath : basename(filePath)
 }

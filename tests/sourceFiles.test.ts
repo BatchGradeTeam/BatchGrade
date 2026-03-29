@@ -1,6 +1,11 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi, afterEach } from 'vitest'
 import { resolve, join } from 'node:path'
 import { getCommonWorkingDirectory, getCppImplementationFiles, getSubmissionRelativePath } from '../src/main/utils/sourceFiles'
+
+afterEach(() => {
+  vi.resetModules()
+  vi.doUnmock('node:path')
+})
 
 describe('getCommonWorkingDirectory', () => {
   it('Returns the current working directory if no files are given', () => {
@@ -42,5 +47,13 @@ describe('getSubmissionRelativePath', () => {
   })
   it('Returns its filename if file is outside the root directory', () => {
     expect(getSubmissionRelativePath(resolve('/test'), resolve('/notTest/test.cpp'))).toBe('test.cpp')
+  })
+})
+
+describe('getCommonWorkingDirectory POSIX root branch', () => {
+  it('Returns "/" when the shared directory string is empty', async () => {
+    vi.doMock('node:path', async () => await import('node:path/posix'))
+    const { getCommonWorkingDirectory } = await import('../src/main/utils/sourceFiles')
+    expect(getCommonWorkingDirectory(['/a.cpp', '/b/test.cpp'])).toBe('/')
   })
 })
