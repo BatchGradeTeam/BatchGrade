@@ -14,9 +14,11 @@
  *  - Student submission review
  *  - Gradebook access
  */
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import NavBar from '../components/Navbar'
 import Footer from '../components/Footer'
+import AssignmentConfigPanel from '../components/AssignmentConfigPanel'
 
 /**
  * InstructorDashboard component
@@ -34,8 +36,31 @@ function InstructorDashboard(): React.JSX.Element {
   // Enables programmatic navigation between routes
   const navigate = useNavigate()
 
+    /**
+   * @brief Tracks whether the assignment configuration workspace is visible.
+   */
+  const [showAssignmentConfig, setShowAssignmentConfig] = useState<boolean>(false)
+
+  /**
+   * @brief Opens the assignment configuration panel.
+   *
+   * @return Nothing.
+   */
+  function openAssignmentConfig(): void {
+    setShowAssignmentConfig(true)
+  }
+
+  /**
+   * @brief Closes the assignment configuration panel.
+   *
+   * @return Nothing.
+   */
+  function closeAssignmentConfig(): void {
+    setShowAssignmentConfig(false)
+  }
+
   return (
-    <>
+     <>
       {/*-----------------------------------------------------------
         Application Navigation Bar
       -----------------------------------------------------------*/}
@@ -44,22 +69,50 @@ function InstructorDashboard(): React.JSX.Element {
       {/*-----------------------------------------------------------
         Dashboard Content Area
       -----------------------------------------------------------*/}
-      <div style={{ padding: '8rem' }}>
-        {/* Page Title */}
-        <h1>Instructor Dashboard Page</h1>
-
-        {/* Placeholder page description */}
-        <p>This is the Instructor Dashboard screen.</p>
+      <div className="dashboard-shell">
+        {/* Page Header */}
+        <div className="dashboard-page-header">
+          <h1>Instructor Dashboard</h1>
+          <p>
+            Manage instructor tools, configure assignments, and review grading workflows from
+            this dashboard.
+          </p>
+        </div>
 
         {/*-----------------------------------------------------------
-          Navigation controls
+          Instructor Action Toolbar
         -----------------------------------------------------------*/}
-        <div style={{ marginTop: '8rem' }}>
-          {/* Return to Home page */}
-          <button onClick={() => navigate('/')} style={{ marginLeft: '1rem' }}>
+        <div className="dashboard-toolbar">
+          {!showAssignmentConfig ? (
+            <button className="btn-primary" onClick={openAssignmentConfig}>
+              Assignment Creation
+            </button>
+          ) : (
+            <button className="btn-ghost" onClick={closeAssignmentConfig}>
+              Close Assignment Configuration
+            </button>
+          )}
+
+          <button className="btn-ghost" onClick={() => navigate('/')}>
             Go to home
           </button>
         </div>
+
+        {/*-----------------------------------------------------------
+          Assignment Configuration Workspace
+        -----------------------------------------------------------*/}
+        {showAssignmentConfig ? (
+          <AssignmentConfigPanel />
+        ) : (
+          <div className="dashboard-empty-state">
+            <h2>Get started</h2>
+            <p>
+              Select <strong>Assignment Creation</strong> to begin creating an assignment.
+
+              Choose a solution input type, and submit the instructor solution.
+            </p>
+          </div>
+        )}
       </div>
 
       {/*-----------------------------------------------------------

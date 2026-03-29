@@ -5,8 +5,13 @@ import type { Assignment } from '../../../shared/types'
  * @brief Local form state used by AssignmentConfigPanel.
  *
  * @details
- * This state mirrors the instructor-facing form fields for FR9, FR10, and FR11.
- * It keeps assignment separate from the list of saved assignments.
+ * This state mirrors the instructor-facing form fields for:
+ * - FR9: Assignment Creation Button & Display
+ * - FR10: Solution Upload Buttons & Display
+ * - FR11: Solution Submission Button & Display
+ *
+ * This version preserves the current assignment schema used by the project:
+ * name, dueDate, gradingCriteria, solutionType, and expectedOutputText.
  */
 type FormState = {
   name: string
@@ -30,20 +35,21 @@ const emptyForm: FormState = {
 }
 
 /**
- * @brief Assignment configuration panel for MVP-5.
+ * @brief Assignment configuration panel for instructor workflows.
  *
  * @details
  * This component implements the renderer-side UI for:
- * - FR9: Instructor-defined assignment creation
- * - FR10: Instructor solution input mode selection (file or text)
- * - FR11: Assignment solution submission/saving
+ * - FR9: Assignment creation and metadata entry
+ * - FR10: Solution input selection via file upload or text entry
+ * - FR11: Assignment solution submission with validation and feedback
  *
  * The component:
  * - loads assignments on mount
  * - allows creating a new assignment
  * - allows editing an existing assignment
- * - allows deleting an assignment
+ * - allows deleting an existing assignment
  * - validates required input before submission
+ * - shows a success or error message after actions
  *
  * @return React JSX element for the assignment configuration panel.
  */
@@ -53,6 +59,7 @@ export function AssignmentConfigPanel(): React.JSX.Element {
   const [editingUuid, setEditingUuid] = useState<string | null>(null)
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [statusMessage, setStatusMessage] = useState<string | null>(null)
 
   /**
    * @brief File currently selected by the instructor.
@@ -72,8 +79,12 @@ export function AssignmentConfigPanel(): React.JSX.Element {
    * @throws Error if the preload or IPC layer fails.
    */
   const loadAssignments = async (): Promise<void> => {
-    const result = await window.api.assignments.getAll()
-    setAssignments(result)
+    try {
+      const result = await window.api.assignments.getAll()
+      setAssignments(result)
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : 'Failed to load assignments.')
+    }
   }
 
   /**
@@ -111,14 +122,15 @@ export function AssignmentConfigPanel(): React.JSX.Element {
   function startEdit(assignment: Assignment): void {
     setEditingUuid(assignment.uuid)
     setForm({
-      name: assignment.name,
-      dueDate: assignment.dueDate,
-      gradingCriteria: assignment.gradingCriteria,
-      solutionType: assignment.solutionType as 'file' | 'text',
+      name: assignment.name ?? '',
+      dueDate: assignment.dueDate ?? '',
+      gradingCriteria: assignment.gradingCriteria ?? '',
+      solutionType: (assignment.solutionType ?? 'text') as 'file' | 'text',
       expectedOutputText: assignment.expectedOutputText ?? ''
     })
     setSelectedFile(null)
     setDeleteConfirm(null)
+    setStatusMessage(null)
     setError(null)
   }
 
@@ -132,11 +144,18 @@ export function AssignmentConfigPanel(): React.JSX.Element {
     setForm(emptyForm)
     setSelectedFile(null)
     setDeleteConfirm(null)
+    setStatusMessage(null)
     setError(null)
   }
 
   /**
    * @brief Validates the current form before create/update.
+   *
+   * @details
+   * Validation reflects FR9, FR10, and FR11:
+   * - assignment metadata is required
+   * - text mode requires expected output text
+   * - file mode requires an uploaded file before submission
    *
    * @return True if the form is valid; otherwise false.
    */
@@ -167,7 +186,7 @@ export function AssignmentConfigPanel(): React.JSX.Element {
     }
 
     if (form.solutionType === 'file' && !selectedFile && !editingUuid) {
-      setError('Please select a solution file.')
+      setError('Please select a solution file before submission.')
       return false
     }
 
@@ -180,9 +199,8 @@ export function AssignmentConfigPanel(): React.JSX.Element {
    *
    * @details
    * For file mode, this version stores the selected file name and a temporary
-   * placeholder path value. Once your Electron main-process file-saving logic
-   * is ready, replace that placeholder with the real persisted path returned
-   * from IPC.
+   * placeholder path value. Once main-process file persistence is implemented,
+   * replace the placeholder path with the real persisted path returned from IPC.
    *
    * @return Promise that resolves when the save operation completes.
    */
@@ -205,16 +223,14 @@ export function AssignmentConfigPanel(): React.JSX.Element {
           gradingCriteria: trimmedCriteria,
           solutionType: form.solutionType,
           solutionFileName: form.solutionType === 'file' ? selectedFile?.name : undefined,
-          /**
-           * Replace this with a real saved file path later when
-           * main-process file persistence is implemented.
-           */
           solutionFilePath:
             form.solutionType === 'file' && selectedFile
               ? `pending://${selectedFile.name}`
               : undefined,
           expectedOutputText: form.solutionType === 'text' ? trimmedExpectedOutput : undefined
         })
+
+        setStatusMessage('Assignment updated successfully.')
       } else {
         await window.api.assignments.create({
           name: trimmedName,
@@ -224,19 +240,19 @@ export function AssignmentConfigPanel(): React.JSX.Element {
           solutionFileName: form.solutionType === 'file' ? (selectedFile?.name ?? null) : null,
           solutionFilePath:
             form.solutionType === 'file' && selectedFile
-              ? // This is a placeholder path value.
-                // Update with real path from IPC once file saving
-                // is implemented. - AS
-                `pending://${selectedFile.name}`
+              ? `pending://${selectedFile.name}`
               : null,
           expectedOutputText: form.solutionType === 'text' ? trimmedExpectedOutput : null,
           createdByUserUuid: null
         })
+
+        setStatusMessage('Assignment created successfully.')
       }
 
       setForm(emptyForm)
       setSelectedFile(null)
       setEditingUuid(null)
+      setDeleteConfirm(null)
       await loadAssignments()
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : 'Something went wrong.')
@@ -250,9 +266,14 @@ export function AssignmentConfigPanel(): React.JSX.Element {
    * @return Promise that resolves when deletion completes.
    */
   async function handleDelete(uuid: string): Promise<void> {
-    await window.api.assignments.delete(uuid)
-    setDeleteConfirm(null)
-    await loadAssignments()
+    try {
+      await window.api.assignments.delete(uuid)
+      setDeleteConfirm(null)
+      setStatusMessage('Assignment deleted successfully.')
+      await loadAssignments()
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : 'Failed to delete assignment.')
+    }
   }
 
   return (
@@ -261,19 +282,24 @@ export function AssignmentConfigPanel(): React.JSX.Element {
         <div>
           <h2>Assignment Configuration</h2>
           <p>
-            assignments · {assignments.length} row
-            {assignments.length !== 1 ? 's' : ''}
+            Use this workspace to create assignments, provide solutions, and manage instructor
+            assignment configurations.
           </p>
         </div>
 
         {editingUuid && (
           <button onClick={cancelEdit} className="btn-ghost">
-            cancel edit
+            Cancel Edit
           </button>
         )}
       </div>
 
       <div className="panel-form">
+        <div className="panel-subheader">
+          <h3>Assignment Creation</h3>
+          <p>Enter assignment metadata before creating the assignment.</p>
+        </div>
+
         <input
           type="text"
           placeholder="Assignment name"
@@ -296,6 +322,11 @@ export function AssignmentConfigPanel(): React.JSX.Element {
           className="panel-input"
           rows={4}
         />
+
+        <div className="panel-subheader">
+          <h3>Solution Upload</h3>
+          <p>Choose whether the instructor solution will be provided as text or as a file.</p>
+        </div>
 
         <div className="panel-section">
           <label>
@@ -331,15 +362,19 @@ export function AssignmentConfigPanel(): React.JSX.Element {
         </div>
 
         {form.solutionType === 'text' ? (
-          <textarea
-            placeholder="Expected output text"
-            value={form.expectedOutputText}
-            onChange={(e) => setForm((f) => ({ ...f, expectedOutputText: e.target.value }))}
-            className="panel-input"
-            rows={5}
-          />
+          <div className="solution-box">
+            <label className="field-label">Expected output text</label>
+            <textarea
+              placeholder="Enter the expected solution output"
+              value={form.expectedOutputText}
+              onChange={(e) => setForm((f) => ({ ...f, expectedOutputText: e.target.value }))}
+              className="panel-input"
+              rows={5}
+            />
+          </div>
         ) : (
-          <div className="panel-section">
+          <div className="solution-box">
+            <label className="field-label">Upload solution file</label>
             <input
               type="file"
               onChange={(e) => {
@@ -348,65 +383,75 @@ export function AssignmentConfigPanel(): React.JSX.Element {
               }}
               className="panel-input"
             />
-            {selectedFile && <p className="text-xs">selected file: {selectedFile.name}</p>}
+            {selectedFile && <p className="helper-text">Selected file: {selectedFile.name}</p>}
           </div>
         )}
 
-        <button onClick={handleSubmit} className="btn-primary">
-          {editingUuid ? 'update assignment' : '+ create assignment'}
+        <div className="panel-subheader">
+          <h3>Solution Submission</h3>
+          <p>Submit the assignment only after the solution input has been provided.</p>
+        </div>
+
+        <button onClick={() => void handleSubmit()} className="btn-primary">
+          {editingUuid ? 'Update Assignment' : '+ Create Assignment'}
         </button>
 
+        {statusMessage && <div className="panel-success">✓ {statusMessage}</div>}
         {error && <div className="panel-error">⚠ {error}</div>}
       </div>
 
-      {assignments.length === 0 ? (
-        <div className="panel-empty">no assignments yet — add one above</div>
-      ) : (
-        <ul className="panel-list">
-          {assignments.map((assignment) => (
-            <li key={assignment.uuid} className="panel-list-item">
-              <div>
-                <strong>{assignment.name}</strong>
-                <div>due: {assignment.dueDate}</div>
-                <div>solution type: {assignment.solutionType}</div>
+      <div className="panel-list-shell">
+        <h3>Existing Assignments</h3>
 
-                {assignment.solutionType === 'text' && assignment.expectedOutputText && (
-                  <div>expected output: {assignment.expectedOutputText}</div>
-                )}
+        {assignments.length === 0 ? (
+          <div className="panel-empty">No assignments yet — add one above.</div>
+        ) : (
+          <ul className="panel-list">
+            {assignments.map((assignment) => (
+              <li key={assignment.uuid} className="panel-list-item">
+                <div>
+                  <strong>{assignment.name}</strong>
+                  <div>Due: {assignment.dueDate}</div>
+                  <div>Solution type: {assignment.solutionType}</div>
 
-                {assignment.solutionType === 'file' && assignment.solutionFileName && (
-                  <div>solution file: {assignment.solutionFileName}</div>
-                )}
+                  {assignment.solutionType === 'text' && assignment.expectedOutputText && (
+                    <div>Expected output: {assignment.expectedOutputText}</div>
+                  )}
 
-                <div>created: {new Date(assignment.createdAt * 1000).toLocaleString()}</div>
-                <div>uuid: {assignment.uuid.slice(0, 8)}…</div>
-              </div>
+                  {assignment.solutionType === 'file' && assignment.solutionFileName && (
+                    <div>Solution file: {assignment.solutionFileName}</div>
+                  )}
 
-              <div className="panel-actions">
-                <button onClick={() => startEdit(assignment)} className="btn-ghost text-xs">
-                  edit
-                </button>
+                  <div>Created: {new Date(assignment.createdAt * 1000).toLocaleString()}</div>
+                  <div>UUID: {assignment.uuid.slice(0, 8)}…</div>
+                </div>
 
-                {deleteConfirm === assignment.uuid ? (
-                  <button
-                    onClick={() => handleDelete(assignment.uuid)}
-                    className="btn-ghost text-xs text-red-400"
-                  >
-                    confirm?
+                <div className="panel-actions">
+                  <button onClick={() => startEdit(assignment)} className="btn-ghost text-xs">
+                    Edit
                   </button>
-                ) : (
-                  <button
-                    onClick={() => setDeleteConfirm(assignment.uuid)}
-                    className="btn-ghost text-xs"
-                  >
-                    delete
-                  </button>
-                )}
-              </div>
-            </li>
-          ))}
-        </ul>
-      )}
+
+                  {deleteConfirm === assignment.uuid ? (
+                    <button
+                      onClick={() => void handleDelete(assignment.uuid)}
+                      className="btn-ghost text-xs text-red-400"
+                    >
+                      Confirm?
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => setDeleteConfirm(assignment.uuid)}
+                      className="btn-ghost text-xs"
+                    >
+                      Delete
+                    </button>
+                  )}
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
     </div>
   )
 }
