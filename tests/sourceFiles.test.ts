@@ -1,0 +1,43 @@
+import { describe, it, expect } from 'vitest'
+import { resolve, join } from 'node:path'
+import { getCommonWorkingDirectory, getCppImplementationFiles, getSubmissionRelativePath } from '../src/main/utils/sourceFiles'
+
+describe('getCommonWorkingDirectory', () => {
+  it('Returns the current working directory if no files are given', () => {
+    expect(getCommonWorkingDirectory([])).toBe(process.cwd())
+  })
+
+  it('Returns the filesystem root when files only share the drive root', () => {
+    expect(getCommonWorkingDirectory(['/a.cpp', '/b/test.cpp'])).toBe(resolve('/'))
+  })
+
+  it('Returns directory of a single file', () => {
+    expect(getCommonWorkingDirectory(['/test/src/a.cpp'])).toBe(resolve('/test/src'))
+  })
+
+  it('Returns the longest common working directory (or prefix)', () => {
+    expect(getCommonWorkingDirectory(['/test/src/main/a.cpp', '/test/src/main/b.cpp'])).toBe(resolve('/test/src/main'))
+    expect(getCommonWorkingDirectory(['/test/src/a.cpp', '/test/src/b.cpp'])).toBe(resolve('/test/src'))
+  })
+})
+
+describe('getCppImplementationFiles', () => {
+  it('Should ignore everything but C++ implementation files', () => {
+    const nonImplementationFiles = ["test.h", "test.hpp", "test.md", "test.txt"]
+    expect(getCppImplementationFiles(nonImplementationFiles)).toStrictEqual([])
+  })
+
+  it('Returns the source files from the given files', () => {
+    const files = ["test.cpp", "test.h", "test.cc", "test.hpp", "test.cxx", "test.md", "test.cp", "test.txt"]
+    expect(getCppImplementationFiles(files)).toStrictEqual(["test.cpp", "test.cc", "test.cxx", "test.cp"])
+  })
+})
+
+describe('getSubmissionRelativePath', () => {
+  it('Returns the relative path if file is inside the root directory', () => {
+    expect(getSubmissionRelativePath(resolve('/test'), resolve('/test/src/main/main.cpp'))).toBe(join('src', 'main', 'main.cpp'))
+  })
+  it('Returns its filename if file is outside the root directory', () => {
+    expect(getSubmissionRelativePath(resolve('/test'), resolve('/notTest/test.cpp'))).toBe('test.cpp')
+  })
+})

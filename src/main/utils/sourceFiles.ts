@@ -45,6 +45,11 @@ export function getCommonWorkingDirectory(sourceFiles: string[]): string {
   const sharedSegments = firstSegments.slice(0, sharedLength)
   const sharedDirectory = sharedSegments.join(sep)
 
+  // On Windows, a drive-only prefix such as "C:" should resolve to the drive root "C:\"
+  if (/^[A-Za-z]:$/.test(sharedDirectory)) {
+    return `${sharedDirectory}${sep}`
+  }
+
   // If join returns an empty string -> return the filesystem root
   return sharedDirectory || sep
 }
