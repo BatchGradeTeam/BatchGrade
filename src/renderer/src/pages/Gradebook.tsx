@@ -207,6 +207,7 @@ function Gradebook(): React.JSX.Element {
     // Main page container
     <div style={{ color: 'var(--ev-c-gray-1)' }}>
       <NavBar />
+      <div style={{ paddingTop: '100px' }}>
       {/* Page title */}
       <h1>Assignment Gradebook</h1>
 
@@ -311,6 +312,7 @@ function Gradebook(): React.JSX.Element {
         </button>
       </div>
       <Footer />
+      </div>
     </div>
   )
 }
