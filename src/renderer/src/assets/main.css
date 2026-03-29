@@ -689,7 +689,7 @@ footer {
 
 .dashboard-page-header p {
   margin: 0;
-  color: var(--ev-c-text-2);
+  color: var(--ev-c-grey-1);
   font-size: 1rem;
 }
 
@@ -705,7 +705,7 @@ footer {
   padding: 1.25rem 1.5rem;
   border-radius: 12px;
   background: var(--ev-c-white);
-  border: 1px solid #d9e2ec;
+  border: 1px solid #a2c1e5;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
 }
 
@@ -716,7 +716,7 @@ footer {
 
 .dashboard-empty-state p {
   margin: 0;
-  color: var(--ev-c-text-2);
+  color: var(--ev-c-grey-1);
   line-height: 1.5;
 }
 

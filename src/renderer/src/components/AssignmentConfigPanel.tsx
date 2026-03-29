@@ -711,7 +711,7 @@ export function AssignmentConfigPanel(): React.JSX.Element {
 
       <div className="panel-form">
         <div className="panel-subheader">
-          <h3>UC9 · Assignment Creation</h3>
+          <h3>Assignment Creation</h3>
           <p>Enter assignment metadata before creating the assignment.</p>
         </div>
 
@@ -739,7 +739,7 @@ export function AssignmentConfigPanel(): React.JSX.Element {
         />
 
         <div className="panel-subheader">
-          <h3>UC10 · Solution Upload</h3>
+          <h3>Solution Upload</h3>
           <p>Choose whether the instructor solution will be provided as text or as a file.</p>
         </div>
 
@@ -803,7 +803,7 @@ export function AssignmentConfigPanel(): React.JSX.Element {
         )}
 
         <div className="panel-subheader">
-          <h3>UC11 · Solution Submission</h3>
+          <h3>Solution Submission</h3>
           <p>Submit the assignment only after the solution input has been provided.</p>
         </div>
 

@@ -107,9 +107,9 @@ function InstructorDashboard(): React.JSX.Element {
           <div className="dashboard-empty-state">
             <h2>Get started</h2>
             <p>
-              Select <strong>Assignment Creation</strong> to begin creating an assignment,
-              choose a solution input type, and submit the instructor solution for UC9, UC10,
-              and UC11.
+              Select <strong>Assignment Creation</strong> to begin creating an assignment.
+
+              Choose a solution input type, and submit the instructor solution.
             </p>
           </div>
         )}
