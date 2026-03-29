@@ -7,17 +7,20 @@ describe('getCommonWorkingDirectory', () => {
     expect(getCommonWorkingDirectory([])).toBe(process.cwd())
   })
 
+  it('Returns to the first file\'s folder if the files don\'t share a path', () => {
+    expect(getCommonWorkingDirectory(['C:/test/test.cpp', 'D:/test/test.cpp'])).toBe(resolve('C:/test'))
+  })
+
   it('Returns the filesystem root when files only share the drive root', () => {
-    expect(getCommonWorkingDirectory(['/a.cpp', '/b/test.cpp'])).toBe(resolve('/'))
+    expect(getCommonWorkingDirectory(['/test.cpp', '/b/test.cpp'])).toBe(resolve('/'))
   })
 
   it('Returns directory of a single file', () => {
-    expect(getCommonWorkingDirectory(['/test/src/a.cpp'])).toBe(resolve('/test/src'))
+    expect(getCommonWorkingDirectory(['/test/src/test.cpp'])).toBe(resolve('/test/src'))
   })
 
   it('Returns the longest common working directory (or prefix)', () => {
-    expect(getCommonWorkingDirectory(['/test/src/main/a.cpp', '/test/src/main/b.cpp'])).toBe(resolve('/test/src/main'))
-    expect(getCommonWorkingDirectory(['/test/src/a.cpp', '/test/src/b.cpp'])).toBe(resolve('/test/src'))
+    expect(getCommonWorkingDirectory(['/test/src/main/test.cpp', '/test/src/main/test2.cpp'])).toBe(resolve('/test/src/main'))
   })
 })
 
