@@ -6,15 +6,15 @@ const { executeCppFilesMock } = vi.hoisted(() => {
   }
 })
 
-vi.mock('../src/main/compiler/executeCppFiles', () => {
+vi.mock('../../src/main/compiler/executeCppFiles', () => {
   return {
     executeCppFiles: executeCppFilesMock
   }
 })
 
-async function loadJudgeModule(): Promise<typeof import('../src/main/compiler/judgeCppFiles')> {
+async function loadJudgeModule(): Promise<typeof import('../../src/main/compiler/judgeCppFiles')> {
   vi.resetModules()
-  return await import('../src/main/compiler/judgeCppFiles')
+  return await import('../../src/main/compiler/judgeCppFiles')
 }
 
 beforeEach(() => {

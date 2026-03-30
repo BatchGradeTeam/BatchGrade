@@ -2,9 +2,9 @@ import { describe, it, expect, beforeEach } from 'vitest'
 
 // Wipes gradebook tables before each test in FK-safe order
 beforeEach(async () => {
-  const { getDb } = await import('../src/main/database/index')
+  const { getDb } = await import('../../src/main/database/index')
   const { grades, submissions, assignments, sections, courses, instructors, users } = await import(
-    '../src/main/database/schema'
+    '../../src/main/database/schema'
   )
   getDb().delete(grades).run()
   getDb().delete(submissions).run()
@@ -19,8 +19,8 @@ beforeEach(async () => {
 
 describe('Gradebook Assignment Schema', () => {
   it('existingSection_insertAssignment_generatesUuidAndStoresFields', async () => {
-    const { getDb } = await import('../src/main/database/index')
-    const { assignments, sections, instructors, courses, users } = await import('../src/main/database/schema')
+    const { getDb } = await import('../../src/main/database/index')
+    const { assignments, sections, instructors, courses, users } = await import('../../src/main/database/schema')
     const user = getDb().insert(users).values({ email: 'prof@test.com', password: 'pw' }).returning().get()
     getDb().insert(instructors).values({ uuid: user.uuid, firstName: 'F', lastName: 'L' }).run()
     const course = getDb().insert(courses).values({ courseCode: 'CS101', title: 'Course', credits: 3 }).returning().get()
@@ -42,8 +42,8 @@ describe('Gradebook Assignment Schema', () => {
   })
 
   it('twoAssignments_selectAll_returnsBothRecords', async () => {
-    const { getDb } = await import('../src/main/database/index')
-    const { assignments, sections, instructors, courses, users } = await import('../src/main/database/schema')
+    const { getDb } = await import('../../src/main/database/index')
+    const { assignments, sections, instructors, courses, users } = await import('../../src/main/database/schema')
     const user = getDb().insert(users).values({ email: 'prof2@test.com', password: 'pw' }).returning().get()
     getDb().insert(instructors).values({ uuid: user.uuid, firstName: 'F', lastName: 'L' }).run()
     const course = getDb().insert(courses).values({ courseCode: 'CS102', title: 'Course', credits: 3 }).returning().get()
@@ -64,9 +64,9 @@ describe('Gradebook Assignment Schema', () => {
 
 describe('Submission Schema', () => {
   it('existingAssignmentAndStudent_insertSubmission_defaultsToNotSubmittedStatus', async () => {
-    const { getDb } = await import('../src/main/database/index')
+    const { getDb } = await import('../../src/main/database/index')
     const { submissions, assignments, sections, instructors, courses, users } = await import(
-      '../src/main/database/schema'
+      '../../src/main/database/schema'
     )
     const profUser = getDb().insert(users).values({ email: 'prof3@test.com', password: 'pw' }).returning().get()
     const stuUser = getDb().insert(users).values({ email: 'stu@test.com', password: 'pw' }).returning().get()
@@ -96,9 +96,9 @@ describe('Submission Schema', () => {
   })
 
   it('submissionWithFileContent_insert_storesContent', async () => {
-    const { getDb } = await import('../src/main/database/index')
+    const { getDb } = await import('../../src/main/database/index')
     const { submissions, assignments, sections, instructors, courses, users } = await import(
-      '../src/main/database/schema'
+      '../../src/main/database/schema'
     )
     const profUser = getDb().insert(users).values({ email: 'prof4@test.com', password: 'pw' }).returning().get()
     const stuUser = getDb().insert(users).values({ email: 'stu2@test.com', password: 'pw' }).returning().get()
@@ -133,9 +133,9 @@ describe('Submission Schema', () => {
   })
 
   it('submissionWithDefaultFileName_insert_usesNADefault', async () => {
-    const { getDb } = await import('../src/main/database/index')
+    const { getDb } = await import('../../src/main/database/index')
     const { submissions, assignments, sections, instructors, courses, users } = await import(
-      '../src/main/database/schema'
+      '../../src/main/database/schema'
     )
     const profUser = getDb().insert(users).values({ email: 'prof5@test.com', password: 'pw' }).returning().get()
     const stuUser = getDb().insert(users).values({ email: 'stu3@test.com', password: 'pw' }).returning().get()
@@ -167,9 +167,9 @@ describe('Submission Schema', () => {
 
 describe('Grade Schema', () => {
   it('existingSubmissionAndInstructor_insertGrade_generatesUuidAndStoresScore', async () => {
-    const { getDb } = await import('../src/main/database/index')
+    const { getDb } = await import('../../src/main/database/index')
     const { grades, submissions, assignments, sections, instructors, courses, users } = await import(
-      '../src/main/database/schema'
+      '../../src/main/database/schema'
     )
     const profUser = getDb().insert(users).values({ email: 'prof6@test.com', password: 'pw' }).returning().get()
     const stuUser = getDb().insert(users).values({ email: 'stu4@test.com', password: 'pw' }).returning().get()
@@ -204,9 +204,9 @@ describe('Grade Schema', () => {
   })
 
   it('gradeWithFeedback_insert_storesFeedbackText', async () => {
-    const { getDb } = await import('../src/main/database/index')
+    const { getDb } = await import('../../src/main/database/index')
     const { grades, submissions, assignments, sections, instructors, courses, users } = await import(
-      '../src/main/database/schema'
+      '../../src/main/database/schema'
     )
     const profUser = getDb().insert(users).values({ email: 'prof7@test.com', password: 'pw' }).returning().get()
     const stuUser = getDb().insert(users).values({ email: 'stu5@test.com', password: 'pw' }).returning().get()
@@ -245,9 +245,9 @@ describe('Grade Schema', () => {
   })
 
   it('gradeWithZeroScore_insert_storesZero', async () => {
-    const { getDb } = await import('../src/main/database/index')
+    const { getDb } = await import('../../src/main/database/index')
     const { grades, submissions, assignments, sections, instructors, courses, users } = await import(
-      '../src/main/database/schema'
+      '../../src/main/database/schema'
     )
     const profUser = getDb().insert(users).values({ email: 'prof8@test.com', password: 'pw' }).returning().get()
     const stuUser = getDb().insert(users).values({ email: 'stu6@test.com', password: 'pw' }).returning().get()

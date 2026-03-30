@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, afterEach } from 'vitest'
 import { resolve, join } from 'node:path'
 
-async function loadSourceFilesModule(pathFlavor: 'default' | 'win32' | 'posix' = 'default'): Promise<typeof import('../src/main/utils/sourceFiles')> {
+async function loadSourceFilesModule(pathFlavor: 'default' | 'win32' | 'posix' = 'default'): Promise<typeof import('../../src/main/utils/sourceFiles')> {
   vi.resetModules()
   vi.doUnmock('node:path')
 
@@ -13,7 +13,7 @@ async function loadSourceFilesModule(pathFlavor: 'default' | 'win32' | 'posix' =
     vi.doMock('node:path', async () => await import('node:path/posix'))
   }
 
-  return await import('../src/main/utils/sourceFiles')
+  return await import('../../src/main/utils/sourceFiles')
 }
 
 afterEach(() => {

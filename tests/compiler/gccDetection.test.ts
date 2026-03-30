@@ -18,7 +18,7 @@ let testPlatform = '' // Need this to simulate other OS'
 const realPlatform = process.platform // Save the real platform so we can put it back later after tests finish
 
 // Reimport after changing the platform
-async function loadGccModule(): Promise<typeof import('../src/main/compiler/gccDetection')> {
+async function loadGccModule(): Promise<typeof import('../../src/main/compiler/gccDetection')> {
   vi.resetModules()
 
   Object.defineProperty(process, 'platform', {
@@ -26,7 +26,7 @@ async function loadGccModule(): Promise<typeof import('../src/main/compiler/gccD
     configurable: true
   })
 
-  return await import('../src/main/compiler/gccDetection')
+  return await import('../../src/main/compiler/gccDetection')
 }
 
 beforeEach(() => {

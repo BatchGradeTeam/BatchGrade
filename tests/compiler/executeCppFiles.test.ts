@@ -34,9 +34,9 @@ function createMockChildProcess(): MockChildProcess {
   return child
 }
 
-async function loadExecuteModule(): Promise<typeof import('../src/main/compiler/executeCppFiles')> {
+async function loadExecuteModule(): Promise<typeof import('../../src/main/compiler/executeCppFiles')> {
   vi.resetModules()
-  return await import('../src/main/compiler/executeCppFiles')
+  return await import('../../src/main/compiler/executeCppFiles')
 }
 
 beforeEach(() => {

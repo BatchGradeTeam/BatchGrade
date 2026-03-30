@@ -2,15 +2,15 @@ import { describe, it, expect, beforeEach } from 'vitest'
 
 // Wipes the assignmentsInstrc table before each test
 beforeEach(async () => {
-  const { getDb } = await import('../src/main/database/index')
-  const { assignmentsInstrc } = await import('../src/main/database/schema')
+  const { getDb } = await import('../../src/main/database/index')
+  const { assignmentsInstrc } = await import('../../src/main/database/schema')
   getDb().delete(assignmentsInstrc).run()
 })
 
 describe('Assignment (Instructor Config) Schema', () => {
   it('emptyTable_insertAssignmentWithFileType_generatesUuidAndStoresAllFields', async () => {
-    const { getDb } = await import('../src/main/database/index')
-    const { assignmentsInstrc } = await import('../src/main/database/schema')
+    const { getDb } = await import('../../src/main/database/index')
+    const { assignmentsInstrc } = await import('../../src/main/database/schema')
 
     const result = getDb()
       .insert(assignmentsInstrc)
@@ -33,8 +33,8 @@ describe('Assignment (Instructor Config) Schema', () => {
   })
 
   it('emptyTable_insertAssignmentWithTextType_storesExpectedOutputText', async () => {
-    const { getDb } = await import('../src/main/database/index')
-    const { assignmentsInstrc } = await import('../src/main/database/schema')
+    const { getDb } = await import('../../src/main/database/index')
+    const { assignmentsInstrc } = await import('../../src/main/database/schema')
 
     const result = getDb()
       .insert(assignmentsInstrc)
@@ -55,8 +55,8 @@ describe('Assignment (Instructor Config) Schema', () => {
   })
 
   it('insertedAssignment_createdAtField_isPopulatedAutomatically', async () => {
-    const { getDb } = await import('../src/main/database/index')
-    const { assignmentsInstrc } = await import('../src/main/database/schema')
+    const { getDb } = await import('../../src/main/database/index')
+    const { assignmentsInstrc } = await import('../../src/main/database/schema')
 
     const result = getDb()
       .insert(assignmentsInstrc)
@@ -75,8 +75,8 @@ describe('Assignment (Instructor Config) Schema', () => {
   })
 
   it('assignmentWithCreatedByUser_insert_storesUserUuid', async () => {
-    const { getDb } = await import('../src/main/database/index')
-    const { assignmentsInstrc } = await import('../src/main/database/schema')
+    const { getDb } = await import('../../src/main/database/index')
+    const { assignmentsInstrc } = await import('../../src/main/database/schema')
 
     const result = getDb()
       .insert(assignmentsInstrc)
@@ -95,8 +95,8 @@ describe('Assignment (Instructor Config) Schema', () => {
   })
 
   it('twoAssignmentsInserted_selectAll_returnsBothRecords', async () => {
-    const { getDb } = await import('../src/main/database/index')
-    const { assignmentsInstrc } = await import('../src/main/database/schema')
+    const { getDb } = await import('../../src/main/database/index')
+    const { assignmentsInstrc } = await import('../../src/main/database/schema')
 
     getDb()
       .insert(assignmentsInstrc)
@@ -111,8 +111,8 @@ describe('Assignment (Instructor Config) Schema', () => {
   })
 
   it('existingAssignment_deleteAll_tableIsEmpty', async () => {
-    const { getDb } = await import('../src/main/database/index')
-    const { assignmentsInstrc } = await import('../src/main/database/schema')
+    const { getDb } = await import('../../src/main/database/index')
+    const { assignmentsInstrc } = await import('../../src/main/database/schema')
 
     getDb()
       .insert(assignmentsInstrc)
