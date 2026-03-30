@@ -11,6 +11,10 @@ export default defineConfig({
     coverage: {
       provider: 'v8',
       reporter: ['text', 'html', 'json-summary'],
+      thresholds: {
+        perFile: true,
+        statements: 90,
+      },
       exclude: [
         'src/main/database/schema/index.ts',
         '**/node_modules/**',
