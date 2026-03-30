@@ -12,7 +12,7 @@ import { executeCppFiles } from './executeCppFiles'
 // Helper function to clean and normalize output for comparison
 async function cleanOutput(output: string): Promise<string> {
   // Remove extra whitespace and newlines for simplified comparison
- return output.trim().replace(/\r\n/g, '\n').replace(/\r/g, '\n').replace(/\n+$/, '')
+  return output.trim().replace(/\r\n/g, '\n').replace(/\r/g, '\n').replace(/\n+$/, '')
 }
 
 // Judges the actual output of a program compared to the expected output.
@@ -26,7 +26,8 @@ async function judgeCppFiles(request: JudgeCppRequest): Promise<JudgeCppResult> 
   })
 
   // Compare the cleaned output of the actual and expected output
-  const outputMatches = (await cleanOutput(executionResult.stdout)) === (await cleanOutput(request.expectedOutput))
+  const outputMatches =
+    (await cleanOutput(executionResult.stdout)) === (await cleanOutput(request.expectedOutput))
   // Check that the program executed successfully
   const passed = executionResult.executionSuccess && outputMatches
 
