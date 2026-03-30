@@ -15,7 +15,6 @@
 
 BatchGrade is a locally hosted automated grading platform designed to streamline the evaluation of source code in academia. The system enables educators to batch test submissions, manage grades through an integrated database, and provide structured feedback, while students can receive immediate results to improve their work. Built with a web-based frontend, backend services, and database support, BatchGrade prioritizes affordability and institutional flexibility by allowing deployment on existing infrastructure or local machines. By reducing grading time and improving feedback quality, the project aims to increase instructional efficiency and student confidence without reliance on costly third-party software as a service (SaaS) solutions.
 
-
 ## Table of Contents
 
 - [Recommended IDE Setup](#recommended-ide-setup)
@@ -74,7 +73,7 @@ Starts the app in development mode with hot-reloading.
 npm run dev
 ```
 
-Simply close the electron window or use `ctrl + c` or `cmd + c` to end the dev app. 
+Simply close the electron window or use `ctrl + c` or `cmd + c` to end the dev app.
 
 ### Build
 
@@ -92,8 +91,6 @@ npm run build:linux
 ```
 
 ---
-
-
 
 ### Where build files and executables are placed
 
@@ -153,6 +150,30 @@ npx drizzle-kit migrate --config=drizzle.config.ts
 - Shared setup runs from `tests/setup.ts`.
 - `tests/setup.ts` mocks `src/main/database/index` with an in-memory SQLite database and runs migrations.
 - `tests/globalSetup.ts` includes teardown logic for Electron test hangs.
+
+### Test structure
+
+Organize Vitest tests into folders that match the structure of the source code:
+
+```
+tests/
+├── compiler/
+│   ├── compileCppFiles.test.ts
+│   ├── executeCppFiles.test.ts
+│   ├── gccDetection.test.ts
+│   └── judgeCppFiles.test.ts
+├── database/
+│   ├── academic.test.ts
+│   ├── gradebook.test.ts
+│   ├── log.test.ts
+│   └── users.test.ts
+├── assignment/
+│   └── assignment.test.ts
+├── submission/
+│   └── submitCppSubmission.test.ts
+└── utils/
+    └── sourceFiles.test.ts
+```
 
 ### Add a new test
 
