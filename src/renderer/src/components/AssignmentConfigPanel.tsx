@@ -239,9 +239,7 @@ export function AssignmentConfigPanel(): React.JSX.Element {
           solutionType: form.solutionType,
           solutionFileName: form.solutionType === 'file' ? (selectedFile?.name ?? null) : null,
           solutionFilePath:
-            form.solutionType === 'file' && selectedFile
-              ? `pending://${selectedFile.name}`
-              : null,
+            form.solutionType === 'file' && selectedFile ? `pending://${selectedFile.name}` : null,
           expectedOutputText: form.solutionType === 'text' ? trimmedExpectedOutput : null,
           createdByUserUuid: null
         })

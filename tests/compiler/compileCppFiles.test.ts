@@ -29,14 +29,14 @@ vi.mock('os', () => {
   return { tmpdir: () => '/tmp' }
 })
 
-vi.mock('../src/main/utils/sourceFiles', () => {
+vi.mock('../../src/main/utils/sourceFiles', () => {
   return {
     getCppImplementationFiles: getCppImplementationFilesMock,
     getCommonWorkingDirectory: getCommonWorkingDirectoryMock
   }
 })
 
-async function loadCompileModule():Promise<typeof import('../src/main/compiler/compileCppFiles')> {
+async function loadCompileModule():Promise<typeof import('../../src/main/compiler/compileCppFiles')> {
   vi.resetModules()
 
   Object.defineProperty(process, 'platform', {
@@ -44,7 +44,7 @@ async function loadCompileModule():Promise<typeof import('../src/main/compiler/c
     configurable: true
   })
 
-  return await import('../src/main/compiler/compileCppFiles')
+  return await import('../../src/main/compiler/compileCppFiles')
 }
 
 beforeEach(() => {

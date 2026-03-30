@@ -2,9 +2,9 @@ import { describe, it, expect, beforeEach } from 'vitest'
 
 // Wipes all academic-related tables before each test in FK-safe order
 beforeEach(async () => {
-  const { getDb } = await import('../src/main/database/index')
+  const { getDb } = await import('../../src/main/database/index')
   const { enrollments, sections, instructors, students, teaching_assistants, courses, users } =
-    await import('../src/main/database/schema')
+    await import('../../src/main/database/schema')
   getDb().delete(enrollments).run()
   getDb().delete(sections).run()
   getDb().delete(instructors).run()
@@ -18,8 +18,8 @@ beforeEach(async () => {
 
 describe('Instructor Schema', () => {
   it('emptyTable_insertInstructor_createsRecordWithCorrectFields', async () => {
-    const { getDb } = await import('../src/main/database/index')
-    const { instructors, users } = await import('../src/main/database/schema')
+    const { getDb } = await import('../../src/main/database/index')
+    const { instructors, users } = await import('../../src/main/database/schema')
     const user = getDb().insert(users).values({ email: 'prof@test.com', password: 'pw' }).returning().get()
 
     const result = getDb()
@@ -34,8 +34,8 @@ describe('Instructor Schema', () => {
   })
 
   it('existingInstructor_selectAll_returnsOneRecord', async () => {
-    const { getDb } = await import('../src/main/database/index')
-    const { instructors, users } = await import('../src/main/database/schema')
+    const { getDb } = await import('../../src/main/database/index')
+    const { instructors, users } = await import('../../src/main/database/schema')
     const user = getDb().insert(users).values({ email: 'prof2@test.com', password: 'pw' }).returning().get()
     getDb().insert(instructors).values({ uuid: user.uuid, firstName: 'Jane', lastName: 'Smith' }).run()
 
@@ -43,8 +43,8 @@ describe('Instructor Schema', () => {
   })
 
   it('userDeleted_cascadeDelete_removesInstructor', async () => {
-    const { getDb } = await import('../src/main/database/index')
-    const { instructors, users } = await import('../src/main/database/schema')
+    const { getDb } = await import('../../src/main/database/index')
+    const { instructors, users } = await import('../../src/main/database/schema')
     const user = getDb().insert(users).values({ email: 'prof3@test.com', password: 'pw' }).returning().get()
     getDb().insert(instructors).values({ uuid: user.uuid, firstName: 'A', lastName: 'B' }).run()
 
@@ -58,8 +58,8 @@ describe('Instructor Schema', () => {
 
 describe('Student Schema', () => {
   it('emptyTable_insertStudent_createsRecordWithCorrectFields', async () => {
-    const { getDb } = await import('../src/main/database/index')
-    const { students, users } = await import('../src/main/database/schema')
+    const { getDb } = await import('../../src/main/database/index')
+    const { students, users } = await import('../../src/main/database/schema')
     const user = getDb().insert(users).values({ email: 'stu@test.com', password: 'pw' }).returning().get()
 
     const result = getDb()
@@ -74,8 +74,8 @@ describe('Student Schema', () => {
   })
 
   it('twoStudentsInserted_selectAll_returnsBothRecords', async () => {
-    const { getDb } = await import('../src/main/database/index')
-    const { students, users } = await import('../src/main/database/schema')
+    const { getDb } = await import('../../src/main/database/index')
+    const { students, users } = await import('../../src/main/database/schema')
     const u1 = getDb().insert(users).values({ email: 'stu1@test.com', password: 'pw' }).returning().get()
     const u2 = getDb().insert(users).values({ email: 'stu2@test.com', password: 'pw' }).returning().get()
     getDb().insert(students).values({ uuid: u1.uuid, firstName: 'Bob', lastName: 'A' }).run()
@@ -85,8 +85,8 @@ describe('Student Schema', () => {
   })
 
   it('userDeleted_cascadeDelete_removesStudent', async () => {
-    const { getDb } = await import('../src/main/database/index')
-    const { students, users } = await import('../src/main/database/schema')
+    const { getDb } = await import('../../src/main/database/index')
+    const { students, users } = await import('../../src/main/database/schema')
     const user = getDb().insert(users).values({ email: 'stu3@test.com', password: 'pw' }).returning().get()
     getDb().insert(students).values({ uuid: user.uuid, firstName: 'C', lastName: 'D' }).run()
 
@@ -100,8 +100,8 @@ describe('Student Schema', () => {
 
 describe('Teaching Assistant Schema', () => {
   it('emptyTable_insertTA_createsRecordWithCorrectFields', async () => {
-    const { getDb } = await import('../src/main/database/index')
-    const { teaching_assistants, users } = await import('../src/main/database/schema')
+    const { getDb } = await import('../../src/main/database/index')
+    const { teaching_assistants, users } = await import('../../src/main/database/schema')
     const user = getDb().insert(users).values({ email: 'ta@test.com', password: 'pw' }).returning().get()
 
     const result = getDb()
@@ -115,8 +115,8 @@ describe('Teaching Assistant Schema', () => {
   })
 
   it('userDeleted_cascadeDelete_removesTA', async () => {
-    const { getDb } = await import('../src/main/database/index')
-    const { teaching_assistants, users } = await import('../src/main/database/schema')
+    const { getDb } = await import('../../src/main/database/index')
+    const { teaching_assistants, users } = await import('../../src/main/database/schema')
     const user = getDb().insert(users).values({ email: 'ta2@test.com', password: 'pw' }).returning().get()
     getDb().insert(teaching_assistants).values({ uuid: user.uuid, firstName: 'T', lastName: 'A' }).run()
 
@@ -130,8 +130,8 @@ describe('Teaching Assistant Schema', () => {
 
 describe('Course Schema', () => {
   it('emptyTable_insertCourse_generatesUuidAndStoresFields', async () => {
-    const { getDb } = await import('../src/main/database/index')
-    const { courses } = await import('../src/main/database/schema')
+    const { getDb } = await import('../../src/main/database/index')
+    const { courses } = await import('../../src/main/database/schema')
 
     const result = getDb()
       .insert(courses)
@@ -146,8 +146,8 @@ describe('Course Schema', () => {
   })
 
   it('courseWithOptionalDescription_insert_storesDescription', async () => {
-    const { getDb } = await import('../src/main/database/index')
-    const { courses } = await import('../src/main/database/schema')
+    const { getDb } = await import('../../src/main/database/index')
+    const { courses } = await import('../../src/main/database/schema')
 
     const result = getDb()
       .insert(courses)
@@ -159,8 +159,8 @@ describe('Course Schema', () => {
   })
 
   it('duplicateCourseCode_insert_throwsUniqueConstraint', async () => {
-    const { getDb } = await import('../src/main/database/index')
-    const { courses } = await import('../src/main/database/schema')
+    const { getDb } = await import('../../src/main/database/index')
+    const { courses } = await import('../../src/main/database/schema')
     getDb().insert(courses).values({ courseCode: 'CS301', title: 'Algorithms', credits: 3 }).run()
 
     expect(() =>
@@ -173,8 +173,8 @@ describe('Course Schema', () => {
 
 describe('Section Schema', () => {
   it('existingCourseAndInstructor_insertSection_generatesUuidAndStoresFields', async () => {
-    const { getDb } = await import('../src/main/database/index')
-    const { sections, instructors, courses, users } = await import('../src/main/database/schema')
+    const { getDb } = await import('../../src/main/database/index')
+    const { sections, instructors, courses, users } = await import('../../src/main/database/schema')
     const user = getDb().insert(users).values({ email: 'sec_prof@test.com', password: 'pw' }).returning().get()
     getDb().insert(instructors).values({ uuid: user.uuid, firstName: 'F', lastName: 'L' }).run()
     const course = getDb()
@@ -199,9 +199,9 @@ describe('Section Schema', () => {
 
 describe('Enrollment Schema', () => {
   it('existingStudentAndSection_insertEnrollment_generatesUuidAndLinksCorrectly', async () => {
-    const { getDb } = await import('../src/main/database/index')
+    const { getDb } = await import('../../src/main/database/index')
     const { sections, instructors, students, enrollments, courses, users } = await import(
-      '../src/main/database/schema'
+      '../../src/main/database/schema'
     )
     const profUser = getDb().insert(users).values({ email: 'enr_prof@test.com', password: 'pw' }).returning().get()
     const stuUser = getDb().insert(users).values({ email: 'enr_stu@test.com', password: 'pw' }).returning().get()

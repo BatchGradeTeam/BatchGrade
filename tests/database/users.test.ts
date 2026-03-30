@@ -1,10 +1,10 @@
 import { describe, it, expect, beforeEach } from 'vitest'
-import { createUser, getAllUsers, updateUser, deleteUser } from '../src/main/database/queries/users'
+import { createUser, getAllUsers, updateUser, deleteUser } from '../../src/main/database/queries/users'
 
 // Wipes the users table before each test so they don't affect each other
 beforeEach(async () => {
-  const { getDb } = await import('../src/main/database/index')
-  const { users } = await import('../src/main/database/schema')
+  const { getDb } = await import('../../src/main/database/index')
+  const { users } = await import('../../src/main/database/schema')
   getDb().delete(users).run()
 })
 
@@ -66,8 +66,8 @@ describe('User Queries', () => {
 
 it('userWithInvalidRole_getAllUsers_throwsInvalidRole', async () => {
     // Insert a row directly bypassing createUser so we can force an invalid role
-    const { getDb } = await import('../src/main/database/index')
-    const { users } = await import('../src/main/database/schema')
+    const { getDb } = await import('../../src/main/database/index')
+    const { users } = await import('../../src/main/database/schema')
     getDb()
       .insert(users)
       .values({ email: 'badrole@test.com', password: 'pw', role: 'superadmin' })

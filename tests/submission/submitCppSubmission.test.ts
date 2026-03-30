@@ -33,16 +33,16 @@ vi.mock('electron', () => {
   }
 })
 
-vi.mock('../src/main/utils/sourceFiles', () => {
+vi.mock('../../src/main/utils/sourceFiles', () => {
   return {
     getCommonWorkingDirectory: getCommonWorkingDirectoryMock,
     getSubmissionRelativePath: getSubmissionRelativePathMock
   }
 })
 
-async function loadSubmitModule(): Promise<typeof import('../src/main/submissions/submitCppSubmission')> {
+async function loadSubmitModule(): Promise<typeof import('../../src/main/submissions/submitCppSubmission')> {
   vi.resetModules()
-  return await import('../src/main/submissions/submitCppSubmission')
+  return await import('../../src/main/submissions/submitCppSubmission')
 }
 
 beforeEach(() => {

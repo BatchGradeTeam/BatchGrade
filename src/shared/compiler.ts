@@ -56,5 +56,5 @@ export type JudgeCppResult = {
   passed: boolean
   timedOut: boolean
   expectedOutput: string
-  actualOutput: string  // The actual output from the judged program
+  actualOutput: string // The actual output from the judged program
 }

@@ -2,9 +2,9 @@ import { describe, it, expect, beforeEach } from 'vitest'
 
 // Wipes log tables before each test in FK-safe order
 beforeEach(async () => {
-  const { getDb } = await import('../src/main/database/index')
+  const { getDb } = await import('../../src/main/database/index')
   const { studentActionLogs, compileLogs, assignments, sections, instructors, courses, users } =
-    await import('../src/main/database/schema')
+    await import('../../src/main/database/schema')
   getDb().delete(studentActionLogs).run()
   getDb().delete(compileLogs).run()
   getDb().delete(assignments).run()
@@ -18,8 +18,8 @@ beforeEach(async () => {
 
 describe('Student Action Log Schema', () => {
   it('existingUser_insertActionLog_generatesUuidAndStoresAction', async () => {
-    const { getDb } = await import('../src/main/database/index')
-    const { studentActionLogs, users } = await import('../src/main/database/schema')
+    const { getDb } = await import('../../src/main/database/index')
+    const { studentActionLogs, users } = await import('../../src/main/database/schema')
     const user = getDb().insert(users).values({ email: 'logger@test.com', password: 'pw' }).returning().get()
 
     const result = getDb()
@@ -34,8 +34,8 @@ describe('Student Action Log Schema', () => {
   })
 
   it('actionLogWithAllOptionalFields_insert_storesAllFields', async () => {
-    const { getDb } = await import('../src/main/database/index')
-    const { studentActionLogs, users } = await import('../src/main/database/schema')
+    const { getDb } = await import('../../src/main/database/index')
+    const { studentActionLogs, users } = await import('../../src/main/database/schema')
     const user = getDb().insert(users).values({ email: 'logger2@test.com', password: 'pw' }).returning().get()
 
     const result = getDb()
@@ -54,8 +54,8 @@ describe('Student Action Log Schema', () => {
   })
 
   it('actionLogInserted_createdAtField_isPopulatedAutomatically', async () => {
-    const { getDb } = await import('../src/main/database/index')
-    const { studentActionLogs, users } = await import('../src/main/database/schema')
+    const { getDb } = await import('../../src/main/database/index')
+    const { studentActionLogs, users } = await import('../../src/main/database/schema')
     const user = getDb().insert(users).values({ email: 'logger3@test.com', password: 'pw' }).returning().get()
 
     const result = getDb()
@@ -68,8 +68,8 @@ describe('Student Action Log Schema', () => {
   })
 
   it('multipleLogsForSameUser_selectAll_returnsAllLogs', async () => {
-    const { getDb } = await import('../src/main/database/index')
-    const { studentActionLogs, users } = await import('../src/main/database/schema')
+    const { getDb } = await import('../../src/main/database/index')
+    const { studentActionLogs, users } = await import('../../src/main/database/schema')
     const user = getDb().insert(users).values({ email: 'logger4@test.com', password: 'pw' }).returning().get()
 
     getDb().insert(studentActionLogs).values({ userId: user.uuid, action: 'login' }).run()
@@ -80,8 +80,8 @@ describe('Student Action Log Schema', () => {
   })
 
   it('userDeleted_cascadeDelete_removesActionLogs', async () => {
-    const { getDb } = await import('../src/main/database/index')
-    const { studentActionLogs, users } = await import('../src/main/database/schema')
+    const { getDb } = await import('../../src/main/database/index')
+    const { studentActionLogs, users } = await import('../../src/main/database/schema')
     const user = getDb().insert(users).values({ email: 'logger5@test.com', password: 'pw' }).returning().get()
     getDb().insert(studentActionLogs).values({ userId: user.uuid, action: 'login' }).run()
 
@@ -95,9 +95,9 @@ describe('Student Action Log Schema', () => {
 
 describe('Compile Log Schema', () => {
   it('existingStudentAndAssignment_insertSuccessCompileLog_generatesUuidAndStoresFields', async () => {
-    const { getDb } = await import('../src/main/database/index')
+    const { getDb } = await import('../../src/main/database/index')
     const { compileLogs, assignments, sections, instructors, courses, users } = await import(
-      '../src/main/database/schema'
+      '../../src/main/database/schema'
     )
     const profUser = getDb().insert(users).values({ email: 'compile_prof@test.com', password: 'pw' }).returning().get()
     const stuUser = getDb().insert(users).values({ email: 'compile_stu@test.com', password: 'pw' }).returning().get()
@@ -135,9 +135,9 @@ describe('Compile Log Schema', () => {
   })
 
   it('compileLogWithError_insert_storesStderr', async () => {
-    const { getDb } = await import('../src/main/database/index')
+    const { getDb } = await import('../../src/main/database/index')
     const { compileLogs, assignments, sections, instructors, courses, users } = await import(
-      '../src/main/database/schema'
+      '../../src/main/database/schema'
     )
     const profUser = getDb().insert(users).values({ email: 'compile_prof2@test.com', password: 'pw' }).returning().get()
     const stuUser = getDb().insert(users).values({ email: 'compile_stu2@test.com', password: 'pw' }).returning().get()
@@ -173,9 +173,9 @@ describe('Compile Log Schema', () => {
   })
 
   it('compileLogInserted_createdAtField_isPopulatedAutomatically', async () => {
-    const { getDb } = await import('../src/main/database/index')
+    const { getDb } = await import('../../src/main/database/index')
     const { compileLogs, assignments, sections, instructors, courses, users } = await import(
-      '../src/main/database/schema'
+      '../../src/main/database/schema'
     )
     const profUser = getDb().insert(users).values({ email: 'compile_prof3@test.com', password: 'pw' }).returning().get()
     const stuUser = getDb().insert(users).values({ email: 'compile_stu3@test.com', password: 'pw' }).returning().get()

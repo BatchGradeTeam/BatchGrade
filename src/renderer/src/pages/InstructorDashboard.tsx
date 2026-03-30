@@ -36,7 +36,7 @@ function InstructorDashboard(): React.JSX.Element {
   // Enables programmatic navigation between routes
   const navigate = useNavigate()
 
-    /**
+  /**
    * @brief Tracks whether the assignment configuration workspace is visible.
    */
   const [showAssignmentConfig, setShowAssignmentConfig] = useState<boolean>(false)
@@ -60,7 +60,7 @@ function InstructorDashboard(): React.JSX.Element {
   }
 
   return (
-     <>
+    <>
       {/*-----------------------------------------------------------
         Application Navigation Bar
       -----------------------------------------------------------*/}
@@ -74,8 +74,8 @@ function InstructorDashboard(): React.JSX.Element {
         <div className="dashboard-page-header">
           <h1>Instructor Dashboard</h1>
           <p>
-            Manage instructor tools, configure assignments, and review grading workflows from
-            this dashboard.
+            Manage instructor tools, configure assignments, and review grading workflows from this
+            dashboard.
           </p>
         </div>
 
@@ -107,9 +107,8 @@ function InstructorDashboard(): React.JSX.Element {
           <div className="dashboard-empty-state">
             <h2>Get started</h2>
             <p>
-              Select <strong>Assignment Creation</strong> to begin creating an assignment.
-
-              Choose a solution input type, and submit the instructor solution.
+              Select <strong>Assignment Creation</strong> to begin creating an assignment. Choose a
+              solution input type, and submit the instructor solution.
             </p>
           </div>
         )}
