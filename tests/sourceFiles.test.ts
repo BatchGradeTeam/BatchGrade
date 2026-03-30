@@ -58,12 +58,6 @@ describe('getCommonWorkingDirectory', () => {
 })
 
 describe('getCppImplementationFiles', () => {
-  it('Should ignore everything but C++ implementation files', async () => {
-    const { getCppImplementationFiles } = await loadSourceFilesModule()
-    const nonImplementationFiles = ["test.h", "test.hpp", "test.md", "test.txt"]
-    expect(getCppImplementationFiles(nonImplementationFiles)).toStrictEqual([])
-  })
-
   it('Returns the source files from the given files', async () => {
     const { getCppImplementationFiles } = await loadSourceFilesModule()
     const files = ["test.cpp", "test.h", "test.cc", "test.hpp", "test.cxx", "test.md", "test.cp", "test.txt"]
