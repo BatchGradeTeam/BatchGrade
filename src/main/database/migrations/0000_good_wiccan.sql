@@ -45,15 +45,6 @@ CREATE TABLE `teaching_assistants` (
 	FOREIGN KEY (`uuid`) REFERENCES `users`(`uuid`) ON UPDATE no action ON DELETE cascade
 );
 --> statement-breakpoint
-CREATE TABLE `users` (
-	`uuid` text PRIMARY KEY NOT NULL,
-	`email` text NOT NULL,
-	`password` text NOT NULL,
-	`role` text NOT NULL,
-	`created_at` integer DEFAULT (unixepoch()) NOT NULL
-);
---> statement-breakpoint
-CREATE UNIQUE INDEX `users_email_unique` ON `users` (`email`);--> statement-breakpoint
 CREATE TABLE `assignments` (
 	`uuid` text PRIMARY KEY NOT NULL,
 	`section_id` text NOT NULL,
@@ -77,14 +68,24 @@ CREATE TABLE `submissions` (
 	`uuid` text PRIMARY KEY NOT NULL,
 	`assignment_id` text NOT NULL,
 	`student_id` text NOT NULL,
-	`file_content` blob,
+	`file_content` text,
 	`file_name` text DEFAULT 'N/A' NOT NULL,
+	`file_size` integer DEFAULT 0 NOT NULL,
 	`status` text DEFAULT 'not submitted' NOT NULL,
 	`submitted_at` integer DEFAULT (unixepoch()),
 	FOREIGN KEY (`assignment_id`) REFERENCES `assignments`(`uuid`) ON UPDATE no action ON DELETE no action,
 	FOREIGN KEY (`student_id`) REFERENCES `users`(`uuid`) ON UPDATE no action ON DELETE no action
 );
 --> statement-breakpoint
+CREATE TABLE `users` (
+	`uuid` text PRIMARY KEY NOT NULL,
+	`email` text NOT NULL,
+	`password` text NOT NULL,
+	`role` text DEFAULT 'student' NOT NULL,
+	`created_at` integer DEFAULT (unixepoch()) NOT NULL
+);
+--> statement-breakpoint
+CREATE UNIQUE INDEX `users_email_unique` ON `users` (`email`);--> statement-breakpoint
 CREATE TABLE `compile_logs` (
 	`uuid` text PRIMARY KEY NOT NULL,
 	`student_id` text NOT NULL,

@@ -62,3 +62,22 @@ describe('User Queries', () => {
     )
   })
 })
+
+
+it('userWithInvalidRole_getAllUsers_throwsInvalidRole', async () => {
+    // Insert a row directly bypassing createUser so we can force an invalid role
+    const { getDb } = await import('../src/main/database/index')
+    const { users } = await import('../src/main/database/schema')
+    getDb()
+      .insert(users)
+      .values({ email: 'badrole@test.com', password: 'pw', role: 'superadmin' })
+      .run()
+ 
+    expect(() => getAllUsers()).toThrow('Invalid role')
+  })
+ 
+  it('userWithValidInstructorRole_updateRole_reflectsNewRole', () => {
+    const user = createUser({ email: 'rolechange@test.com', password: 'pw' })
+    const updated = updateUser({ uuid: user.uuid, role: 'instructor' })
+    expect(updated.role).toBe('instructor')
+  })

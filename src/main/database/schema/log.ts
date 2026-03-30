@@ -10,7 +10,7 @@ export const studentActionLogs = sqliteTable('action_logs', {
     .$defaultFn(() => crypto.randomUUID()),
   userId: text('user_id')
     .notNull()
-    .references(() => users.uuid),
+    .references(() => users.uuid, { onDelete: 'cascade' }),
   action: text('action').notNull(),
   entityId: text('entity_id'),
   details: text('details'),
