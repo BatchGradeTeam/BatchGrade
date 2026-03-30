@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { join } from 'node:path'
 
 const { execFileAsyncMock,mkdtempMock, getCppImplementationFilesMock,getCommonWorkingDirectoryMock } = vi.hoisted(() => {
   return {
@@ -93,6 +94,7 @@ describe('compileCppFiles', () => {
       stdout: 'compiled',
       stderr: ''
     })
+    const expectedExecutablePath = join('/tmp/batchgrade-123', 'batchgrade-program')
 
     const { compileCppFiles } = await loadCompileModule()
     const result = await compileCppFiles('g++', { sourceFiles: ['test.cpp', 'test.h'] })
@@ -100,7 +102,7 @@ describe('compileCppFiles', () => {
     expect(result).toEqual({
       compileSuccess: true,
       compilerPath: 'g++',
-      executablePath: '/tmp/batchgrade-123/batchgrade-program',
+      executablePath: expectedExecutablePath,
       sourceFiles: ['test.cpp', 'test.h'],
       stdout: 'compiled',
       stderr: '',
@@ -110,7 +112,7 @@ describe('compileCppFiles', () => {
     // Expect to be called using this
     expect(execFileAsyncMock).toHaveBeenCalledWith(
       'g++',
-      ['test.cpp', '-o', '/tmp/batchgrade-123/batchgrade-program'], // NOTE: 'test'.cpp from the mock
+      ['test.cpp', '-o', expectedExecutablePath], // NOTE: 'test'.cpp from the mock
       expect.objectContaining({
         cwd: '/projectTest',
         windowsHide: true,
@@ -125,15 +127,16 @@ describe('compileCppFiles', () => {
       stdout:'compiled',
       stderr: ''
     })
+    const expectedExecutablePath = join('/tmp/batchgrade-123', 'batchgrade-program.exe')
 
     const { compileCppFiles } = await loadCompileModule()
     const result = await compileCppFiles('g++', { sourceFiles: ['test.cpp'] })
 
-    expect(result.executablePath).toBe('/tmp/batchgrade-123/batchgrade-program.exe')
+    expect(result.executablePath).toBe(expectedExecutablePath)
 
     expect(execFileAsyncMock).toHaveBeenCalledWith(
       'g++',
-      ['test.cpp', '-o', '/tmp/batchgrade-123/batchgrade-program.exe'],
+      ['test.cpp', '-o', expectedExecutablePath],
       expect.objectContaining({
         cwd: '/projectTest',
         windowsHide: true,
