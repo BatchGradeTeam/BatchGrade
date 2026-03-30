@@ -21,7 +21,7 @@ import type { Assignment } from '../../../shared/types'
 import NavBar from '../components/Navbar'
 import Footer from '../components/Footer'
 import { useAuth } from '../components/AuthContext'
-import { CppWorkflowPanel } from '../components/CppWorkflowPanel'
+import { CppWorkflowPanel } from '../components/compiler/CppWorkflowPanel'
 
 /**
  * StudentDashboard Component
