@@ -11,8 +11,8 @@ import type {
 // A promise is a temporary place holder for a value we will get at a later time
 
 // Pretty much want to look at the window.api.xxxx this will essentially let you know what is going
-// on in this :)  
- 
+// on in this :)
+
 export function getCompilerStatus(): Promise<GccInstallationInfo> {
   return window.api.compiler.getGccStatus()
 }

@@ -1,8 +1,7 @@
-
 // Imports
 import { useEffect, useState } from 'react'
 
-// This is just a shared type / data shape 
+// This is just a shared type / data shape
 import type {
   CompileCppResult,
   GccInstallationInfo,
@@ -19,7 +18,6 @@ import {
   selectCppFiles,
   setCompilerPath
 } from '../../components/compiler/cppWorkflowApi'
-
 
 // these are optional items denoted by ?, So we don't necessarily need these when
 // we make a call, howevver these will return whether or not a change was made in
@@ -55,7 +53,6 @@ type UseCppWorkflowReturn = {
   handleRunProgram: () => Promise<void>
 }
 
-
 // onselection, oncompile are optional parameters, we can use these but are not required
 // just useful. Everything below it is a state variable, ie something that we are actually
 // storing from input/output of either the user or api, compilation etc
@@ -74,7 +71,7 @@ export function useCppWorkflow({
   const [isCompiling, setIsCompiling] = useState(false)
   const [isRunning, setIsRunning] = useState(false)
 
-    // Loads the gcc status when we start/open anywhere we use this panel
+  // Loads the gcc status when we start/open anywhere we use this panel
   useEffect(() => {
     async function loadCompilerStatus(): Promise<void> {
       try {
@@ -125,9 +122,9 @@ export function useCppWorkflow({
   // First we set isCompiling to true, and the other stuff to false
   // then we run compile on the selected file, and wait to see if we get a result
   // if it does not error we have that value, otherwise we will error, and lastly
-  // set the iscompiling to false. 
+  // set the iscompiling to false.
   // We use the compilecppfiles which is a wrapper in the api's file. That then
-  // uses a backend electron ipc to  utilize a locally installed compiler, and we 
+  // uses a backend electron ipc to  utilize a locally installed compiler, and we
   // ultimately capture those results and this will fail/pass based on the compiler
   // output
   async function handleCompileCpp(): Promise<void> {
@@ -160,11 +157,7 @@ export function useCppWorkflow({
     setRunResult(null)
 
     try {
-      const result = await runCompiledProgram(
-        compileResult.executablePath,
-        stdinText,
-        5000
-      )
+      const result = await runCompiledProgram(compileResult.executablePath, stdinText, 5000)
       setRunResult(result)
     } catch (error) {
       console.error('Error running compiled program:', error)

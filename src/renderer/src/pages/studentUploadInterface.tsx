@@ -29,27 +29,25 @@ import { CppWorkflowPanel } from '../components/compiler/CppWorkflowPanel'
 export function StudentUploadInterface(): React.JSX.Element {
   const navigate = useNavigate()
 
-
-
   return (
     <>
       <NavBar />
 
-<div className="cpp-page">
-  <div className="cpp-content">
-    <CppWorkflowPanel
-      title="Project Code Submission"
-      description="Upload and compile your C++ project files for grading."
-      allowExecution={true}
-    />
+      <div className="cpp-page">
+        <div className="cpp-content">
+          <CppWorkflowPanel
+            title="Project Code Submission"
+            description="Upload and compile your C++ project files for grading."
+            allowExecution={true}
+          />
 
-    <button className="secondary-button" onClick={() => navigate('/')}>
-      Go to Home
-    </button>
-  </div>
-</div>
+          <button className="secondary-button" onClick={() => navigate('/')}>
+            Go to Home
+          </button>
+        </div>
+      </div>
 
-<Footer />
+      <Footer />
     </>
   )
 }
