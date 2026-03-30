@@ -866,8 +866,8 @@ footer {
   .cpp-output {
     max-height: 120px;
   }
-  Instructor Dashboard / Assignment Configuration Components
-
+}
+  /* Instructor Dashboard / Assignment Configuration Components */
 .dashboard-shell {
   width: 100%;
   min-height: 100vh;

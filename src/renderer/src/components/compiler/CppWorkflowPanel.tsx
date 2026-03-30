@@ -85,21 +85,29 @@ export function CppWorkflowPanel({
 
               {gccStatus && (
                 <>
-                  <p><strong>Status:</strong> {gccStatus.status}</p>
-                  <p><strong>Message:</strong> {gccStatus.message}</p>
-                  <p><strong>Platform:</strong> {gccStatus.platform}</p>
-                  <p><strong>Path:</strong> {gccStatus.path ?? 'Not set'}</p>
+                  <p>
+                    <strong>Status:</strong> {gccStatus.status}
+                  </p>
+                  <p>
+                    <strong>Message:</strong> {gccStatus.message}
+                  </p>
+                  <p>
+                    <strong>Platform:</strong> {gccStatus.platform}
+                  </p>
+                  <p>
+                    <strong>Path:</strong> {gccStatus.path ?? 'Not set'}
+                  </p>
                   {gccStatus.installInstruction && (
-                    <p><strong>Install Help:</strong> {gccStatus.installInstruction}</p>
+                    <p>
+                      <strong>Install Help:</strong> {gccStatus.installInstruction}
+                    </p>
                   )}
                 </>
               )}
             </div>
 
             <div>
-              <h4 style={{ marginBottom: '8px', fontSize: '16px' }}>
-                Set Compiler Path Manually
-              </h4>
+              <h4 style={{ marginBottom: '8px', fontSize: '16px' }}>Set Compiler Path Manually</h4>
               <input
                 type="text"
                 value={manualPath}
@@ -165,9 +173,7 @@ export function CppWorkflowPanel({
               onClick={() => void handleCompileCpp()}
               disabled={isCompiling || selectedFiles.length === 0}
               className={
-                isCompiling || selectedFiles.length === 0
-                  ? 'cancel-button'
-                  : 'secondary-button'
+                isCompiling || selectedFiles.length === 0 ? 'cancel-button' : 'secondary-button'
               }
               style={{ marginTop: '10px' }}
             >
