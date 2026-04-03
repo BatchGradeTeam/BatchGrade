@@ -47,7 +47,7 @@ export function StudentUploadInterface(): React.JSX.Element {
         </div>
       </div>
       <div className="dashboard-container">
-       <CppWorkflowPanel
+        <CppWorkflowPanel
           title="Student Compilation Workspace"
           description="Choose the files you want to submit, compile them, optionally run them with input, and review the output before submitting."
           allowExecution={true}
@@ -63,13 +63,10 @@ export function StudentUploadInterface(): React.JSX.Element {
       </div>
 
       <div className="button-container">
-        <button 
-          className="secondary-button" 
-          onClick={() => navigate('/studentdashboard')}>
+        <button className="secondary-button" onClick={() => navigate('/studentdashboard')}>
           Go Home
         </button>
       </div>
-
 
       <Footer />
     </>

@@ -1,12 +1,12 @@
 /**
  * CppWorkflowPanel.tsx
- * 
+ *
  * Description:
  * This component provides a user interface for compiling and optionally running C++ code
  * within the BatchGrade application. It is designed to be used in both the StudentDashboard
  * and StudentUploadInterface pages, allowing students to select their C++ source files,
  * compile them locally, and review the results before submission.
- * 
+ *
  * The panel includes:
  *  - A section for checking GCC compiler status and setting a manual path if needed
  *  - A section for selecting C++ files and compiling them, with output display
@@ -25,13 +25,13 @@ type CppWorkflowPanelProps = {
 
 /**
  * CppWorkflowPanel Component
- * 
+ *
  * This component provides a user interface for compiling and optionally running C++ code
  * within the BatchGrade application. It is designed to be used in both the StudentDashboard
  * and StudentUploadInterface pages, allowing students to select their C++ source files,
  * compile them locally, and review the results before submission.
-  * @param {CppWorkflowPanelProps} props - The properties for the CppWorkflowPanel component
-  * @returns {React.JSX.Element} The rendered CppWorkflowPanel component
+ * @param {CppWorkflowPanelProps} props - The properties for the CppWorkflowPanel component
+ * @returns {React.JSX.Element} The rendered CppWorkflowPanel component
  */
 export function CppWorkflowPanel({
   title,

@@ -1,6 +1,6 @@
 /**
  * useSubmitWorkflow.ts
- * 
+ *
  * Description:
  * This custom React hook manages the state and logic for the submission workflow
  * in the SubmitPanel component. It handles loading assignments, managing user input,
@@ -129,7 +129,7 @@ export function useSubmitWorkflow({
       if (!result.submissionSuccess) {
         setErrorMessage(result.message)
       }
-    // Catch and handle any errors that occur during the submission process
+      // Catch and handle any errors that occur during the submission process
     } catch (error) {
       console.error('Error submitting source files:', error)
       setErrorMessage('Could not save the submission.')

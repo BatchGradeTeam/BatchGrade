@@ -1,16 +1,16 @@
 /**
  * cppWorkflowApi.ts
- * 
+ *
  * Description:
  * This module provides a set of functions that act as an interface to the C++ compilation
  * and execution workflow. It allows components in the renderer process to interact with
  * the compiler and file system through the exposed API on the window object.
- * 
+ *
  * Each function corresponds to a specific action in the workflow, such as getting compiler
  * status, setting the compiler path, selecting C++ files, compiling them, and running the
  * compiled program. These functions return promises that resolve with the results of the
  * respective operations, allowing for asynchronous handling in the components that use them.
- * 
+ *
  */
 import type {
   CompileCppResult,

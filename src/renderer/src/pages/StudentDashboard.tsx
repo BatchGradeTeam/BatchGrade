@@ -44,31 +44,20 @@ export function StudentDashboard(): React.JSX.Element {
             The submission artifact stores source files and compile logs instead of a host-specific
             executable.
           </p>
-
         </div>
       </div>
 
       <div className="student-dashboard-container">
         <div className="student-dashboard-item">
-          <button 
-            className="primary-button"
-            onClick={() => navigate('/studentuploadinterface')}
-          >
+          <button className="primary-button" onClick={() => navigate('/studentuploadinterface')}>
             Compile
           </button>
         </div>
         <div className="student-dashboard-item">
-          <button
-            className="primary-button"
-          >
-            Assignments
-          </button>
+          <button className="primary-button">Assignments</button>
         </div>
         <div className="student-dashboard-item">
-          <button
-            className="primary-button"
-            onClick={() => navigate('/about')}
-          >
+          <button className="primary-button" onClick={() => navigate('/about')}>
             About
           </button>
         </div>

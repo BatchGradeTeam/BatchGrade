@@ -59,9 +59,7 @@ export function NavBar(): React.JSX.Element {
             ☰
           </button>
           {/* Application Title */}
-          <h1 className="navbar-title hover-underline">
-            BatchGrade
-          </h1>
+          <h1 className="navbar-title hover-underline">BatchGrade</h1>
         </div>
         {/*-----------------------------------------------------------
           Authentication Controls

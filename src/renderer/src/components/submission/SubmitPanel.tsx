@@ -1,14 +1,14 @@
 /**
  * SubmitPanel.tsx
- * 
+ *
  * Description:
  * This component implements the submission interface for students to submit their code for grading.
  * It allows students to select an assignment, review compile results, and submit their code bundle.
  * The panel displays submission status and any relevant messages after submission.
- * 
- * The component relies on the useSubmitWorkflow hook to manage the submission logic and state. 
+ *
+ * The component relies on the useSubmitWorkflow hook to manage the submission logic and state.
  * The UI is designed to be simple and informative, guiding students through the submission process.
- * 
+ *
  * Future enhancements may include:
  *  - More detailed submission feedback
  *  - Support for multiple programming languages
@@ -26,10 +26,10 @@ type SubmitPanelProps = {
 
 /**
  * SubmitPanel Component
- * 
+ *
  * Provides the interface for students to submit their code for grading.
  * Displays assignment selection, submission status, and feedback messages.
- * 
+ *
  * @param {SubmitPanelProps} props - The properties for the SubmitPanel component
  * @returns {React.JSX.Element} The rendered SubmitPanel component
  */

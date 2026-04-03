@@ -161,9 +161,7 @@ export function Login(): React.JSX.Element {
               Login
             </button>
 
-            <button className="secondary-button">
-              Guest
-            </button>
+            <button className="secondary-button">Guest</button>
 
             {/* Cancel login and reset form */}
             <button
