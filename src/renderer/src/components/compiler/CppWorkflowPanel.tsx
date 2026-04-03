@@ -1,3 +1,17 @@
+/**
+ * CppWorkflowPanel.tsx
+ * 
+ * Description:
+ * This component provides a user interface for compiling and optionally running C++ code
+ * within the BatchGrade application. It is designed to be used in both the StudentDashboard
+ * and StudentUploadInterface pages, allowing students to select their C++ source files,
+ * compile them locally, and review the results before submission.
+ * 
+ * The panel includes:
+ *  - A section for checking GCC compiler status and setting a manual path if needed
+ *  - A section for selecting C++ files and compiling them, with output display
+ *  - An optional section for running the compiled executable with custom input
+ */
 import type { CompileCppResult } from '../../../../shared/compiler'
 import { useCppWorkflow } from '../../components/compiler/useCPPWorkflow'
 
@@ -9,6 +23,16 @@ type CppWorkflowPanelProps = {
   onCompileResultChange?: (result: CompileCppResult | null) => void
 }
 
+/**
+ * CppWorkflowPanel Component
+ * 
+ * This component provides a user interface for compiling and optionally running C++ code
+ * within the BatchGrade application. It is designed to be used in both the StudentDashboard
+ * and StudentUploadInterface pages, allowing students to select their C++ source files,
+ * compile them locally, and review the results before submission.
+  * @param {CppWorkflowPanelProps} props - The properties for the CppWorkflowPanel component
+  * @returns {React.JSX.Element} The rendered CppWorkflowPanel component
+ */
 export function CppWorkflowPanel({
   title,
   description,
@@ -38,14 +62,8 @@ export function CppWorkflowPanel({
   })
 
   return (
-    <div style={{ display: 'grid', gap: '1rem', marginTop: '2rem' }}>
-      <div
-        style={{
-          border: '1px solid gray',
-          padding: '1rem',
-          backgroundColor: '#2b2b2b'
-        }}
-      >
+    <div className="cpp-container">
+      <div className="cpp-item">
         <h2 className="cpp-title">{title}</h2>
         <p className="cpp-description">{description}</p>
 
