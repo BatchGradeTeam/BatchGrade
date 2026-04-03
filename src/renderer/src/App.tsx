@@ -9,11 +9,14 @@
  *
  * The application uses React Router to manage navigation between
  * the following primary views:
- *  - Home (landing page)
- *  - Login
+ *  - Login (landing page)
+ *  - SignUp (registration page)
+ *  - About (project information)
  *  - Student Dashboard
+ *    - Student Upload Interface
  *  - Instructor Dashboard
- *  - Grading Interface
+ *    - Grading Interface
+ *    - Gradebook Interface
  *
  * The routing system is wrapped in an AuthProvider to allow all
  * pages within the application to access shared authentication
@@ -21,15 +24,15 @@
  */
 import { HashRouter, Routes, Route } from 'react-router-dom'
 import { AuthProvider } from './components/AuthContext'
-import Home from './pages/Home'
-import About from './pages/About'
-import Login from './pages/Login'
-import Grading from './pages/Grading'
-import Gradebook from './pages/Gradebook'
-import StudentDashboard from './pages/StudentDashboard'
-import InstructorDashboard from './pages/InstructorDashboard'
-import ProtectedRoute from './components/ProtectedRoute'
-import StudentUploadInterface from './pages/studentUploadInterface'
+import { SignUp } from './pages/SignUp'
+import { About } from './pages/About'
+import { Login } from './pages/Login'
+import { Grading } from './pages/Grading'
+import { Gradebook } from './pages/Gradebook'
+import { StudentDashboard } from './pages/StudentDashboard'
+import { InstructorDashboard } from './pages/InstructorDashboard'
+import { ProtectedRoute } from './components/ProtectedRoute'
+import { StudentUploadInterface } from './pages/studentUploadInterface'
 import { STUDENT_ROLE, INSTRUCTOR_ROLE } from '../../main/database/schema'
 
 /**
@@ -58,7 +61,7 @@ import { STUDENT_ROLE, INSTRUCTOR_ROLE } from '../../main/database/schema'
  * @returns App(): React.JSX.Element
  */
 
-function App(): React.JSX.Element {
+export function App(): React.JSX.Element {
   return (
     /*-----------------------------------------------------------
       Authentication Provider
@@ -77,12 +80,14 @@ function App(): React.JSX.Element {
             Each route maps a URL path to a specific page
           -----------------------------------------------------------*/}
         <Routes>
-          {/* Landing Home Page */}
-          <Route path="/" element={<Home />} />
+          {/* Landing Page */}
+          <Route path="/" element={<Login />} />
           {/* About Page */}
           <Route path="/about" element={<About />} />
           {/* Login Page */}
           <Route path="/login" element={<Login />} />
+          {/* SignUp Page */}
+          <Route path="/signup" element={<SignUp />} />
           {/* Student Interface */}
           <Route
             path="/studentdashboard"
@@ -133,5 +138,3 @@ function App(): React.JSX.Element {
     </AuthProvider>
   )
 }
-
-export default App

@@ -14,13 +14,15 @@
   --ev-c-gray-3: #32363f;
 
   --ev-c-blue-1: #81c3d7;
+  --ev-c-blue-1-dark: #75AFC1;
   --ev-c-blue-2: #3a7ca5;
   --ev-c-blue-3: #2f6690;
   --ev-c-blue-4: #16425b;
+  --ev-c-blue-4-dark: #152C3A;
 
-  --ev-c-text-1: rgba(255, 255, 245, 0.86);
-  --ev-c-text-2: rgba(235, 235, 245, 0.6);
-  --ev-c-text-3: rgba(235, 235, 245, 0.38);
+  --ev-c-text-1: #D3D3D3;
+  --ev-c-text-2: #A9A9A9;
+  --ev-c-text-3: #818589;
 
   --ev-button-alt-border: transparent;
   --ev-button-alt-text: var(--ev-c-text-1);
@@ -35,7 +37,7 @@
   --color-background-soft: var(--ev-c-black-soft);
   --color-background-mute: var(--ev-c-black-mute);
 
-  --color-text: var(--ev-c-text-1);
+  --color-text: var(--ev-c-gray-1);
 }
 
 *,

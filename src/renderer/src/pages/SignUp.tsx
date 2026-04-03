@@ -1,8 +1,8 @@
 /**
- * Homes.tsx
+ * SignUp.tsx
  *
  * Description:
- * This component serves as the main landing page for BatchGrade.
+ * This component serves as the registration page for BatchGrade.
  * It provides navigation to the major system interfaces (Student Dashboard,
  * Instructor Dashboard, and Grading) while also presenting a brief overview
  * of the platform
@@ -15,18 +15,18 @@
  */
 import { IpcPing } from '../components/IpcPing'
 import { UserPanel } from '../components/UserPanel'
-import NavBar from '../components/Navbar'
-import Footer from '../components/Footer'
+import { NavBar } from '../components/Navbar'
+import { Footer } from '../components/Footer'
 
 /**
- * Home Component
+ * SignUp Component
  *
- * The Home component renders the primary landing page interface
+ * The SignUp component renders the registration page interface
  * and provides navigation to key areas of the BatchGrade system
  *
- * @returns Home(): React.JSX.Element
+ * @returns SignUp(): React.JSX.Element
  */
-function Home(): React.JSX.Element {
+export function SignUp(): React.JSX.Element {
   return (
     <>
       {/*-----------------------------------------------------------
@@ -38,13 +38,13 @@ function Home(): React.JSX.Element {
         Hero Section
           Main landing content and navigation controls
         -----------------------------------------------------------*/}
-      <div className="hero-container">
+      <div className="signup-container">
         {/* Spacer element used for layout alignment */}
-        <div className="hero-item">
+        <div className="signup-item">
           {/* Application Title */}
           <header className="header">
-            <h1 className="title">BatchGrade</h1>
-            <p className="subtitle">Automated Grading System</p>
+            <h1 className="title">Sign Up</h1>
+            <p className="subtitle">Register & Connect with BatchGrade</p>
           </header>
 
           {/*-----------------------------------------------------------
@@ -58,12 +58,7 @@ function Home(): React.JSX.Element {
           </div>
         </div>
 
-        <div className="hero-item">
-          <header className="header">
-            <h1 className="title signup">Sign Up</h1>
-            <p>Register & Connect with BatchGrade.</p>
-          </header>
-
+        <div className="signup-item">
           {/*-----------------------------------------------------------
             User Information Panel
               Displays current authenticated user data
@@ -81,5 +76,3 @@ function Home(): React.JSX.Element {
     </>
   )
 }
-
-export default Home

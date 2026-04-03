@@ -13,10 +13,14 @@
  * This component is intended to be expanded in the future to include actual file upload functionality,
  * validation, and integration with the backend grading system.
  */
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import NavBar from '../components/Navbar'
-import Footer from '../components/Footer'
+import { useAuth } from '../components/AuthContext'
+import { NavBar } from '../components/Navbar'
+import { Footer } from '../components/Footer'
 import { CppWorkflowPanel } from '../components/compiler/CppWorkflowPanel'
+import { CompileCppResult } from 'src/shared/compiler'
+import { SubmitPanel } from '../components/submission/SubmitPanel'
 
 /**
  * StudentUploadInterface Component
@@ -28,28 +32,43 @@ import { CppWorkflowPanel } from '../components/compiler/CppWorkflowPanel'
  */
 export function StudentUploadInterface(): React.JSX.Element {
   const navigate = useNavigate()
+  const { user } = useAuth()
+  const [selectedFiles, setSelectedFiles] = useState<string[]>([])
+  const [compileResult, setCompileResult] = useState<CompileCppResult | null>(null)
 
   return (
     <>
       <NavBar />
-
-      <div className="cpp-page">
-        <div className="cpp-content">
-          <CppWorkflowPanel
-            title="Project Code Submission"
-            description="Upload and compile your C++ project files for grading."
-            allowExecution={true}
-          />
-
-          <button className="secondary-button" onClick={() => navigate('/')}>
-            Go to Home
-          </button>
+      <div className="dashboard-header">
+        <div className="dashboard-header-container interface-icon"></div>
+        <div className="dashboard-header-container">
+          <h1 className="title">Student Upload Interface</h1>
+          <p className="subtitle">Submit your project code for grading</p>
         </div>
+      </div>
+      <div className="dashboard-container">
+        <CppWorkflowPanel
+          title="Student Compilation Workspace"
+          description="Choose the files you want to submit, compile them, optionally run them with input, and review the output before submitting."
+          allowExecution={true}
+          onSelectionChange={setSelectedFiles}
+          onCompileResultChange={setCompileResult}
+        />
+
+        <SubmitPanel
+          compileResult={compileResult}
+          selectedFiles={selectedFiles}
+          userId={user?.uuid}
+        />
+      </div>
+
+      <div className="button-container">
+        <button className="secondary-button" onClick={() => navigate('/studentdashboard')}>
+          Go Home
+        </button>
       </div>
 
       <Footer />
     </>
   )
 }
-
-export default StudentUploadInterface

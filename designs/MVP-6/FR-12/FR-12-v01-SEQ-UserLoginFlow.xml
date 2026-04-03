@@ -1,6 +1,6 @@
-<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36 OPR/127.0.0.0" version="29.6.3">
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36 OPR/127.0.0.0" version="29.6.1">
   <diagram name="Page-1" id="KhVFQDiuLIzrvsz12-TM">
-    <mxGraphModel dx="886" dy="534" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="850" math="0" shadow="0">
+    <mxGraphModel dx="770" dy="464" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="850" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -32,9 +32,8 @@
             <mxPoint x="80" y="845" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="r3aOnOZzlPhhHOFyqCRy-37" edge="1" parent="1" style="html=1;verticalAlign=bottom;endArrow=block;curved=0;rounded=0;" value="1. clickLoginButton">
+        <mxCell id="r3aOnOZzlPhhHOFyqCRy-37" edge="1" parent="1" style="html=1;verticalAlign=bottom;endArrow=block;curved=0;rounded=0;" value="1.&amp;nbsp;clickRoleButton()">
           <mxGeometry relative="1" width="80" as="geometry">
-            <mxPoint as="offset" />
             <mxPoint x="100" y="160" as="sourcePoint" />
             <mxPoint x="280" y="160" as="targetPoint" />
           </mxGeometry>
@@ -51,7 +50,7 @@
         <mxCell id="MaWj38EACGj4qdPdTC3g-13" parent="MaWj38EACGj4qdPdTC3g-15" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" value="" vertex="1">
           <mxGeometry height="40" width="10" y="20" as="geometry" />
         </mxCell>
-        <mxCell id="MaWj38EACGj4qdPdTC3g-14" edge="1" parent="MaWj38EACGj4qdPdTC3g-15" style="html=1;align=left;spacingLeft=2;endArrow=block;rounded=0;edgeStyle=orthogonalEdgeStyle;curved=0;rounded=0;" target="MaWj38EACGj4qdPdTC3g-13" value="2. loginForm()">
+        <mxCell id="MaWj38EACGj4qdPdTC3g-14" edge="1" parent="MaWj38EACGj4qdPdTC3g-15" style="html=1;align=left;spacingLeft=2;endArrow=block;rounded=0;edgeStyle=orthogonalEdgeStyle;curved=0;rounded=0;" target="MaWj38EACGj4qdPdTC3g-13" value="2. loginForm(role)">
           <mxGeometry relative="1" as="geometry">
             <Array as="points">
               <mxPoint x="35" y="30" />
