@@ -100,6 +100,18 @@ footer {
   Typography
 ========================================================== */
 
+.cpp-title {
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.cpp-description {
+  font-size: 1rem;
+  margin: 0.25rem 0 0;
+  color: var(--ev-c-text-2);
+}
+
 .emphasis {
   color: var(--ev-c-blue-2);
   font-size: 30px;
@@ -147,10 +159,6 @@ footer {
   font-weight: 600;
 }
 
-.navbar-title:hover {
-  cursor: pointer;
-}
-
 .react {
   background: -webkit-linear-gradient(0deg,var(--ev-c-blue-1),var(--ev-c-blue-4));
   background-clip: text;
@@ -163,15 +171,12 @@ footer {
   font-size: 24px;
   line-height: 16px;
   font-weight: 600;
-  margin-top: 1rem;
-  margin-bottom: 2vh;
+  margin: 1rem 0;
 }
 
 .title {
   font-size: 60px;
   font-weight: 700;
-  display: flex;
-  justify-content: center;
 }
 
 .text {
@@ -195,19 +200,31 @@ footer {
   Buttons
 ========================================================== */
 
-.home-buttons {
+.button-container {
+  width: 100%;
+  height: 100%;
+  max-width: 90vw;
+  max-height: 10vh;
   display: flex;
-  flex-direction: column;
-  gap: 4vh;
+  align-items: center;
+  margin: 2rem auto;
+  background: transparent;
+  color: var(--ev-c-gray-1);
+  border-radius: 30px;
 }
 
 .menu-button {
   background: none;
-  font-size: 24px;
-  color: var(--ev-c-gray-1);
+  border: none;
+  font-size: 2rem;
   cursor: pointer;
-  padding: 8px;
-  margin-right: 1rem;
+  padding: 0.5rem 1rem 0.5rem 0;
+  color: var(--ev-c-gray-1);
+  transition: color 0.2s;
+}
+
+.menu-button:hover {
+  color: var(--ev-c-blue-1);
 }
 
 .primary-button {
@@ -216,7 +233,7 @@ footer {
   background-color: var(--ev-c-blue-3);
   color: white;
   border: none;
-  border-radius: 6px;
+  border-radius: 25px;
   cursor: pointer;
   transition: 0.25s;
 }
@@ -251,7 +268,7 @@ footer {
 
 .secondary-button {
   padding: 10px 18px;
-  border-radius: 6px;
+  border-radius: 25px;
   border: none;
   background-color: var(--ev-c-blue-4);
   color: var(--ev-c-white);
@@ -266,7 +283,7 @@ footer {
 
 .submit-button {
   padding: 10px 18px;
-  border-radius: 6px;
+  border-radius: 25px;
   border: none;
   background-color: var(--ev-c-blue-2);
   color: var(--ev-c-white);
@@ -284,7 +301,7 @@ footer {
   color: var(--ev-c-gray-1);
   background-color: var(--ev-c-white);
   border: none;
-  border-radius: 6px;
+  border-radius: 25px;
   cursor: pointer;
   transition: 0.25s;
 }
@@ -292,11 +309,6 @@ footer {
 .tertiary-button:hover {
   transform: scale(1.05);
   background-color: #ccc;
-}
-
-.test-buttons {
-  display: flex;
-  justify-content: center;
 }
 
 .userpanel-buttons {
@@ -310,7 +322,7 @@ footer {
 
 .navbar {
   position: fixed;
-  min-height: 10vh;
+  min-height: 8vh;
   padding: 0 2rem;
   width: 100vw;
   display: flex;
@@ -337,32 +349,19 @@ footer {
   margin: 0;
 }
 
-.menu-button {
-  background: none;
-  border: none;
-  font-size: 1.5rem;
-  cursor: pointer;
-  padding: 0.5rem;
-  color: var(--ev-c-gray-1);
-  transition: color 0.2s;
-}
-
-.menu-button:hover {
-  color: var(--ev-c-blue-1);
-}
-
 .profile-image {
   width: 40px;
   height: 40px;
   border-radius: 50%;
   cursor: pointer;
   object-fit: fill;
-  border: 2px solid #ddd;
-  transition: border-color 0.3s;
+  border: none;
+  transition: background-color 0.25s ease;
 }
 
 .profile-image:hover {
-  border-color: var(--ev-c-blue-2);
+  background-color: var(--ev-c-blue-1);
+  border: 1px solid var(--ev-c-blue-1);
 }
 
 /* ==========================================================
@@ -370,8 +369,8 @@ footer {
 ========================================================== */
 
 .dropdown-menu {
-  position: absolute;
-  top: 100%;
+  position: fixed;
+  top: 0;
   left: 0;
   right: 0;
   background-color: var(--ev-c-white);
@@ -382,7 +381,7 @@ footer {
   display: flex;
   flex-direction: column;
   padding: 1rem 0;
-  margin-top: 4rem;
+  margin-top: 5rem;
 }
 
 .dropdown-item {
@@ -406,6 +405,7 @@ footer {
 /* ==========================================================
   User Panel Components
 ========================================================== */
+
 .ueserpanel-cancel-edit {
   justify-items: left;
   padding: 0;
@@ -418,8 +418,8 @@ footer {
   width: 35rem;
   background-color: var(--ev-c-white);
   color: var(--ev-c-gray-1);
-  padding: 0.5rem;
-  border-radius: 10px;
+  padding: 1rem;
+  border-radius: 36px;
   box-shadow: 0 10px 30px rgba(0,0,0,0.3);
   margin-top: 2vh;
 }
@@ -434,7 +434,7 @@ footer {
 .userpanel-input {
   padding: 10px;
   font-size: 15px;
-  border-radius: 6px;
+  border-radius: 12px;
   border: 1px solid #ccc;
 }
 
@@ -470,7 +470,7 @@ footer {
 }
 
 /* ==========================================================
-  Home Components
+  About Components
 ========================================================== */
 
 .about-container {
@@ -529,13 +529,17 @@ footer {
   justify-content: center;
 }
 
-.hero-container {
+/* ==========================================================
+  SignUp Page Components
+========================================================== */
+
+.signup-container {
   display: flex;
   height: 100vh; 
   width: 100vw;
 }
 
-.hero-item {
+.signup-item {
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -543,7 +547,7 @@ footer {
   align-items: center;
 }
 
-.hero-item:first-child {
+.signup-item:first-child {
   color: var(--ev-c-white);
   background:
     linear-gradient(rgba(0,0,0,0.1), rgba(0,0,0,0.2)),
@@ -552,13 +556,9 @@ footer {
   background-position: center;
 }
 
-.hero-item:nth-child(2) {
+.signup-item:nth-child(2) {
   background-color: var(--ev-c-white);
   color: var(--ev-c-gray-1);
-}
-
-.home-header {
-  margin-top: 6vh;
 }
 
 .logo {
@@ -629,11 +629,11 @@ footer {
   background: var(--ev-c-white);
   color: var(--ev-c-gray-1);
   padding: 4vh;
-  border-radius: 10px;
   width: 32vw;
   display:flex;
   flex-direction: column;
   gap: 2vh;
+  border-radius: 36px;
   box-shadow: 0 10px 30px rgba(0,0,0,0.2);
 }
 
@@ -663,10 +663,114 @@ footer {
 
 .login-title {
   margin-top: 10vh;
+  color: var(--ev-c-white);
+}
+
+/* ==========================================================
+  Dashboard Page Components
+========================================================== */
+
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 90vw;
+  margin: 6rem auto 1rem auto;
+  padding: 2rem;
+  gap: 2rem;
+  color: var(--ev-c-white);
+  background: -webkit-linear-gradient(45deg, var(--ev-c-blue-2), var(--ev-c-blue-4));
+  border-radius: 30px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+
+.dashboard-container {
+  width: 100%;
+  max-width: 90vw;
+  margin: 0 auto;
+  padding: 2rem;
+  background: var(--ev-c-white);
+  color: var(--ev-c-gray-1);
+  border-radius: 30px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+
+.dashboard-header-container {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 1rem;
+}
+
+.dashboard-header-container:first-child {
+  width: 8rem;
+  height: 8rem;
+  margin: auto;
+  border-radius: 30px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+  transition: all 0.25s ease;
+}
+
+.dashboard-header-container:first-child:hover {
+  transform: translateX(-12px) translateY(-12px);
+  box-shadow: 12px 12px rgba(0,0,0,0.2);
+}
+
+.dashboard-header-container:nth-child(2) {
+  flex: 1;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.student-dashboard-container {
+  width: 90%;
+  margin: 2rem auto;
+  flex: 1;
+  display: flex;
+  justify-content: space-around;
+}
+
+.student-dashboard-item {
+  max-width: 24vw;
+  max-height: 24vh;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+  background-color: var(--ev-c-white);
+  border-radius: 30px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+
+.instructor-icon {
+  background: url('./globe.png');
+  background-size: 70%;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-color: var(--ev-c-white);
+}
+
+.student-icon {
+  background: url('./pencil.png');
+  background-size: 70%;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-color: var(--ev-c-white);
+}
+
+.interface-icon {
+  background: url('./laptop.png');
+  background-size: 70%;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-color: var(--ev-c-white);
 }
 
 /* ==========================================================
   C++ Workflow Panel (Final Version)
+========================================================== */
 
 /* Page wrapper */
 .cpp-page {
@@ -697,13 +801,13 @@ footer {
   width: 100%;
   max-width: 1400px;
   margin: 0 auto;
-
   display: flex;
   flex-direction: column;
   gap: 1rem;
-
   min-height: 0;
   overflow: hidden;
+  border: none;
+  padding: 2rem;
 }
 
 /* ✨ Card (matches signup style) */
@@ -747,7 +851,13 @@ footer {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
-/* Sections */
+.cpp-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  background-color: var(--ev-c-white-muted);
+}
+
 .cpp-section {
   display: flex;
   flex-direction: column;
@@ -755,20 +865,6 @@ footer {
   min-height: 0;
 }
 
-/* Titles */
-.cpp-title {
-  font-size: 2rem;
-  font-weight: 700;
-  margin: 0;
-}
-
-.cpp-description {
-  font-size: 1rem;
-  margin: 0.25rem 0 0;
-  color: var(--ev-c-text-2);
-}
-
-/* Inputs */
 .cpp-input,
 .cpp-textarea {
   width: 100%;
@@ -799,7 +895,10 @@ footer {
   display: none;
 }
 
-/* Output box */
+/* ==========================================================
+   C++ Output Console
+========================================================== */
+
 .cpp-output {
   background-color: #111;
   color: white;
@@ -824,54 +923,14 @@ footer {
   display: none;
 }
 
-/* Responsive tweaks */
-@media (max-width: 1100px) {
-  .cpp-content {
-    padding: 6.5rem 1rem 5rem;
-  }
+/* ==========================================================
+  Instructor Dashboard / Assignment Configuration Components
+========================================================== */
 
-  .cpp-card {
-    padding: 1.25rem;
-  }
-}
-
-@media (max-width: 900px) {
-  .cpp-grid-2 {
-    grid-template-columns: 1fr;
-  }
-
-  .cpp-title {
-    font-size: 1.6rem;
-  }
-
-  .cpp-description {
-    font-size: 0.95rem;
-  }
-}
-
-@media (max-width: 600px) {
-  .cpp-content {
-    padding: 6rem 0.75rem 4.5rem;
-    gap: 0.75rem;
-  }
-
-  .cpp-card {
-    padding: 1rem;
-  }
-
-  .cpp-title {
-    font-size: 1.35rem;
-  }
-
-  .cpp-output {
-    max-height: 120px;
-  }
-}
-  /* Instructor Dashboard / Assignment Configuration Components */
 .dashboard-shell {
   width: 100%;
   min-height: 100vh;
-  padding: 7rem 6rem 8rem;
+  padding: 2rem 6rem 8rem;
   box-sizing: border-box;
   color: var(--ev-c-gray-1);
 }
@@ -1083,13 +1142,36 @@ footer {
   color: var(--ev-c-text-2);
 }
 
+
 /* ==========================================================
   Responsive Design
 ========================================================== */
+
+@media (max-width: 1100px) {
+  .cpp-content {
+    padding: 6.5rem 1rem 5rem;
+  }
+
+  .cpp-card {
+    padding: 1.25rem;
+  }
+}
+
 @media (max-width: 990px) {
   .about-blot {
     margin: 5rem;
     font-size: 14px;
+  }
+  .cpp-grid-2 {
+    grid-template-columns: 1fr;
+  }
+
+  .cpp-title {
+    font-size: 1.6rem;
+  }
+
+  .cpp-description {
+    font-size: 0.95rem;
   }
   .creator {
     font-size: 24px;
@@ -1097,9 +1179,23 @@ footer {
   .emphasis {
     font-size: 24px;
   }
+  .login-actions {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  .login-title {
+    margin-top: 1rem;
+  }
+  .login-item {
+    margin-top: 1rem;
+  }
   .navbar {
     min-height: 8vh;
     padding: 0.5rem 1rem;
+  }
+  .student-dashboard-header-container:first-child {
+    width: 8rem;
+    height: 8rem;
   }
   .userpanel-container{
     width: 20rem;
@@ -1125,6 +1221,19 @@ footer {
 }
 
 @media (max-width: 620px) {
+  .cpp-content {
+    padding: 6rem 0.75rem 4.5rem;
+    gap: 0.75rem;
+  }
+  .cpp-card {
+    padding: 1rem;
+  }
+  .cpp-title {
+    font-size: 1.35rem;
+  }
+  .cpp-output {
+    max-height: 120px;
+  }
   .versions {
     display: none;
   }
