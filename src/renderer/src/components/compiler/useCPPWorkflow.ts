@@ -1,4 +1,14 @@
-// Imports
+/**
+ * useCPPWorkflow.ts
+ *
+ * Description:
+ * This module defines a custom React hook, `useCppWorkflow`, which provides
+ * a set of state variables and functions for interacting with the C++ compilation
+ * and execution workflow. It allows components to manage compiler status,
+ * file selection, compilation, and program execution in a React-friendly manner.
+ * The hook abstracts away the details of interacting with the underlying API and
+ * provides a clean interface for components to use in the grading workflow.
+ */
 import { useEffect, useState } from 'react'
 
 // This is just a shared type / data shape
