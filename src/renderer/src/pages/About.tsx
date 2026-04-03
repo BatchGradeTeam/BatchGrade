@@ -14,8 +14,8 @@
  * - Responsive design for various screen sizes
  */
 import React from 'react'
-import NavBar from '../components/Navbar'
-import Footer from '../components/Footer'
+import { NavBar } from '../components/Navbar'
+import { Footer } from '../components/Footer'
 
 /**
  * About Component
@@ -26,7 +26,7 @@ import Footer from '../components/Footer'
  *
  * @returns About(): React.JSX.Element
  */
-function About(): React.JSX.Element {
+export function About(): React.JSX.Element {
   return (
     <>
       <NavBar />
@@ -56,5 +56,3 @@ function About(): React.JSX.Element {
     </>
   )
 }
-
-export default About
