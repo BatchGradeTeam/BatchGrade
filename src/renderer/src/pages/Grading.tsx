@@ -13,8 +13,8 @@
  * This page is protected and only accessible to users with the instructor role.
  */
 import { useNavigate } from 'react-router-dom'
-import Footer from '../components/Footer'
-import NavBar from '../components/Navbar'
+import { Footer } from '../components/Footer'
+import { NavBar } from '../components/Navbar'
 import { CppWorkflowPanel } from '../components/compiler/CppWorkflowPanel'
 import { useState } from 'react'
 import type { CompileCppResult } from '../../../shared/compiler'
@@ -28,7 +28,7 @@ import { CppJudgePanel } from '../components/CppJudgePanel'
  *
  * @returns Grading(): React.JSX.Element
  */
-function Grading(): React.JSX.Element {
+export function Grading(): React.JSX.Element {
   const navigate = useNavigate()
   const [compileResult, setCompileResult] = useState<CompileCppResult | null>(null)
 
@@ -72,5 +72,3 @@ function Grading(): React.JSX.Element {
     </>
   )
 }
-
-export default Grading

@@ -16,8 +16,9 @@
  */
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import NavBar from '../components/Navbar'
-import Footer from '../components/Footer'
+import { useAuth } from '../components/AuthContext'
+import { NavBar } from '../components/Navbar'
+import { Footer } from '../components/Footer'
 import AssignmentConfigPanel from '../components/AssignmentConfigPanel'
 
 /**
@@ -29,12 +30,13 @@ import AssignmentConfigPanel from '../components/AssignmentConfigPanel'
  *
  * @returns InstructorDashboard(); React.JSX.Element
  */
-function InstructorDashboard(): React.JSX.Element {
+export function InstructorDashboard(): React.JSX.Element {
   // -----------------------------------------------------------
   // Navigation Hook
   // -----------------------------------------------------------
   // Enables programmatic navigation between routes
   const navigate = useNavigate()
+  const { logout } = useAuth()
 
   /**
    * @brief Tracks whether the assignment configuration workspace is visible.
@@ -69,33 +71,32 @@ function InstructorDashboard(): React.JSX.Element {
       {/*-----------------------------------------------------------
         Dashboard Content Area
       -----------------------------------------------------------*/}
-      <div className="dashboard-shell">
-        {/* Page Header */}
-        <div className="dashboard-page-header">
-          <h1>Instructor Dashboard</h1>
+
+      {/* Page Header */}
+      <div className="dashboard-header">
+        <div className="dashboard-header-container instructor-icon"></div>
+        <div className="dashboard-header-container">
+          <h1 className="title">Instructor Dashboard</h1>
           <p>
             Manage instructor tools, configure assignments, and review grading workflows from this
             dashboard.
           </p>
         </div>
-
+      </div>
+      <div className="dashboard-container">
         {/*-----------------------------------------------------------
           Instructor Action Toolbar
         -----------------------------------------------------------*/}
         <div className="dashboard-toolbar">
           {!showAssignmentConfig ? (
-            <button className="btn-primary" onClick={openAssignmentConfig}>
+            <button className="primary-button" onClick={openAssignmentConfig}>
               Assignment Creation
             </button>
           ) : (
-            <button className="btn-ghost" onClick={closeAssignmentConfig}>
+            <button className="secondary-button" onClick={closeAssignmentConfig}>
               Close Assignment Configuration
             </button>
           )}
-
-          <button className="btn-ghost" onClick={() => navigate('/')}>
-            Go to home
-          </button>
         </div>
 
         {/*-----------------------------------------------------------
@@ -115,11 +116,24 @@ function InstructorDashboard(): React.JSX.Element {
       </div>
 
       {/*-----------------------------------------------------------
+        Logout Button
+      -----------------------------------------------------------*/}
+      <div className="button-container">
+        <button
+          className="secondary-button"
+          onClick={() => {
+            logout()
+            navigate('/')
+          }}
+        >
+          Logout
+        </button>
+      </div>
+
+      {/*-----------------------------------------------------------
         Application Footer
       -----------------------------------------------------------*/}
       <Footer />
     </>
   )
 }
-
-export default InstructorDashboard

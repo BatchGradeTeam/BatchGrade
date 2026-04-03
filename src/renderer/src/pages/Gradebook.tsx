@@ -18,8 +18,8 @@
  */
 
 import { useState } from 'react' // Import React hook used to manage component state
-import NavBar from '../components/Navbar' // Import the navigation bar component
-import Footer from '../components/Footer' // Import the footer component
+import { NavBar } from '../components/Navbar' // Import the navigation bar component
+import { Footer } from '../components/Footer' // Import the footer component
 
 // =============================================================================
 // Helper Types
@@ -233,7 +233,7 @@ const gradebookData = {
 // Gradebook page component
 // Displays the highest score each student achieved for the selected assignment
 // =============================================================================
-function Gradebook(): React.JSX.Element {
+export function Gradebook(): React.JSX.Element {
   // State variable that tracks which assignment is currently selected
   const [selectedAssignment, setSelectedAssignment] = useState('Assignment 1')
 
@@ -406,6 +406,3 @@ const cellStyle: React.CSSProperties = {
   padding: '10px',
   textAlign: 'left'
 }
-
-// Export the Gradebook component so it can be used in routing (App.tsx)
-export default Gradebook

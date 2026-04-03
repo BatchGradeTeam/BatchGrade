@@ -30,7 +30,7 @@ import { useAuth } from '../components/AuthContext'
  *
  * @returns Login(): React.JSX.Element
  */
-function Login(): React.JSX.Element {
+export function Login(): React.JSX.Element {
   // -----------------------------------------------------------
   // Navigation Hook
   // -----------------------------------------------------------
@@ -126,6 +126,7 @@ function Login(): React.JSX.Element {
       <div className="login-title">
         <header className="header">
           <h1 className="title">BatchGrade</h1>
+          <p className="subtitle">Automated grading made easy</p>
         </header>
       </div>
 
@@ -167,10 +168,10 @@ function Login(): React.JSX.Element {
                 setEmail('')
                 setPassword('')
                 setError(null)
-                navigate('/')
+                navigate('/signup')
               }}
             >
-              Cancel
+              Sign Up
             </button>
           </div>
           {/* Display login error message if present */}
@@ -180,5 +181,3 @@ function Login(): React.JSX.Element {
     </div>
   )
 }
-
-export default Login

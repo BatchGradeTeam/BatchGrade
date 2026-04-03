@@ -21,16 +21,14 @@ import Versions from './Versions'
  *
  * @returns Footer(): React.JSX.Element
  */
-function Footer(): React.JSX.Element {
+export function Footer(): React.JSX.Element {
   return (
     <div className="app-footer">
       {/* Application Build Information */}
-      <p>BatchGrade Development Build v01</p>
+      <p>BatchGrade Development Build v02</p>
 
       {/* System version information */}
       <Versions />
     </div>
   )
 }
-
-export default Footer

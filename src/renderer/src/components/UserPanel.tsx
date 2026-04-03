@@ -293,5 +293,3 @@ export function UserPanel(): React.JSX.Element {
     </div>
   )
 }
-
-export default UserPanel
