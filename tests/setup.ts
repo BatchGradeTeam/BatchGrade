@@ -1,9 +1,12 @@
+// Runs before each test file
+// Good for cleaning caches
+
 import Database from 'better-sqlite3'
 import { drizzle } from 'drizzle-orm/better-sqlite3'
 import { migrate } from 'drizzle-orm/better-sqlite3/migrator'
 import * as schema from '../src/main/database/schema'
 import path from 'path'
-import { afterAll } from 'vitest'
+import { afterAll, vi } from 'vitest'
 
 let sqliteRef: Database.Database
 
