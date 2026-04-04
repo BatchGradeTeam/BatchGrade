@@ -138,12 +138,14 @@ export function useCppWorkflow({
 
     lastAutoCompileSelectionRef.current = selectionSignature
     runAutomaticCompile()
-  }, [autoCompileOnSelection, gccStatus, isCompiling, selectedFiles, runAutomaticCompile])
+  }, [autoCompileOnSelection, gccStatus, isCompiling, selectedFiles])
 
   async function handleSetManualPath(): Promise<void> {
     try {
       const result = await setCompilerPath(manualPath)
       setGccStatus(result)
+      setCompileResult(null)
+      setRunResult(null)
       setErrorMessage(null)
     } catch (error) {
       console.error('Error setting GCC path:', error)

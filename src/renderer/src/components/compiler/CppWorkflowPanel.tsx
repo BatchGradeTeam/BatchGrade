@@ -64,6 +64,8 @@ export function CppWorkflowPanel({
     autoCompileOnSelection
   })
 
+  const isCompilerReady = gccStatus?.status === 'ready' && !!gccStatus.path
+
   return (
     <div className="cpp-container">
       <div className="cpp-item">
@@ -192,9 +194,11 @@ export function CppWorkflowPanel({
 
             <button
               onClick={() => void handleCompileCpp()}
-              disabled={isCompiling || selectedFiles.length === 0}
+              disabled={isCompiling || selectedFiles.length === 0 || !isCompilerReady}
               className={
-                isCompiling || selectedFiles.length === 0 ? 'cancel-button' : 'secondary-button'
+                isCompiling || selectedFiles.length === 0 || !isCompilerReady
+                  ? 'cancel-button'
+                  : 'secondary-button'
               }
               style={{ marginTop: '10px' }}
             >
