@@ -21,6 +21,7 @@ type CppWorkflowPanelProps = {
   allowExecution: boolean
   onSelectionChange?: (files: string[]) => void
   onCompileResultChange?: (result: CompileCppResult | null) => void
+  autoCompileOnSelection?: boolean
 }
 
 /**
@@ -38,7 +39,8 @@ export function CppWorkflowPanel({
   description,
   allowExecution,
   onSelectionChange,
-  onCompileResultChange
+  onCompileResultChange,
+  autoCompileOnSelection = false
 }: CppWorkflowPanelProps): React.JSX.Element {
   const {
     gccStatus,
@@ -58,7 +60,8 @@ export function CppWorkflowPanel({
     handleRunProgram
   } = useCppWorkflow({
     onSelectionChange,
-    onCompileResultChange
+    onCompileResultChange,
+    autoCompileOnSelection
   })
 
   return (
