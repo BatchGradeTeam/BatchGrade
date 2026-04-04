@@ -1,4 +1,4 @@
-**Addresses the Issue:** <[#10](URL)>
+**Addresses the Issue:** 
 
 **PR Type:**
 - [X] Feature/functional requirement
@@ -29,9 +29,10 @@ If your PR changes structure (classes, responsibilities),\
 If your PR changes behavior (interactions between objects),\
   then you must draw/update the sequence diagram.\
 Example format for this section:\
-N/A or
-- Updated class diagram [Name](URL)
-- New sequence diagram [Name](URL)
+N/A
+or
+- (Current/Updated/New) Class diagram:
+- (Current/Updated/New) Sequence diagram:
 >
 
 **Tests Added/Updated:**
@@ -40,16 +41,20 @@ N/A or
 
 **CI Status:**
 
-<N/A or
 - All tests passing
 - Statement coverage >=90 (no coverage drop)
 - CI pipeline is green
 >
 
-**Mental Checklist:**
-- Is the PR title clear in describing what change is being introduced?
-- Is this change small & localized to a coherent part of the system?
-- If I used AI-generated code, did I properly document it?
-- Is my code well-documented? (descriptive names, comments, class & function documentation)
-- Do I need to update a diagram or design artifact?
-
+**PR Review Checklist:**
+If a box cannot be checked, **explain why there should be an exception**.
+- [ ] Does the PR properly link a relevant, **open issue**?
+- [ ] Does the PR contribute to closing the issue? Does it work as intended?
+- [ ] If the PR is for a feature/FR, does it include the most up-to-date **design diagrams**?
+- [ ] If the PR adds source code, does it include **unit tests** with the proper naming convention?
+- - No, the PR refactors code that already has relevant tests (example of an exception)
+- [ ] If the PR adds code, is it well-documented? (**useful, descriptive names & comments, function & class documentation**)
+- [ ] If the PR includes **AI generated code**, is it properly documented? (TODOs don’t count)
+- [ ] Does the PR uphold >= 90% per-file **statement coverage** & pass CI?
+- [ ] After testing the PR branch, does the app still work as intended?
+- [ ] Is the PR **small** and focused?
