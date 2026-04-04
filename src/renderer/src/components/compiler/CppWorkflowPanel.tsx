@@ -125,6 +125,11 @@ export function CppWorkflowPanel({
                       <strong>Install Help:</strong> {gccStatus.installInstruction}
                     </p>
                   )}
+                  {gccStatus.status === 'missing' && (
+                    <p style={{ color: 'red', fontWeight: 'bold', marginTop: '8px' }}>
+                      Set up a valid C++ compiler before compiling.
+                    </p>
+                  )}
                 </>
               )}
             </div>
@@ -204,6 +209,12 @@ export function CppWorkflowPanel({
             >
               {isCompiling ? 'Compiling...' : 'Compile'}
             </button>
+
+            {!isCompilerReady && selectedFiles.length > 0 && (
+              <p style={{ marginTop: '10px', color: 'red', fontWeight: 'bold' }}>
+                Set up a valid compiler first.
+              </p>
+            )}
 
             {compileResult && (
               <div style={{ marginTop: '12px', borderTop: '1px solid gray', paddingTop: '10px' }}>
