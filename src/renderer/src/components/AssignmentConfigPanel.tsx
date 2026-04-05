@@ -273,6 +273,11 @@ export function AssignmentConfigPanel(): React.JSX.Element {
       return false
     }
 
+    if (!/^\d+$/.test(trimmedCriteria)) {
+      setError('Grading criteria must be a non-negative whole number. Please use numbers only.')
+      return false
+    }
+
     if (form.solutionType === 'text' && !trimmedExpectedOutput) {
       setError('Expected output text is required for text solution mode.')
       return false
