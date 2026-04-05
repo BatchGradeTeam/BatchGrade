@@ -415,13 +415,27 @@ export function AssignmentConfigPanel(): React.JSX.Element {
           />
         </div>
 
-        <textarea
-          placeholder="Grading criteria"
-          value={form.gradingCriteria}
-          onChange={(e) => setForm((f) => ({ ...f, gradingCriteria: e.target.value }))}
-          className="panel-input"
-          rows={4}
-        />
+        <div>
+          <label className="field-label">Grading criteria score</label>
+          <input
+            type="number"
+            min="0"
+            step="1"
+            placeholder="Enter score"
+            value={form.gradingCriteria}
+            onChange={(e) => {
+              const value = e.target.value
+
+              if (value === '' || /^\d+$/.test(value)) {
+                setForm((f) => ({ ...f, gradingCriteria: value }))
+                setError(null)
+              } else {
+                setError('Grading criteria must be a non-negative whole number. Please use numbers only.')
+              }
+            }}
+            className="panel-input"
+          />
+        </div>
 
         <div className="panel-subheader">
           <h3>Solution Upload</h3>
