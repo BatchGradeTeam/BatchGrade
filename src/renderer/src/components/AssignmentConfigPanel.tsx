@@ -102,26 +102,6 @@ export function AssignmentConfigPanel(): React.JSX.Element {
   const [compiledOutput, setCompiledOutput] = useState<string | null>(null)
 
   /**
-   * @brief Stores the captured stdout ready to be saved.
-   *
-   * @details
-   * Set after compile+run succeeds. The instructor sees the preview,
-   * then clicks "Confirm & Save" which uses this value to persist.
-   * Kept separate from compiledOutput so it survives until actual save.
-   */
-  const [resolvedOutput, setResolvedOutput] = useState<string | null>(null)
-
-  /**
-   * @brief True after compile+run succeeds, waiting for instructor confirmation.
-   *
-   * @details
-   * Splits the file-mode flow into two steps:
-   *   1. Compile & Preview  → sets previewReady = true, shows output
-   *   2. Confirm & Save     → persists to DB, resets everything
-   */
-  const [previewReady, setPreviewReady] = useState<boolean>(false)
-
-  /**
    * @brief Loads all assignments from the preload API.
    *
    * @return Promise that resolves when assignments have been loaded.
@@ -197,16 +177,13 @@ export function AssignmentConfigPanel(): React.JSX.Element {
     setSelectedFilePath(null)
     setSelectedFileName(null)
     setCompiledOutput(null)
-    setResolvedOutput(null)
-    setPreviewReady(false)
     setDeleteConfirm(null)
     setStatusMessage(null)
     setError(null)
   }
 
   /**
-   * @brief  Opens Electron's file open dialog and
-   * stores the selected .cpp file path.
+   * @brief  Opens Electron's file open dialog and stores the selected .cpp file path.
    *
    * @details
    * Uses window.api.file.selectCppFiles() which calls the main-process
@@ -227,11 +204,40 @@ export function AssignmentConfigPanel(): React.JSX.Element {
       setSelectedFilePath(filePath)
       setSelectedFileName(fileName)
       setCompiledOutput(null)
-      setResolvedOutput(null)
-      setPreviewReady(false)
       setError(null)
+      setIsSubmitting(true)
+
+      // Step 1: Compile
+      const compileResult = await window.api.compiler.compileCpp({
+        sourceFiles: [filePath]
+      })
+
+      if (!compileResult.compileSuccess || !compileResult.executablePath) {
+        setError(
+          `Compilation failed:\n${compileResult.stderr || compileResult.message || 'Unknown compile error.'}`
+        )
+        return
+      }
+
+      // Step 2: Run and capture stdout as expected output
+      const runResult = await window.api.compiler.runCompiledProgram({
+        executablePath: compileResult.executablePath,
+        stdin: '',
+        timeoutMs: 10000
+      })
+
+      if (!runResult.executionSuccess) {
+        setError(
+          `Execution failed:\n${runResult.stderr || runResult.message || 'Unknown execution error.'}`
+        )
+        return
+      }
+
+      setCompiledOutput(runResult.stdout)
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : 'Failed to open file dialog.')
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
@@ -282,15 +288,15 @@ export function AssignmentConfigPanel(): React.JSX.Element {
   }
 
   /**
-   * @brief Handles both the compile preview step and the confirm save step.
+   * @brief Creates or updates an assignment using already-captured output.
    *
    * @details
-   * File mode uses a two-step flow:
-   *   Step 1 (previewReady === false): compile → run → show preview → stop.
-   *   Step 2 (previewReady === true):  save resolvedOutput to DB → reset.
-   * Text mode saves directly in one step (no compile needed).
+   * Compile and run now happen at file selection time in handleSelectFile,
+   * so handleSubmit is a pure save operation. For file mode, compiledOutput
+   * already holds the captured stdout from the earlier compile+run step.
+   * For text mode, the typed expected output is stored directly.
    *
-   * @return Promise that resolves when the current step completes.
+   * @return Promise that resolves when the save operation completes.
    */
   async function handleSubmit(): Promise<void> {
     if (!validateForm()) return
@@ -305,41 +311,6 @@ export function AssignmentConfigPanel(): React.JSX.Element {
     setStatusMessage(null)
 
     try {
-      // FILE MODE — Step 1: compile + run, show preview, wait for confirm
-      if (form.solutionType === 'file' && !previewReady) {
-        const compileResult = await window.api.compiler.compileCpp({
-          sourceFiles: [selectedFilePath!]
-        })
-
-        if (!compileResult.compileSuccess || !compileResult.executablePath) {
-          setError(
-            `Compilation failed:\n${compileResult.stderr || compileResult.message || 'Unknown compile error.'}`
-          )
-          return
-        }
-
-        const runResult = await window.api.compiler.runCompiledProgram({
-          executablePath: compileResult.executablePath,
-          stdin: '',
-          timeoutMs: 10000
-        })
-
-        if (!runResult.executionSuccess) {
-          setError(
-            `Execution failed:\n${runResult.stderr || runResult.message || 'Unknown execution error.'}`
-          )
-          return
-        }
-
-        // Store captured output and show preview — wait for instructor to confirm
-        setResolvedOutput(runResult.stdout)
-        setCompiledOutput(runResult.stdout)
-        setPreviewReady(true)
-        return  // Stop here — instructor must click "Confirm & Save"
-      }
-
-      // FILE MODE — Step 2: save using already-captured resolvedOutput
-      // TEXT MODE — single step: save typed expected output directly
       if (editingUuid) {
         await window.api.assignments.update({
           uuid: editingUuid,
@@ -349,7 +320,7 @@ export function AssignmentConfigPanel(): React.JSX.Element {
           solutionType: form.solutionType,
           solutionFileName: form.solutionType === 'file' ? (selectedFileName ?? undefined) : undefined,
           solutionFilePath: form.solutionType === 'file' ? (selectedFilePath ?? undefined) : undefined,
-          expectedOutputText: form.solutionType === 'text' ? trimmedExpectedOutput : (resolvedOutput ?? undefined)
+          expectedOutputText: form.solutionType === 'text' ? trimmedExpectedOutput : (compiledOutput ?? undefined)
         })
         setStatusMessage('Assignment updated successfully.')
       } else {
@@ -360,19 +331,16 @@ export function AssignmentConfigPanel(): React.JSX.Element {
           solutionType: form.solutionType,
           solutionFileName: form.solutionType === 'file' ? (selectedFileName ?? null) : null,
           solutionFilePath: form.solutionType === 'file' ? (selectedFilePath ?? null) : null,
-          expectedOutputText: form.solutionType === 'text' ? trimmedExpectedOutput : resolvedOutput,
+          expectedOutputText: form.solutionType === 'text' ? trimmedExpectedOutput : compiledOutput,
           createdByUserUuid: null
         })
         setStatusMessage('Assignment created successfully.')
       }
 
-      // Reset everything after a successful save
       setForm(emptyForm)
       setSelectedFilePath(null)
       setSelectedFileName(null)
       setCompiledOutput(null)
-      setResolvedOutput(null)
-      setPreviewReady(false)
       setEditingUuid(null)
       setDeleteConfirm(null)
       await loadAssignments()
@@ -509,7 +477,7 @@ export function AssignmentConfigPanel(): React.JSX.Element {
               className="btn-ghost"
               disabled={isSubmitting}
             >
-              Select .cpp File
+              {isSubmitting ? 'Compiling solution…' : 'Select .cpp File'}
             </button>
 
             {selectedFileName && (
@@ -532,9 +500,8 @@ export function AssignmentConfigPanel(): React.JSX.Element {
         </div>
 
         <button onClick={() => void handleSubmit()} className="btn-primary" disabled={isSubmitting}>
-          {isSubmitting ? previewReady ? 'Saving…' : 'Compiling & running solution…'
-            : previewReady ? 'Confirm & Save Assignment'
-              : editingUuid ? 'Update Assignment' : '+ Create Assignment'}
+          {isSubmitting ? 'Saving…' 
+            : editingUuid ? 'Update Assignment' : '+ Create Assignment'}
         </button>
 
         {statusMessage && <div className="panel-success">✓ {statusMessage}</div>}
