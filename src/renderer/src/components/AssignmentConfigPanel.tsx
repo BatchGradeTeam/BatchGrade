@@ -306,12 +306,15 @@ export function AssignmentConfigPanel(): React.JSX.Element {
           className="panel-input"
         />
 
-        <input
-          type="date"
-          value={form.dueDate}
-          onChange={(e) => setForm((f) => ({ ...f, dueDate: e.target.value }))}
-          className="panel-input"
-        />
+        <div>
+          <label className="field-label">Due date</label>
+          <input
+            type="date"
+            value={form.dueDate}
+            onChange={(e) => setForm((f) => ({ ...f, dueDate: e.target.value }))}
+            className="panel-input"
+          />
+        </div>
 
         <textarea
           placeholder="Grading criteria"
