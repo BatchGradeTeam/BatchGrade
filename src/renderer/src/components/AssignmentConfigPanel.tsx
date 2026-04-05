@@ -92,7 +92,7 @@ export function AssignmentConfigPanel(): React.JSX.Element {
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
 
   /**
-   * @brief FR11: Preview of the compiled solution's stdout.
+   * @brief Preview of the compiled solution's stdout.
    *
    * @details
    * Populated after a successful compile + run in file mode.
@@ -100,6 +100,26 @@ export function AssignmentConfigPanel(): React.JSX.Element {
    * before the assignment record is persisted.
    */
   const [compiledOutput, setCompiledOutput] = useState<string | null>(null)
+
+  /**
+   * @brief Stores the captured stdout ready to be saved.
+   *
+   * @details
+   * Set after compile+run succeeds. The instructor sees the preview,
+   * then clicks "Confirm & Save" which uses this value to persist.
+   * Kept separate from compiledOutput so it survives until actual save.
+   */
+  const [resolvedOutput, setResolvedOutput] = useState<string | null>(null)
+
+  /**
+   * @brief True after compile+run succeeds, waiting for instructor confirmation.
+   *
+   * @details
+   * Splits the file-mode flow into two steps:
+   *   1. Compile & Preview  → sets previewReady = true, shows output
+   *   2. Confirm & Save     → persists to DB, resets everything
+   */
+  const [previewReady, setPreviewReady] = useState<boolean>(false)
 
   /**
    * @brief Loads all assignments from the preload API.
@@ -177,6 +197,8 @@ export function AssignmentConfigPanel(): React.JSX.Element {
     setSelectedFilePath(null)
     setSelectedFileName(null)
     setCompiledOutput(null)
+    setResolvedOutput(null)
+    setPreviewReady(false)
     setDeleteConfirm(null)
     setStatusMessage(null)
     setError(null)
@@ -205,6 +227,8 @@ export function AssignmentConfigPanel(): React.JSX.Element {
       setSelectedFilePath(filePath)
       setSelectedFileName(fileName)
       setCompiledOutput(null)
+      setResolvedOutput(null)
+      setPreviewReady(false)
       setError(null)
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : 'Failed to open file dialog.')
@@ -258,19 +282,18 @@ export function AssignmentConfigPanel(): React.JSX.Element {
   }
 
   /**
-   * @brief Creates a new assignment or updates an existing one.
+   * @brief Handles both the compile preview step and the confirm save step.
    *
    * @details
-   * For file mode, this version stores the selected file name and a temporary
-   * placeholder path value. Once main-process file persistence is implemented,
-   * replace the placeholder path with the real persisted path returned from IPC.
+   * File mode uses a two-step flow:
+   *   Step 1 (previewReady === false): compile → run → show preview → stop.
+   *   Step 2 (previewReady === true):  save resolvedOutput to DB → reset.
+   * Text mode saves directly in one step (no compile needed).
    *
-   * @return Promise that resolves when the save operation completes.
+   * @return Promise that resolves when the current step completes.
    */
   async function handleSubmit(): Promise<void> {
-    if (!validateForm()) {
-      return
-    }
+    if (!validateForm()) return
 
     const trimmedName = form.name.trim()
     const trimmedDueDate = form.dueDate.trim()
@@ -282,23 +305,19 @@ export function AssignmentConfigPanel(): React.JSX.Element {
     setStatusMessage(null)
 
     try {
-      let resolvedExpectedOutput: string | null = null
-
-      if (form.solutionType === 'file' && selectedFilePath) {
-        // Step 1: Compile the solution file
+      // FILE MODE — Step 1: compile + run, show preview, wait for confirm
+      if (form.solutionType === 'file' && !previewReady) {
         const compileResult = await window.api.compiler.compileCpp({
-          sourceFiles: [selectedFilePath]
+          sourceFiles: [selectedFilePath!]
         })
 
         if (!compileResult.compileSuccess || !compileResult.executablePath) {
           setError(
             `Compilation failed:\n${compileResult.stderr || compileResult.message || 'Unknown compile error.'}`
           )
-          setIsSubmitting(false)
           return
         }
 
-        // Step 2: Run the compiled executable and capture stdout
         const runResult = await window.api.compiler.runCompiledProgram({
           executablePath: compileResult.executablePath,
           stdin: '',
@@ -309,15 +328,18 @@ export function AssignmentConfigPanel(): React.JSX.Element {
           setError(
             `Execution failed:\n${runResult.stderr || runResult.message || 'Unknown execution error.'}`
           )
-          setIsSubmitting(false)
           return
         }
 
-        resolvedExpectedOutput = runResult.stdout
-        // Show the captured output to the instructor before persisting
-        setCompiledOutput(resolvedExpectedOutput)
+        // Store captured output and show preview — wait for instructor to confirm
+        setResolvedOutput(runResult.stdout)
+        setCompiledOutput(runResult.stdout)
+        setPreviewReady(true)
+        return  // Stop here — instructor must click "Confirm & Save"
       }
 
+      // FILE MODE — Step 2: save using already-captured resolvedOutput
+      // TEXT MODE — single step: save typed expected output directly
       if (editingUuid) {
         await window.api.assignments.update({
           uuid: editingUuid,
@@ -326,11 +348,9 @@ export function AssignmentConfigPanel(): React.JSX.Element {
           gradingCriteria: trimmedCriteria,
           solutionType: form.solutionType,
           solutionFileName: form.solutionType === 'file' ? (selectedFileName ?? undefined) : undefined,
-          solutionFilePath:
-            form.solutionType === 'file' ? (selectedFilePath ?? undefined) : undefined,
-          expectedOutputText: form.solutionType === 'text' ? trimmedExpectedOutput : (resolvedExpectedOutput ?? undefined)   
+          solutionFilePath: form.solutionType === 'file' ? (selectedFilePath ?? undefined) : undefined,
+          expectedOutputText: form.solutionType === 'text' ? trimmedExpectedOutput : (resolvedOutput ?? undefined)
         })
-
         setStatusMessage('Assignment updated successfully.')
       } else {
         await window.api.assignments.create({
@@ -340,16 +360,19 @@ export function AssignmentConfigPanel(): React.JSX.Element {
           solutionType: form.solutionType,
           solutionFileName: form.solutionType === 'file' ? (selectedFileName ?? null) : null,
           solutionFilePath: form.solutionType === 'file' ? (selectedFilePath ?? null) : null,
-          expectedOutputText: form.solutionType === 'text' ? trimmedExpectedOutput : resolvedExpectedOutput,
+          expectedOutputText: form.solutionType === 'text' ? trimmedExpectedOutput : resolvedOutput,
           createdByUserUuid: null
         })
-
         setStatusMessage('Assignment created successfully.')
       }
 
+      // Reset everything after a successful save
       setForm(emptyForm)
       setSelectedFilePath(null)
       setSelectedFileName(null)
+      setCompiledOutput(null)
+      setResolvedOutput(null)
+      setPreviewReady(false)
       setEditingUuid(null)
       setDeleteConfirm(null)
       await loadAssignments()
@@ -509,8 +532,9 @@ export function AssignmentConfigPanel(): React.JSX.Element {
         </div>
 
         <button onClick={() => void handleSubmit()} className="btn-primary" disabled={isSubmitting}>
-          {isSubmitting ? form.solutionType === 'file' ? 'Compiling & running solution…' : 'Saving…' : 
-          editingUuid ? 'Update Assignment' : '+ Create Assignment'}
+          {isSubmitting ? previewReady ? 'Saving…' : 'Compiling & running solution…'
+            : previewReady ? 'Confirm & Save Assignment'
+              : editingUuid ? 'Update Assignment' : '+ Create Assignment'}
         </button>
 
         {statusMessage && <div className="panel-success">✓ {statusMessage}</div>}
