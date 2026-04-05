@@ -282,6 +282,42 @@ export function AssignmentConfigPanel(): React.JSX.Element {
     setStatusMessage(null)
 
     try {
+      let resolvedExpectedOutput: string | null = null
+
+      if (form.solutionType === 'file' && selectedFilePath) {
+        // Step 1: Compile the solution file
+        const compileResult = await window.api.compiler.compileCpp({
+          sourceFiles: [selectedFilePath]
+        })
+
+        if (!compileResult.compileSuccess || !compileResult.executablePath) {
+          setError(
+            `Compilation failed:\n${compileResult.stderr || compileResult.message || 'Unknown compile error.'}`
+          )
+          setIsSubmitting(false)
+          return
+        }
+
+        // Step 2: Run the compiled executable and capture stdout
+        const runResult = await window.api.compiler.runCompiledProgram({
+          executablePath: compileResult.executablePath,
+          stdin: '',
+          timeoutMs: 10000
+        })
+
+        if (!runResult.executionSuccess) {
+          setError(
+            `Execution failed:\n${runResult.stderr || runResult.message || 'Unknown execution error.'}`
+          )
+          setIsSubmitting(false)
+          return
+        }
+
+        resolvedExpectedOutput = runResult.stdout
+        // Show the captured output to the instructor before persisting
+        setCompiledOutput(resolvedExpectedOutput)
+      }
+
       if (editingUuid) {
         await window.api.assignments.update({
           uuid: editingUuid,
@@ -292,7 +328,7 @@ export function AssignmentConfigPanel(): React.JSX.Element {
           solutionFileName: form.solutionType === 'file' ? (selectedFileName ?? undefined) : undefined,
           solutionFilePath:
             form.solutionType === 'file' ? (selectedFilePath ?? undefined) : undefined,
-          expectedOutputText: form.solutionType === 'text' ? trimmedExpectedOutput : undefined
+          expectedOutputText: form.solutionType === 'text' ? trimmedExpectedOutput : (resolvedExpectedOutput ?? undefined)   
         })
 
         setStatusMessage('Assignment updated successfully.')
@@ -304,7 +340,7 @@ export function AssignmentConfigPanel(): React.JSX.Element {
           solutionType: form.solutionType,
           solutionFileName: form.solutionType === 'file' ? (selectedFileName ?? null) : null,
           solutionFilePath: form.solutionType === 'file' ? (selectedFilePath ?? null) : null,
-          expectedOutputText: form.solutionType === 'text' ? trimmedExpectedOutput : null,
+          expectedOutputText: form.solutionType === 'text' ? trimmedExpectedOutput : resolvedExpectedOutput,
           createdByUserUuid: null
         })
 
