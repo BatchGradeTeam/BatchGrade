@@ -62,14 +62,44 @@ export function AssignmentConfigPanel(): React.JSX.Element {
   const [statusMessage, setStatusMessage] = useState<string | null>(null)
 
   /**
-   * @brief File currently selected by the instructor.
+   * @brief Absolute path of the .cpp file chosen via
+   * Electron's native file-open dialog.
    *
    * @details
-   * This is only used when solutionType === 'file'.
-   * For now, the UI stores the selected file name and passes a placeholder path
-   * value until full main-process file persistence is wired in.
+   * Replaces the old browser File object.  
+   * The path is passed directly to the compiler 
+   * handler so the main process can resolve it on disk.
    */
-  const [selectedFile, setSelectedFile] = useState<File | null>(null)
+  const [selectedFilePath, setSelectedFilePath] = useState<string | null>(null)
+
+  /**
+   * @brief Display name of the selected solution file.
+   *
+   * @details
+   * Derived from selectedFilePath and shown in the UI so the instructor
+   * can confirm which file is staged.
+   */
+  const [selectedFileName, setSelectedFileName] = useState<string | null>(null)
+
+  /**
+   * @brief Tracks whether the compile-and-run pipeline is in progress.
+   *
+   * @details
+   * Set to true while the submit handler is awaiting compilation and execution.
+   * Used to disable the submit button and show a loading label so the instructor
+   * knows the system is working.
+   */
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
+
+  /**
+   * @brief Preview of the compiled solution's stdout.
+   *
+   * @details
+   * Populated after a successful compile + run in file mode.
+   * Displayed beneath the file picker so the instructor can verify the output
+   * before the assignment record is persisted.
+   */
+  const [compiledOutput, setCompiledOutput] = useState<string | null>(null)
 
   /**
    * @brief Loads all assignments from the preload API.
@@ -128,7 +158,9 @@ export function AssignmentConfigPanel(): React.JSX.Element {
       solutionType: (assignment.solutionType ?? 'text') as 'file' | 'text',
       expectedOutputText: assignment.expectedOutputText ?? ''
     })
-    setSelectedFile(null)
+    setSelectedFilePath(null)
+    setSelectedFileName(null)
+    setCompiledOutput(null)
     setDeleteConfirm(null)
     setStatusMessage(null)
     setError(null)
@@ -142,10 +174,71 @@ export function AssignmentConfigPanel(): React.JSX.Element {
   function cancelEdit(): void {
     setEditingUuid(null)
     setForm(emptyForm)
-    setSelectedFile(null)
+    setSelectedFilePath(null)
+    setSelectedFileName(null)
+    setCompiledOutput(null)
     setDeleteConfirm(null)
     setStatusMessage(null)
     setError(null)
+  }
+
+  /**
+   * @brief  Opens Electron's file open dialog and stores the selected .cpp file path.
+   *
+   * @details
+   * Uses window.api.file.selectCppFiles() which calls the main-process
+   * file:selectCppFiles IPC handler.  Only the first selected file is used.
+   * Clears any previously compiled output whenever a new file is chosen.
+   *
+   * @return Promise that resolves when the dialog closes.
+   */
+  async function handleSelectFile(): Promise<void> {
+    try {
+      const paths = await window.api.file.selectCppFiles()
+      if (!paths || paths.length === 0) return
+
+      const filePath = paths[0]
+      // Extract basename for display
+      const fileName = filePath.split(/[\\/]/).pop() ?? filePath
+
+      setSelectedFilePath(filePath)
+      setSelectedFileName(fileName)
+      setCompiledOutput(null)
+      setError(null)
+      setIsSubmitting(true)
+
+      // Step 1: Compile
+      const compileResult = await window.api.compiler.compileCpp({
+        sourceFiles: [filePath]
+      })
+
+      if (!compileResult.compileSuccess || !compileResult.executablePath) {
+        setError(
+          `Compilation failed:\n${compileResult.stderr || compileResult.message || 'Unknown compile error.'}`
+        )
+        return
+      }
+
+      // Step 2: Run and capture stdout as expected output
+      const runResult = await window.api.compiler.runCompiledProgram({
+        executablePath: compileResult.executablePath,
+        stdin: '',
+        timeoutMs: 10000
+      })
+
+      if (!runResult.executionSuccess) {
+        setError(
+          `Execution failed:\n${runResult.stderr || runResult.message || 'Unknown execution error.'}`
+        )
+        return
+      }
+
+      setCompiledOutput(runResult.stdout)
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : 'Failed to open file dialog.')
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   /**
@@ -185,7 +278,7 @@ export function AssignmentConfigPanel(): React.JSX.Element {
       return false
     }
 
-    if (form.solutionType === 'file' && !selectedFile && !editingUuid) {
+    if (form.solutionType === 'file' && !selectedFilePath && !editingUuid) {
       setError('Please select a solution file before submission.')
       return false
     }
@@ -195,24 +288,27 @@ export function AssignmentConfigPanel(): React.JSX.Element {
   }
 
   /**
-   * @brief Creates a new assignment or updates an existing one.
+   * @brief Creates or updates an assignment using already-captured output.
    *
    * @details
-   * For file mode, this version stores the selected file name and a temporary
-   * placeholder path value. Once main-process file persistence is implemented,
-   * replace the placeholder path with the real persisted path returned from IPC.
+   * Compile and run now happen at file selection time in handleSelectFile,
+   * so handleSubmit is a pure save operation. For file mode, compiledOutput
+   * already holds the captured stdout from the earlier compile+run step.
+   * For text mode, the typed expected output is stored directly.
    *
    * @return Promise that resolves when the save operation completes.
    */
   async function handleSubmit(): Promise<void> {
-    if (!validateForm()) {
-      return
-    }
+    if (!validateForm()) return
 
     const trimmedName = form.name.trim()
     const trimmedDueDate = form.dueDate.trim()
     const trimmedCriteria = form.gradingCriteria.trim()
     const trimmedExpectedOutput = form.expectedOutputText.trim()
+
+    setIsSubmitting(true)
+    setError(null)
+    setStatusMessage(null)
 
     try {
       if (editingUuid) {
@@ -222,14 +318,10 @@ export function AssignmentConfigPanel(): React.JSX.Element {
           dueDate: trimmedDueDate,
           gradingCriteria: trimmedCriteria,
           solutionType: form.solutionType,
-          solutionFileName: form.solutionType === 'file' ? selectedFile?.name : undefined,
-          solutionFilePath:
-            form.solutionType === 'file' && selectedFile
-              ? `pending://${selectedFile.name}`
-              : undefined,
-          expectedOutputText: form.solutionType === 'text' ? trimmedExpectedOutput : undefined
+          solutionFileName: form.solutionType === 'file' ? (selectedFileName ?? undefined) : undefined,
+          solutionFilePath: form.solutionType === 'file' ? (selectedFilePath ?? undefined) : undefined,
+          expectedOutputText: form.solutionType === 'text' ? trimmedExpectedOutput : (compiledOutput ?? undefined)
         })
-
         setStatusMessage('Assignment updated successfully.')
       } else {
         await window.api.assignments.create({
@@ -237,23 +329,25 @@ export function AssignmentConfigPanel(): React.JSX.Element {
           dueDate: trimmedDueDate,
           gradingCriteria: trimmedCriteria,
           solutionType: form.solutionType,
-          solutionFileName: form.solutionType === 'file' ? (selectedFile?.name ?? null) : null,
-          solutionFilePath:
-            form.solutionType === 'file' && selectedFile ? `pending://${selectedFile.name}` : null,
-          expectedOutputText: form.solutionType === 'text' ? trimmedExpectedOutput : null,
+          solutionFileName: form.solutionType === 'file' ? (selectedFileName ?? null) : null,
+          solutionFilePath: form.solutionType === 'file' ? (selectedFilePath ?? null) : null,
+          expectedOutputText: form.solutionType === 'text' ? trimmedExpectedOutput : compiledOutput,
           createdByUserUuid: null
         })
-
         setStatusMessage('Assignment created successfully.')
       }
 
       setForm(emptyForm)
-      setSelectedFile(null)
+      setSelectedFilePath(null)
+      setSelectedFileName(null)
+      setCompiledOutput(null)
       setEditingUuid(null)
       setDeleteConfirm(null)
       await loadAssignments()
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : 'Something went wrong.')
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
@@ -306,12 +400,15 @@ export function AssignmentConfigPanel(): React.JSX.Element {
           className="panel-input"
         />
 
-        <input
-          type="date"
-          value={form.dueDate}
-          onChange={(e) => setForm((f) => ({ ...f, dueDate: e.target.value }))}
-          className="panel-input"
-        />
+        <div>
+          <label className="field-label">Due date</label>
+          <input
+            type="date"
+            value={form.dueDate}
+            onChange={(e) => setForm((f) => ({ ...f, dueDate: e.target.value }))}
+            className="panel-input"
+          />
+        </div>
 
         <textarea
           placeholder="Grading criteria"
@@ -372,16 +469,28 @@ export function AssignmentConfigPanel(): React.JSX.Element {
           </div>
         ) : (
           <div className="solution-box">
-            <label className="field-label">Upload solution file</label>
-            <input
-              type="file"
-              onChange={(e) => {
-                const file = e.target.files?.[0] ?? null
-                setSelectedFile(file)
-              }}
-              className="panel-input"
-            />
-            {selectedFile && <p className="helper-text">Selected file: {selectedFile.name}</p>}
+            <label className="field-label">Upload solution file (.cpp)</label>
+
+            <button
+              type="button"
+              onClick={() => void handleSelectFile()}
+              className="btn-ghost"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? 'Compiling solution…' : 'Select .cpp File'}
+            </button>
+
+            {selectedFileName && (
+              <p className="helper-text">Selected file: {selectedFileName}</p>
+            )}
+
+            {/* FR11: Preview compiled output once the pipeline has run */}
+            {compiledOutput !== null && (
+              <div className="panel-output-preview">
+                <label className="field-label">Compiled solution output (preview)</label>
+                <pre className="panel-pre">{compiledOutput}</pre>
+              </div>
+            )}
           </div>
         )}
 
@@ -390,8 +499,9 @@ export function AssignmentConfigPanel(): React.JSX.Element {
           <p>Submit the assignment only after the solution input has been provided.</p>
         </div>
 
-        <button onClick={() => void handleSubmit()} className="btn-primary">
-          {editingUuid ? 'Update Assignment' : '+ Create Assignment'}
+        <button onClick={() => void handleSubmit()} className="btn-primary" disabled={isSubmitting}>
+          {isSubmitting ? 'Saving…' 
+            : editingUuid ? 'Update Assignment' : '+ Create Assignment'}
         </button>
 
         {statusMessage && <div className="panel-success">✓ {statusMessage}</div>}
