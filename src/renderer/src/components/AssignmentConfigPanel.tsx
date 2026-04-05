@@ -350,7 +350,6 @@ export function AssignmentConfigPanel(): React.JSX.Element {
       setForm(emptyForm)
       setSelectedFilePath(null)
       setSelectedFileName(null)
-      setCompiledOutput(null)
       setEditingUuid(null)
       setDeleteConfirm(null)
       await loadAssignments()
@@ -509,8 +508,9 @@ export function AssignmentConfigPanel(): React.JSX.Element {
           <p>Submit the assignment only after the solution input has been provided.</p>
         </div>
 
-        <button onClick={() => void handleSubmit()} className="btn-primary">
-          {editingUuid ? 'Update Assignment' : '+ Create Assignment'}
+        <button onClick={() => void handleSubmit()} className="btn-primary" disabled={isSubmitting}>
+          {isSubmitting ? form.solutionType === 'file' ? 'Compiling & running solution…' : 'Saving…' : 
+          editingUuid ? 'Update Assignment' : '+ Create Assignment'}
         </button>
 
         {statusMessage && <div className="panel-success">✓ {statusMessage}</div>}
