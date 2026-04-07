@@ -426,7 +426,7 @@ export function AssignmentConfigPanel(): React.JSX.Element {
             onChange={(e) => {
               const value = e.target.value
 
-              if (value === '' || /^\d+$/.test(value)) {
+              if (value === '' || /^(0|[1-9]\d*)$/.test(value)) {
                 setForm((f) => ({ ...f, gradingCriteria: value }))
                 setError(null)
               } else {
