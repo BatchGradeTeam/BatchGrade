@@ -28,15 +28,16 @@ export const submissions = sqliteTable('submissions', {
   assignmentId: text('assignment_id')
     .notNull()
     .references(() => assignments.uuid),
-  fileContent: text('file_content'),
   fileName: text('file_name')
     .notNull()
     .default('N/A'),
+  fileContent: text('file_content')
+    .notNull(),
+  fileSize: integer('file_size')
+    .notNull(),
   status: text('status')
     .notNull()
     .default('not submitted'), // "submittted", "pending", "not submitted"
-  submittedAt: integer('submitted_at')
-    .default(sql`(unixepoch())`)
 })
 
 /**

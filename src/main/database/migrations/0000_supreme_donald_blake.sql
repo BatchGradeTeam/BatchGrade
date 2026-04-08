@@ -50,10 +50,9 @@ CREATE TABLE `grades` (
 CREATE TABLE `submissions` (
 	`uuid` text PRIMARY KEY NOT NULL,
 	`assignment_id` text NOT NULL,
-	`file_content` text,
 	`file_name` text DEFAULT 'N/A' NOT NULL,
-	`file_size` integer DEFAULT 0 NOT NULL,
+	`file_content` text NOT NULL,
+	`file_size` integer NOT NULL,
 	`status` text DEFAULT 'not submitted' NOT NULL,
-	`submitted_at` integer DEFAULT (unixepoch()),
 	FOREIGN KEY (`assignment_id`) REFERENCES `assignments`(`uuid`) ON UPDATE no action ON DELETE no action
 );

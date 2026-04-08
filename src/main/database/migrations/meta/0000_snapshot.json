@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "13e0cd8a-42e8-46ba-a698-e9dcf82cea90",
+  "id": "5edac2f1-9dbc-4421-bb06-6277fe0fa1aa",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "instructor_assignments": {
@@ -329,13 +329,6 @@
           "notNull": true,
           "autoincrement": false
         },
-        "file_content": {
-          "name": "file_content",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
         "file_name": {
           "name": "file_name",
           "type": "text",
@@ -344,13 +337,19 @@
           "autoincrement": false,
           "default": "'N/A'"
         },
+        "file_content": {
+          "name": "file_content",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
         "file_size": {
           "name": "file_size",
           "type": "integer",
           "primaryKey": false,
           "notNull": true,
-          "autoincrement": false,
-          "default": 0
+          "autoincrement": false
         },
         "status": {
           "name": "status",
@@ -359,14 +358,6 @@
           "notNull": true,
           "autoincrement": false,
           "default": "'not submitted'"
-        },
-        "submitted_at": {
-          "name": "submitted_at",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false,
-          "default": "(unixepoch())"
         }
       },
       "indexes": {},
