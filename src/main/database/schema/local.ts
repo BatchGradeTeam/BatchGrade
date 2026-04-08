@@ -60,7 +60,8 @@ export const grades = sqliteTable('grades', {
     .references(() => submissions.uuid),
   score: integer('score').notNull(),
   feedback: text('feedback'),
-  gradedAt: integer('graded_at').default(sql(unixepoch()))
+  gradedAt: integer('graded_at')
+    .default(sql`(unixepoch())`)
 })
 
 /**
@@ -71,9 +72,6 @@ export const compileLogs = sqliteTable('compile_logs', {
   uuid: text('uuid')
     .primaryKey()
     .$defaultFn(() => crypto.randomUUID()),
-  studentId: text('student_id')
-    .notNull()
-    .references(() => users.uuid),
   submissionId: text('submission_id')
     .notNull()
     .references(() => assignments.uuid),
