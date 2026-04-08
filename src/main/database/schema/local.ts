@@ -32,9 +32,6 @@ export const submissions = sqliteTable('submissions', {
   fileName: text('file_name')
     .notNull()
     .default('N/A'),
-  fileSize: integer('file_size')
-    .notNull()
-    .default(0),
   status: text('status')
     .notNull()
     .default('not submitted'), // "submittted", "pending", "not submitted"

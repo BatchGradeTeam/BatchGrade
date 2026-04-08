@@ -1,8 +1,7 @@
 import { eq } from 'drizzle-orm'
 import { getDb } from '../index'
 import fs from 'fs'
-import { submissions } from '../schema
-import { Buffer } from 'node:buffer';'
+import { submissions } from '../schema'
 
 // ai-gen start (Claude Sonnet 4.6, 2)
 const MAX_FILE_SIZE = 500 * 1024 // 500 KB soft limit for file size
