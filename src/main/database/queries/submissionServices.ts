@@ -1,7 +1,8 @@
 import { eq } from 'drizzle-orm'
 import { getDb } from '../index'
 import fs from 'fs'
-import { submissions } from '../schema'
+import { submissions } from '../schema
+import { Buffer } from 'node:buffer';'
 
 // ai-gen start (Claude Sonnet 4.6, 2)
 const MAX_FILE_SIZE = 500 * 1024 // 500 KB soft limit for file size
@@ -53,11 +54,11 @@ export function createSubmission(input: {
   db.insert(submissions)
     .values({
       uuid: submissionId,
-      studentId: input.studentId,
       assignmentId: input.assignmentId,
       fileName: input.fileName,
-      fileContent: fileContent,
+      fileContent: typeof fileContent === 'string' ? Buffer.from(fileContent) : fileContent,
       fileSize: fileSize,
+      filePath: input.filePath,
       status: 'pending'
     })
     .run()
