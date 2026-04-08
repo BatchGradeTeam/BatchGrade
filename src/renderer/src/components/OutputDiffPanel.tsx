@@ -16,14 +16,11 @@
  *  - Red    : line is in expected output but missing or wrong in student output
  *  - Green  : extra line in student output not present in expected output
  *
- * Students cannot supply their own expected output — only instructors define it
+ * Students cannot supply their own expected output only instructors define it
  * via FR-9/FR-11.
  */
 import { useMemo } from 'react'
 
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
 
 type DiffLineType = 'match' | 'missing' | 'extra'
 
@@ -38,10 +35,6 @@ type OutputDiffPanelProps = {
   /** FR-5: The instructor's expected output, fetched from the assignment record. */
   expectedOutput: string | null
 }
-
-// ---------------------------------------------------------------------------
-// Diff helpers
-// ---------------------------------------------------------------------------
 
 /**
  * @brief Normalizes a single line for whitespace-insensitive comparison.
@@ -58,10 +51,10 @@ function normalizeLine(line: string): string {
 }
 
 /**
- * @brief Splits a raw output string into non-empty normalized lines.
+ * @brief Splits a raw output string into non empty normalized lines.
  *
- * @param output Raw multi-line string.
- * @return Array of normalized, non-empty lines.
+ * @param output Raw multiline string.
+ * @return Array of normalized, non empty lines.
  */
 function toLines(output: string): string[] {
   return output
@@ -71,7 +64,7 @@ function toLines(output: string): string[] {
 }
 
 /**
- * @brief Computes a line-by-line diff using the LCS algorithm.
+ * @brief Computes a line by line diff using the LCS alg
  *
  * @details
  * Line types in the result:
@@ -120,9 +113,6 @@ function computeDiff(expected: string[], actual: string[]): DiffLine[] {
   return result
 }
 
-// ---------------------------------------------------------------------------
-// Styling helpers
-// ---------------------------------------------------------------------------
 
 function lineStyle(type: DiffLineType): React.CSSProperties {
   switch (type) {
@@ -145,20 +135,16 @@ function linePrefix(type: DiffLineType): string {
   }
 }
 
-// ---------------------------------------------------------------------------
-// Component
-// ---------------------------------------------------------------------------
-
 /**
- * @brief FR-5: Side-by-side diff of instructor expected output vs student actual output.
+ * @brief Side by side diff of instructor expected output vs student actual output.
  *
  * @details
  * The instructor's stored expected output (from the selected assignment) is used
  * as the reference. Students cannot supply their own expected output file.
  * Whitespace differences are ignored in the comparison.
  *
- * @param actualOutput   The student's program stdout (FR-4).
- * @param expectedOutput The instructor's stored expected output (FR-5).
+ * @param actualOutput   The student's program stdout
+ * @param expectedOutput The instructor's stored expected output
  * @return React JSX element for the output diff panel.
  */
 export function OutputDiffPanel({
@@ -189,41 +175,78 @@ export function OutputDiffPanel({
         backgroundColor: '#2b2b2b'
       }}
     >
-      {/* ----------------------------------------------------------------
-          Header
-      ---------------------------------------------------------------- */}
+      
       <h2 style={{ marginBottom: '0.5rem' }}>Output Comparison</h2>
       <p style={{ marginBottom: '1rem', fontSize: '14px', color: '#ccc' }}>
         Your output is compared line-by-line against the instructor&apos;s expected output.
         Whitespace differences are ignored.
       </p>
 
-      {/* ----------------------------------------------------------------
-          Color legend
-      ---------------------------------------------------------------- */}
+
+
+
       <div
-        style={{ display: 'flex', gap: '1.5rem', marginBottom: '1rem', fontSize: '13px', flexWrap: 'wrap' }}
+        style={{ 
+          display: 'flex', 
+          gap: '1.5rem', 
+          marginBottom: '1rem', 
+          fontSize: '13px', 
+          flexWrap: 'wrap'
+        }}
       >
         <span style={{ color: '#e0e0e0' }}>
-          <span style={{ display: 'inline-block', width: '12px', height: '12px', backgroundColor: '#555', marginRight: '6px', verticalAlign: 'middle' }} />
+          <span 
+            style={{ 
+              display: 'inline-block', 
+              width: '12px', 
+              height: '12px', 
+              backgroundColor: '#555', 
+              marginRight: '6px', 
+              verticalAlign: 'middle' 
+            }} 
+          />
           Match
         </span>
         <span style={{ color: '#ff6b6b' }}>
-          <span style={{ display: 'inline-block', width: '12px', height: '12px', backgroundColor: '#3b0000', border: '1px solid #ff4444', marginRight: '6px', verticalAlign: 'middle' }} />
+          <span 
+            style={{ 
+              display: 'inline-block', 
+              width: '12px', 
+              height: '12px', 
+              backgroundColor: '#3b0000', 
+              border: '1px solid #ff4444', 
+              marginRight: '6px', 
+              verticalAlign: 'middle' 
+            }} 
+          />
           Missing / Wrong (expected but not in your output)
         </span>
         <span style={{ color: '#69db7c' }}>
-          <span style={{ display: 'inline-block', width: '12px', height: '12px', backgroundColor: '#002200', border: '1px solid #40c057', marginRight: '6px', verticalAlign: 'middle' }} />
+          <span 
+            style={{ 
+              display: 'inline-block', 
+              width: '12px', 
+              height: '12px', 
+              backgroundColor: '#002200', 
+              border: '1px solid #40c057', 
+              marginRight: '6px', 
+              verticalAlign: 'middle' 
+            }} 
+          />
           Extra (in your output but not expected)
         </span>
       </div>
 
-      {/* ----------------------------------------------------------------
-          Not-ready guidance
-      ---------------------------------------------------------------- */}
+
       {!isReady && (
         <div
-          style={{ border: '1px solid #444', padding: '12px', backgroundColor: '#1f1f1f', color: '#aaa', fontSize: '14px' }}
+          style={{ 
+            border: '1px solid #444', 
+            padding: '12px', 
+            backgroundColor: '#1f1f1f', 
+            color: '#aaa', 
+            fontSize: '14px' 
+          }}
         >
           {actualOutput === null && expectedOutput === null && (
             <p>Select an assignment and run your program to see the output comparison.</p>
@@ -237,9 +260,7 @@ export function OutputDiffPanel({
         </div>
       )}
 
-      {/* ----------------------------------------------------------------
-          Summary bar
-      ---------------------------------------------------------------- */}
+
       {isReady && diffLines.length > 0 && (
         <div
           style={{
@@ -318,7 +339,13 @@ export function OutputDiffPanel({
                   </div>
                 ) : (
                   /* Transparent placeholder keeps rows aligned with expected column */
-                  <div key={idx} style={{ padding: '2px 8px', color: 'transparent', borderLeft: '3px solid transparent' }}>
+                  <div 
+                    key={idx} style={{ 
+                    padding: '2px 8px', 
+                    color: 'transparent', 
+                    borderLeft: '3px solid transparent' 
+                    }}
+                  >
                     {'  —'}
                   </div>
                 )
