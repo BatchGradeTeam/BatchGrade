@@ -1,6 +1,5 @@
 /**
- * @author: Tri Tran
- * @file: batchGrading.ts
+ * @file: GradingPlus.tsx
  * @description:
  * This page implements the instructor-only batch grading workflow.
  * It allows the instructor to load multiple student C++ submissions,
@@ -24,28 +23,6 @@ import type { BatchJudgeCaseResult, BatchStudentSubmission } from '../../../shar
 function getFileName(filePath: string): string {
   const parts = filePath.split(/[/\\]/)
   return parts[parts.length - 1] || filePath
-}
-
-/**
- * Builds the initial student queue from selected file paths.
- *
- * @param {string[]} files - Selected student submission files
- * @returns {BatchStudentSubmission[]} Initial queue
- */
-function buildStudentQueue(files: string[]): BatchStudentSubmission[] {
-  return files.map((filePath, index) => ({
-    studentId: `student-${index + 1}`,
-    studentName: `Student ${index + 1}`,
-    filePath,
-    fileName: getFileName(filePath),
-    status: 'pending',
-    compileResult: null,
-    judgeResults: [],
-    passedCount: 0,
-    totalCount: 0,
-    savedToGradebook: false,
-    errorMessage: null
-  }))
 }
 
 /**
@@ -91,14 +68,43 @@ export function GradingPlus(): React.JSX.Element {
   }
 
   /**
-   * Lets the instructor select all student C++ submissions.
+   * Lets the instructor select multiple student submission files to build the grading queue.
+   * Each file is added as a new student in the queue with an initial "pending" status.
+   * Duplicate files are ignored to prevent adding the same student multiple times.
    */
   async function handleSelectStudentFiles(): Promise<void> {
     try {
       const files = await window.api.file.selectCppFiles()
-      setStudents(buildStudentQueue(files))
+
+      setStudents((currentStudents) => {
+        const existingPaths = new Set(currentStudents.map((student) => student.filePath))
+
+        const newFiles = files.filter((filePath) => !existingPaths.has(filePath))
+
+        if (newFiles.length === 0) {
+          return currentStudents
+        }
+
+        const startIndex = currentStudents.length
+
+        const newStudents = newFiles.map((filePath, index) => ({
+          studentId: `student-${startIndex + index + 1}`,
+          studentName: `Student ${startIndex + index + 1}`,
+          filePath,
+          fileName: getFileName(filePath),
+          status: 'pending' as const,
+          compileResult: null,
+          judgeResults: [],
+          passedCount: 0,
+          totalCount: 0,
+          savedToGradebook: false,
+          errorMessage: null
+        }))
+
+        return [...currentStudents, ...newStudents]
+      })
+
       setBatchError(null)
-      setCurrentStudentIndex(null)
     } catch (error) {
       console.error('Error selecting student files:', error)
       setBatchError('Could not select student submission files.')
@@ -251,8 +257,7 @@ export function GradingPlus(): React.JSX.Element {
       <div style={{ padding: '6rem' }}>
         <h1>Grading+ Page</h1>
         <p>
-          Instructor batch grading workflow for compiling and judging multiple student submissions
-          one at a time.
+          Instructor batch grading workflow for compiling and judging multiple student submissions.
         </p>
 
         {batchError && (
@@ -283,7 +288,7 @@ export function GradingPlus(): React.JSX.Element {
               Select Student C++ Files
             </button>
 
-            <button onClick={() => void handleSelectInputFile()} className="secondary-button">
+            <button onClick={() => void handleSelectInputFile()} className="primary-button">
               Add Input File
             </button>
 
@@ -301,6 +306,11 @@ export function GradingPlus(): React.JSX.Element {
               {isBatchGrading ? 'Grading...' : 'Grade Next Student'}
             </button>
           </div>
+
+          <p style={{ marginTop: '10px', fontSize: '13px', color: '#facc15' }}>
+            ⚠️ If the program requires user input, add input files before grading. Otherwise, test
+            cases may fail due to missing input.
+          </p>
 
           <div style={{ marginTop: '12px', fontSize: '14px', lineHeight: '1.6' }}>
             <p>Total Students: {students.length}</p>

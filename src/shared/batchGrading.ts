@@ -1,5 +1,4 @@
 /**
- * @author: Tri Tran
  * @file: batchGrading.ts
  * @description:
  * This file defines shared types used for the Grading+ (batch grading) feature.

@@ -34,6 +34,7 @@ import { InstructorDashboard } from './pages/InstructorDashboard'
 import { ProtectedRoute } from './components/ProtectedRoute'
 import { StudentUploadInterface } from './pages/studentUploadInterface'
 import { STUDENT_ROLE, INSTRUCTOR_ROLE } from '../../main/database/schema'
+import { GradingPlus } from './pages/GradingPlus'
 
 /**
  * App Component
@@ -130,6 +131,15 @@ export function App(): React.JSX.Element {
             element={
               <ProtectedRoute requiredRoles={[INSTRUCTOR_ROLE]}>
                 <Grading />
+              </ProtectedRoute>
+            }
+          />
+          {/* Grading+ (Batch Grading) Interface */}
+          <Route
+            path="/grading-plus"
+            element={
+              <ProtectedRoute requiredRoles={[INSTRUCTOR_ROLE]}>
+                <GradingPlus />
               </ProtectedRoute>
             }
           />
