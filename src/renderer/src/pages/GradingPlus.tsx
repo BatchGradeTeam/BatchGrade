@@ -39,6 +39,7 @@ export function GradingPlus(): React.JSX.Element {
   const [currentStudentIndex, setCurrentStudentIndex] = useState<number | null>(null)
   const [isBatchGrading, setIsBatchGrading] = useState(false)
   const [batchError, setBatchError] = useState<string | null>(null)
+  const [expandedStudentIndex, setExpandedStudentIndex] = useState<number | null>(null)
 
   /**
    * Updates one student in the queue.
@@ -163,6 +164,7 @@ export function GradingPlus(): React.JSX.Element {
     setIsBatchGrading(true)
     setBatchError(null)
     setCurrentStudentIndex(nextIndex)
+    setExpandedStudentIndex(nextIndex)
 
     const student = students[nextIndex]
 
@@ -327,6 +329,7 @@ export function GradingPlus(): React.JSX.Element {
         <div style={{ display: 'grid', gap: '12px' }}>
           {students.map((student, index) => {
             const isActive = currentStudentIndex === index
+            const isExpanded = expandedStudentIndex === index
 
             return (
               <div
@@ -347,27 +350,50 @@ export function GradingPlus(): React.JSX.Element {
                 </p>
                 <p style={{ fontSize: '14px' }}>Status: {student.status}</p>
 
-                {student.compileResult && (
-                  <div style={{ marginTop: '10px' }}>
-                    <p style={{ fontSize: '14px' }}>
-                      Compile Success: {student.compileResult.compileSuccess ? 'Yes' : 'No'}
+                {isExpanded && (
+                  <div
+                    style={{
+                      marginTop: '12px',
+                      padding: '12px',
+                      border: '1px solid #4b5563',
+                      backgroundColor: '#111827'
+                    }}
+                  >
+                    <p style={{ fontSize: '14px', fontWeight: 'bold', marginBottom: '8px' }}>
+                      Grading Details
                     </p>
-                    <p style={{ fontSize: '14px' }}>Message: {student.compileResult.message}</p>
-                  </div>
-                )}
 
-                {student.totalCount > 0 && (
-                  <div style={{ marginTop: '10px' }}>
-                    <p style={{ fontSize: '14px' }}>
-                      Judge Result: {student.passedCount} / {student.totalCount} passed
+                    <p style={{ fontSize: '14px', marginBottom: '8px' }}>
+                      {student.status === 'grading' && 'Compiling submission...'}
+                      {student.status === 'judging' && 'Running judge test cases...'}
+                      {student.status === 'done' && 'Grading complete.'}
+                      {student.status === 'failed' && 'Grading failed.'}
+                      {student.status === 'pending' && 'Waiting to be graded.'}
                     </p>
-                  </div>
-                )}
 
-                {student.errorMessage && (
-                  <p style={{ marginTop: '10px', color: '#f87171' }}>
-                    Error: {student.errorMessage}
-                  </p>
+                    {student.compileResult && (
+                      <div style={{ marginTop: '10px' }}>
+                        <p style={{ fontSize: '14px' }}>
+                          Compile Success: {student.compileResult.compileSuccess ? 'Yes' : 'No'}
+                        </p>
+                        <p style={{ fontSize: '14px' }}>Message: {student.compileResult.message}</p>
+                      </div>
+                    )}
+
+                    {student.totalCount > 0 && (
+                      <div style={{ marginTop: '10px' }}>
+                        <p style={{ fontSize: '14px' }}>
+                          Judge Result: {student.passedCount} / {student.totalCount} passed
+                        </p>
+                      </div>
+                    )}
+
+                    {student.errorMessage && (
+                      <p style={{ marginTop: '10px', color: '#f87171' }}>
+                        Error: {student.errorMessage}
+                      </p>
+                    )}
+                  </div>
                 )}
               </div>
             )
