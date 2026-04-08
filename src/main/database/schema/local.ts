@@ -28,18 +28,13 @@ export const submissions = sqliteTable('submissions', {
   assignmentId: text('assignment_id')
     .notNull()
     .references(() => assignments.uuid),
-  attemptNumber: integer('attempt_number')
-    .notNull()
-    .default(0),
-  fileContent: blob('file_content', { mode: 'buffer'}),
+  fileContent: text('file_content'),
   fileName: text('file_name')
     .notNull()
     .default('N/A'),
   fileSize: integer('file_size')
     .notNull()
     .default(0),
-  filePath: text('file_path')
-    .notNull(),
   status: text('status')
     .notNull()
     .default('not submitted'), // "submittted", "pending", "not submitted"

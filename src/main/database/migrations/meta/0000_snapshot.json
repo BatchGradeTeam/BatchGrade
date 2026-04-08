@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "03d19f0d-8c6d-4606-8e73-ba6ac3fb4544",
+  "id": "13e0cd8a-42e8-46ba-a698-e9dcf82cea90",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "instructor_assignments": {
@@ -329,17 +329,9 @@
           "notNull": true,
           "autoincrement": false
         },
-        "attempt_number": {
-          "name": "attempt_number",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": 0
-        },
         "file_content": {
           "name": "file_content",
-          "type": "blob",
+          "type": "text",
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
@@ -359,13 +351,6 @@
           "notNull": true,
           "autoincrement": false,
           "default": 0
-        },
-        "file_path": {
-          "name": "file_path",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
         },
         "status": {
           "name": "status",

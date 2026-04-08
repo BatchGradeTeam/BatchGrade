@@ -56,9 +56,8 @@ export function createSubmission(input: {
       uuid: submissionId,
       assignmentId: input.assignmentId,
       fileName: input.fileName,
-      fileContent: typeof fileContent === 'string' ? Buffer.from(fileContent) : fileContent,
+      fileContent: fileContent,
       fileSize: fileSize,
-      filePath: input.filePath,
       status: 'pending'
     })
     .run()
