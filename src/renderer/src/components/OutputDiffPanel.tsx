@@ -219,7 +219,7 @@ export function OutputDiffPanel({
               verticalAlign: 'middle' 
             }} 
           />
-          Missing / Wrong (expected but not in your output)
+          Missing / Wrong Output
         </span>
         <span style={{ color: '#69db7c' }}>
           <span 
@@ -233,7 +233,7 @@ export function OutputDiffPanel({
               verticalAlign: 'middle' 
             }} 
           />
-          Extra (in your output but not expected)
+          Superfluous Output
         </span>
       </div>
 
@@ -291,6 +291,35 @@ export function OutputDiffPanel({
       {isReady && (
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
 
+          {/* Actual output column */}
+          <div>
+            <h4 style={{ fontSize: '15px', marginBottom: '6px' }}>
+              Your Output{' '}
+              
+              <span style={{ fontWeight: 'normal', color: '#aaa', fontSize: '13px' }}>(actual)</span>
+            </h4>
+            <pre
+              style={{
+                whiteSpace: 'pre-wrap', overflowWrap: 'anywhere', backgroundColor: '#111',
+                border: '1px solid #444', padding: 0, margin: 0,
+                maxHeight: '320px', overflowY: 'auto', fontSize: '12px', fontFamily: 'monospace'
+              }}
+            >
+              {diffLines.map((line, idx) =>
+                line.type !== 'missing' ? (
+                  <div key={idx} style={{ ...lineStyle(line.type), padding: '2px 8px' }}>
+                    {linePrefix(line.type)}{line.value}
+                  </div>
+                ) : (
+                  /* Transparent placeholder to keep rows aligned with actual column */
+                  <div key={idx} style={{ padding: '2px 8px', color: 'transparent', borderLeft: '3px solid transparent' }}>
+                    {'  —'}
+                  </div>
+                )
+              )}
+            </pre>
+          </div>
+
           {/* Expected output column */}
           <div>
             <h4 style={{ fontSize: '15px', marginBottom: '6px' }}>
@@ -307,38 +336,10 @@ export function OutputDiffPanel({
               {diffLines.map((line, idx) =>
                 line.type !== 'extra' ? (
                   <div key={idx} style={{ ...lineStyle(line.type), padding: '2px 8px' }}>
-                    {linePrefix(line.type)}{line.value}
+                    {linePrefix(line.type === 'match' ? 'match' : 'missing')}{line.value}
                   </div>
                 ) : (
-                  /* Transparent placeholder keeps rows aligned with actual column */
-                  <div key={idx} style={{ padding: '2px 8px', color: 'transparent', borderLeft: '3px solid transparent' }}>
-                    {'  —'}
-                  </div>
-                )
-              )}
-            </pre>
-          </div>
-
-          {/* Actual output column */}
-          <div>
-            <h4 style={{ fontSize: '15px', marginBottom: '6px' }}>
-              Your Output{' '}
-              <span style={{ fontWeight: 'normal', color: '#aaa', fontSize: '13px' }}>(actual)</span>
-            </h4>
-            <pre
-              style={{
-                whiteSpace: 'pre-wrap', overflowWrap: 'anywhere', backgroundColor: '#111',
-                border: '1px solid #444', padding: 0, margin: 0,
-                maxHeight: '320px', overflowY: 'auto', fontSize: '12px', fontFamily: 'monospace'
-              }}
-            >
-              {diffLines.map((line, idx) =>
-                line.type !== 'missing' ? (
-                  <div key={idx} style={{ ...lineStyle(line.type), padding: '2px 8px' }}>
-                    {linePrefix(line.type)}{line.value}
-                  </div>
-                ) : (
-                  /* Transparent placeholder keeps rows aligned with expected column */
+                  /* Transparent placeholder to keep rows aligned with expected column */
                   <div 
                     key={idx} style={{ 
                     padding: '2px 8px', 

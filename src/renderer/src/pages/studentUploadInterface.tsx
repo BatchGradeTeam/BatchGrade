@@ -19,8 +19,9 @@ import { useAuth } from '../components/AuthContext'
 import { NavBar } from '../components/Navbar'
 import { Footer } from '../components/Footer'
 import { CppWorkflowPanel } from '../components/compiler/CppWorkflowPanel'
-import { CompileCppResult } from 'src/shared/compiler'
+import { CompileCppResult, RunCppResult } from 'src/shared/compiler'
 import { SubmitPanel } from '../components/submission/SubmitPanel'
+import { OutputDiffPanel } from '../components/OutputDiffPanel'
 
 /**
  * StudentUploadInterface Component
@@ -35,6 +36,9 @@ export function StudentUploadInterface(): React.JSX.Element {
   const { user } = useAuth()
   const [selectedFiles, setSelectedFiles] = useState<string[]>([])
   const [compileResult, setCompileResult] = useState<CompileCppResult | null>(null)
+
+  const [runResult, setRunResult] = useState<RunCppResult | null>(null)
+  const [expectedOutput, setExpectedOutput] = useState<string | null>(null)
 
   return (
     <>
@@ -53,12 +57,19 @@ export function StudentUploadInterface(): React.JSX.Element {
           allowExecution={true}
           onSelectionChange={setSelectedFiles}
           onCompileResultChange={setCompileResult}
+          onRunResultChange={setRunResult}
         />
 
         <SubmitPanel
           compileResult={compileResult}
           selectedFiles={selectedFiles}
           userId={user?.uuid}
+          onExpectedOutputChange={setExpectedOutput}
+        />
+
+        <OutputDiffPanel
+          actualOutput={runResult?.stdout ?? null}
+          expectedOutput={expectedOutput}
         />
       </div>
 

@@ -15,6 +15,7 @@
  *  - Integration with a file upload system for source code bundles
  *  - Real-time validation of submission contents before final submission
  */
+import { useEffect } from 'react'
 import type { CompileCppResult } from '../../../../shared/compiler'
 import { useSubmitWorkflow } from './useSubmitWorkflow'
 
@@ -52,21 +53,20 @@ export function SubmitPanel({
   } = useSubmitWorkflow({ compileResult, selectedFiles, userId })
 
   /**
-   * @brief Handles assignment dropdown change.
+   * @brief FR-5: Notify parent of the initial assignment's expected output.
    *
    * @details
-   * Updates the selected ID and notifies the parent of the
-   * new assignment's expectedOutputText for OutputDiffPanel.
-   *
-   * @param uuid UUID from the select element value.
+   * The dropdown defaults to the first assignment on load but onChange
+   * never fires for the initial value, so OutputDiffPanel has no expected
+   * output until the user manually changes the selection. This effect
+   * fires whenever selectedAssignment changes — including on first load —
+   * ensuring the parent always has the current expected output.
    */
-  function handleAssignmentChange(uuid: string): void {
-    setSelectedAssignmentId(uuid)
+  useEffect(() => {
     if (onExpectedOutputChange) {
-      const assignment = assignments.find((a) => a.uuid === uuid)
-      onExpectedOutputChange(assignment?.expectedOutputText ?? null)
+      onExpectedOutputChange(selectedAssignment?.expectedOutputText ?? null)
     }
-  }
+  }, [selectedAssignment, onExpectedOutputChange])
 
   return (
     <div
@@ -101,7 +101,7 @@ export function SubmitPanel({
       <select
         value={selectedAssignmentId}
         onChange={(e) => {
-          handleAssignmentChange(e.target.value)
+          setSelectedAssignmentId(e.target.value)
         }}
         className="panel-input"
         style={{ maxWidth: '480px', marginBottom: '1rem' }}
