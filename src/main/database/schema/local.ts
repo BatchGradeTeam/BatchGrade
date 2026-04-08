@@ -11,7 +11,7 @@ export const assignments = sqliteTable('assignments', {
     .$defaultFn(() => crypto.randomUUID()),
   title: text('title')
     .notNull(),
-  config: blob('config'),
+  config: blob('config', { mode: 'buffer'}),
   createdAt: integer('created_at', { mode: 'number' })
     .notNull()
     .default(sql`(unixepoch())`)
@@ -31,7 +31,7 @@ export const submissions = sqliteTable('submissions', {
   attemptNumber: integer('attempt_number')
     .notNull()
     .default(0),
-  fileContent: blob('file_content'),
+  fileContent: blob('file_content', { mode: 'buffer'}),
   fileName: text('file_name')
     .notNull()
     .default('N/A'),
@@ -45,6 +45,22 @@ export const submissions = sqliteTable('submissions', {
     .default('not submitted'), // "submittted", "pending", "not submitted"
   submittedAt: integer('submitted_at')
     .default(sql`(unixepoch())`)
+})
+
+/**
+ * Grades Table
+ * Tracking scores for each submissions
+ */
+export const grades = sqliteTable('grades', {
+  uuid: text('uuid')
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  submissionId: text('submission_id')
+    .notNull()
+    .references(() => submissions.uuid),
+  score: integer('score').notNull(),
+  feedback: text('feedback'),
+  gradedAt: integer('graded_at').default(sql(unixepoch()))
 })
 
 /**
