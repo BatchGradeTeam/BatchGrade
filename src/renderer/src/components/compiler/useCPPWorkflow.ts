@@ -71,7 +71,7 @@ type UseCppWorkflowReturn = {
 // Further are just more functions.
 export function useCppWorkflow({
   onSelectionChange,
-  onCompileResultChange
+  onCompileResultChange,
   onRunResultChange
 }: UseCppWorkflowProps): UseCppWorkflowReturn {
   const [gccStatus, setGccStatus] = useState<GccInstallationInfo | null>(null)
