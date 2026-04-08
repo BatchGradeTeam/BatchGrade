@@ -175,7 +175,9 @@ app.whenReady().then(() => {
   // Validate the manual compiler path from the UI and make it the current GCC selection
   ipcMain.handle('compiler:setGccPath', async (_e, filePath: string) => {
     if ( !(await validateGccPath(filePath)) ) {
-      return {
+      manualGccPath = null
+
+      const missingRes: GccInstallationInfo = {
         compilerId: 'gcc',
         status: 'missing',
         platform: getSupportedPlatform(),
@@ -184,6 +186,12 @@ app.whenReady().then(() => {
         path: null ,
         source: null // User can manually set the path to a GCC installation
       }
+
+      // Keep the cached compiler status in sync with what the UI shows.
+      // Without this, compile could still use an older valid compiler path.
+      gccStatusPromise = Promise.resolve(missingRes)
+
+      return missingRes
     }
     else { 
       manualGccPath = filePath
