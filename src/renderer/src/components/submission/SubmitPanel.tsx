@@ -22,6 +22,7 @@ type SubmitPanelProps = {
   compileResult: CompileCppResult | null
   selectedFiles: string[]
   userId: string | undefined
+  onExpectedOutputChange?: (expectedOutput: string | null) => void
 }
 
 /**
@@ -36,7 +37,8 @@ type SubmitPanelProps = {
 export function SubmitPanel({
   compileResult,
   selectedFiles,
-  userId
+  userId,
+  onExpectedOutputChange
 }: SubmitPanelProps): React.JSX.Element {
   const {
     assignments,
@@ -48,6 +50,23 @@ export function SubmitPanel({
     setSelectedAssignmentId,
     handleSubmit
   } = useSubmitWorkflow({ compileResult, selectedFiles, userId })
+
+  /**
+   * @brief Handles assignment dropdown change.
+   *
+   * @details
+   * Updates the selected ID and notifies the parent of the
+   * new assignment's expectedOutputText for OutputDiffPanel.
+   *
+   * @param uuid UUID from the select element value.
+   */
+  function handleAssignmentChange(uuid: string): void {
+    setSelectedAssignmentId(uuid)
+    if (onExpectedOutputChange) {
+      const assignment = assignments.find((a) => a.uuid === uuid)
+      onExpectedOutputChange(assignment?.expectedOutputText ?? null)
+    }
+  }
 
   return (
     <div
@@ -82,7 +101,7 @@ export function SubmitPanel({
       <select
         value={selectedAssignmentId}
         onChange={(e) => {
-          setSelectedAssignmentId(e.target.value)
+          handleAssignmentChange(e.target.value)
         }}
         className="panel-input"
         style={{ maxWidth: '480px', marginBottom: '1rem' }}
