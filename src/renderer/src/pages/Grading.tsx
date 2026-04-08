@@ -16,6 +16,7 @@ import { useNavigate } from 'react-router-dom'
 import { Footer } from '../components/Footer'
 import { NavBar } from '../components/Navbar'
 import { CppWorkflowPanel } from '../components/compiler/CppWorkflowPanel'
+import { DockerDetectionPanel } from '../components/DockerDetectionPanel'
 import { useState } from 'react'
 import type { CompileCppResult } from '../../../shared/compiler'
 import { CppJudgePanel } from '../components/CppJudgePanel'
@@ -51,6 +52,8 @@ export function Grading(): React.JSX.Element {
         />
 
         <CppJudgePanel compileResult={compileResult} />
+
+        <DockerDetectionPanel />
 
         <button
           onClick={() => navigate('/')}

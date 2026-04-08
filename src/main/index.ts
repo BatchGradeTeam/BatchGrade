@@ -18,6 +18,7 @@ import { selectFile, stringifyFile, selectCppFiles } from './utils/file'
 
 // @ Issue 9: Implement Automated Build & Compilation
 import { detectGccInstallation, validateGccPath } from './compiler/gccDetection'
+import { detectDockerInstallation } from './compiler/dockerDetection'
 import type { GccInstallationInfo, SupportedPlatform } from '../shared/compiler'
 
 import { compileCppFiles } from './compiler/compileCppFiles'
@@ -202,7 +203,10 @@ app.whenReady().then(() => {
 
       return manualRes
     }
-  }) 
+  })
+
+  // Docker Detection
+  ipcMain.handle('compiler:getDockerStatus', () => detectDockerInstallation()) 
 
   /* TEST ONLY DELETE WHEN DONE */
   // File selection

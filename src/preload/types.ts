@@ -1,6 +1,7 @@
 import type { User, NewUser, UpdateUser } from '../shared/types'
 import type {
   GccInstallationInfo,
+  DockerInstallationInfo,
   CompileCppRequest,
   CompileCppResult,
   RunCppRequest,
@@ -21,6 +22,7 @@ export type UsersAPI = {
 export type CompilerAPI = {
   getGccStatus: () => Promise<GccInstallationInfo>
   setGccPath: (filePath: string) => Promise<GccInstallationInfo>
+  getDockerStatus: () => Promise<DockerInstallationInfo>
   compileCpp: (request: CompileCppRequest) => Promise<CompileCppResult>
   runCompiledProgram: (request: RunCppRequest) => Promise<RunCppResult>
   judgeCpp: (request: JudgeCppRequest) => Promise<JudgeCppResult>

@@ -58,3 +58,16 @@ export type JudgeCppResult = {
   expectedOutput: string
   actualOutput: string // The actual output from the judged program
 }
+
+// ***********************************************************************
+// Docker Detection
+export type DockerInstallationInfo = {
+  containerId: 'docker'
+  status: 'ready' | 'missing' | 'not-running'
+  platform: SupportedPlatform
+  message: string
+  installInstruction: string | null
+  path: string | null
+  version: string | null
+  source: 'auto' | 'manual' | null
+}
