@@ -21,6 +21,7 @@ type CppWorkflowPanelProps = {
   allowExecution: boolean
   onSelectionChange?: (files: string[]) => void
   onCompileResultChange?: (result: CompileCppResult | null) => void
+  autoCompileOnSelection?: boolean
 }
 
 /**
@@ -38,7 +39,8 @@ export function CppWorkflowPanel({
   description,
   allowExecution,
   onSelectionChange,
-  onCompileResultChange
+  onCompileResultChange,
+  autoCompileOnSelection = false
 }: CppWorkflowPanelProps): React.JSX.Element {
   const {
     gccStatus,
@@ -58,8 +60,11 @@ export function CppWorkflowPanel({
     handleRunProgram
   } = useCppWorkflow({
     onSelectionChange,
-    onCompileResultChange
+    onCompileResultChange,
+    autoCompileOnSelection
   })
+
+  const isCompilerReady = gccStatus?.status === 'ready' && !!gccStatus.path
 
   return (
     <div className="cpp-container">
@@ -118,6 +123,11 @@ export function CppWorkflowPanel({
                   {gccStatus.installInstruction && (
                     <p>
                       <strong>Install Help:</strong> {gccStatus.installInstruction}
+                    </p>
+                  )}
+                  {gccStatus.status === 'missing' && (
+                    <p style={{ color: 'red', fontWeight: 'bold', marginTop: '8px' }}>
+                      Set up a valid C++ compiler before compiling.
                     </p>
                   )}
                 </>
@@ -189,14 +199,22 @@ export function CppWorkflowPanel({
 
             <button
               onClick={() => void handleCompileCpp()}
-              disabled={isCompiling || selectedFiles.length === 0}
+              disabled={isCompiling || selectedFiles.length === 0 || !isCompilerReady}
               className={
-                isCompiling || selectedFiles.length === 0 ? 'cancel-button' : 'secondary-button'
+                isCompiling || selectedFiles.length === 0 || !isCompilerReady
+                  ? 'cancel-button'
+                  : 'secondary-button'
               }
               style={{ marginTop: '10px' }}
             >
               {isCompiling ? 'Compiling...' : 'Compile'}
             </button>
+
+            {!isCompilerReady && selectedFiles.length > 0 && (
+              <p style={{ marginTop: '10px', color: 'red', fontWeight: 'bold' }}>
+                Set up a valid compiler first.
+              </p>
+            )}
 
             {compileResult && (
               <div style={{ marginTop: '12px', borderTop: '1px solid gray', paddingTop: '10px' }}>

@@ -9,7 +9,7 @@
  * The hook abstracts away the details of interacting with the underlying API and
  * provides a clean interface for components to use in the grading workflow.
  */
-import { useEffect, useState } from 'react'
+import { useEffect, useEffectEvent, useState, useRef } from 'react'
 
 // This is just a shared type / data shape
 import type {
@@ -35,6 +35,7 @@ import {
 type UseCppWorkflowProps = {
   onSelectionChange?: (files: string[]) => void
   onCompileResultChange?: (result: CompileCppResult | null) => void
+  autoCompileOnSelection?: boolean
 }
 
 // This is what the hook gives us back, ie
@@ -69,7 +70,8 @@ type UseCppWorkflowReturn = {
 // Further are just more functions.
 export function useCppWorkflow({
   onSelectionChange,
-  onCompileResultChange
+  onCompileResultChange,
+  autoCompileOnSelection = false
 }: UseCppWorkflowProps): UseCppWorkflowReturn {
   const [gccStatus, setGccStatus] = useState<GccInstallationInfo | null>(null)
   const [compileResult, setCompileResult] = useState<CompileCppResult | null>(null)
@@ -80,6 +82,11 @@ export function useCppWorkflow({
   const [stdinText, setStdinText] = useState('')
   const [isCompiling, setIsCompiling] = useState(false)
   const [isRunning, setIsRunning] = useState(false)
+
+  const lastAutoCompileSelectionRef = useRef<string | null>(null)
+  const runAutomaticCompile = useEffectEvent(() => {
+    void handleCompileCpp()
+  })
 
   // Loads the gcc status when we start/open anywhere we use this panel
   useEffect(() => {
@@ -99,15 +106,46 @@ export function useCppWorkflow({
   useEffect(() => {
     onSelectionChange?.(selectedFiles)
   }, [onSelectionChange, selectedFiles])
-  //Tells us when a compile result has changed
+  // Tells us when a compile result has changed
   useEffect(() => {
     onCompileResultChange?.(compileResult)
   }, [compileResult, onCompileResultChange])
+
+  // This automatically compiles newly selected files, iff the user asked for auto compile and valid C++ compiler is ready
+  useEffect(() => {
+    if (!autoCompileOnSelection) {
+      return
+    }
+
+    if (selectedFiles.length == 0) {
+      lastAutoCompileSelectionRef.current = null
+      return
+    }
+
+    if (!gccStatus) {
+      return
+    }
+
+    if (gccStatus.status !== 'ready' || !gccStatus.path) {
+      return
+    }
+
+    // To remember if last selected files have already been compiled
+    const selectionSignature = selectedFiles.join('::')
+    if (isCompiling || lastAutoCompileSelectionRef.current === selectionSignature) {
+      return
+    }
+
+    lastAutoCompileSelectionRef.current = selectionSignature
+    runAutomaticCompile()
+  }, [autoCompileOnSelection, gccStatus, isCompiling, selectedFiles])
 
   async function handleSetManualPath(): Promise<void> {
     try {
       const result = await setCompilerPath(manualPath)
       setGccStatus(result)
+      setCompileResult(null)
+      setRunResult(null)
       setErrorMessage(null)
     } catch (error) {
       console.error('Error setting GCC path:', error)
@@ -118,6 +156,10 @@ export function useCppWorkflow({
   async function handleSelectCppFiles(): Promise<void> {
     try {
       const files = await selectCppFiles()
+
+      // A new file selection -> allow auto compile to run again
+      lastAutoCompileSelectionRef.current = null
+
       setSelectedFiles(files)
       setCompileResult(null)
       setRunResult(null)
