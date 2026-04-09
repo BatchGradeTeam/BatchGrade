@@ -24,7 +24,6 @@ export function StudentGradingCard({
 }: StudentGradingCardProps): React.JSX.Element {
   return (
     <div
-      key={student.filePath}
       style={{
         border: isExpanded ? '2px solid #22c55e' : '1px solid gray',
         backgroundColor: '#1f1f1f',
@@ -36,8 +35,17 @@ export function StudentGradingCard({
       </h3>
 
       <p style={{ fontSize: '14px' }}>Student ID: {student.studentId}</p>
-      <p style={{ fontSize: '14px', overflowWrap: 'anywhere' }}>File: {student.fileName}</p>
+      <p style={{ fontSize: '14px' }}>Folder: {student.folderName}</p>
       <p style={{ fontSize: '14px' }}>Status: {student.status}</p>
+
+      <p style={{ fontSize: '14px', marginTop: '6px' }}>C++ Files:</p>
+      <ul style={{ marginTop: '4px', paddingLeft: '20px' }}>
+        {student.fileNames.map((fileName) => (
+          <li key={fileName} style={{ fontSize: '14px', overflowWrap: 'anywhere' }}>
+            {fileName}
+          </li>
+        ))}
+      </ul>
 
       {isExpanded && (
         <div

@@ -79,7 +79,7 @@ export function GradingPlus(): React.JSX.Element {
       const files = await window.api.file.selectCppFiles()
 
       setStudents((currentStudents) => {
-        const existingPaths = new Set(currentStudents.map((student) => student.filePath))
+        const existingPaths = new Set(currentStudents.flatMap((student) => student.filePaths))
 
         const newFiles = files.filter((filePath) => !existingPaths.has(filePath))
 
@@ -92,8 +92,9 @@ export function GradingPlus(): React.JSX.Element {
         const newStudents = newFiles.map((filePath, index) => ({
           studentId: `student-${startIndex + index + 1}`,
           studentName: `Student ${startIndex + index + 1}`,
-          filePath,
-          fileName: getFileName(filePath),
+          folderName: `Manual Upload ${startIndex + index + 1}`,
+          filePaths: [filePath],
+          fileNames: [getFileName(filePath)],
           status: 'pending' as const,
           compileResult: null,
           judgeResults: [],
@@ -110,6 +111,51 @@ export function GradingPlus(): React.JSX.Element {
     } catch (error) {
       console.error('Error selecting student files:', error)
       setBatchError('Could not select student submission files.')
+    }
+  }
+
+  /**
+   * Imports student submissions from a selected parent folder.
+   * Each subfolder is treated as one student and all `.cpp` files
+   * inside are added to the grading queue.
+   */
+  async function handleImportSubmissionFolder(): Promise<void> {
+    try {
+      const groups = await window.api.file.selectSubmissionFolder()
+
+      setStudents((currentStudents) => {
+        const existingFolderNames = new Set(currentStudents.map((student) => student.folderName))
+
+        const newGroups = groups.filter((group) => !existingFolderNames.has(group.folderName))
+
+        if (newGroups.length === 0) {
+          return currentStudents
+        }
+
+        const startIndex = currentStudents.length
+
+        const newStudents = newGroups.map((group, index) => ({
+          studentId: `student-${startIndex + index + 1}`,
+          studentName: group.folderName,
+          folderName: group.folderName,
+          filePaths: group.cppFiles,
+          fileNames: group.cppFiles.map((filePath) => getFileName(filePath)),
+          status: 'pending' as const,
+          compileResult: null,
+          judgeResults: [],
+          passedCount: 0,
+          totalCount: 0,
+          savedToGradebook: false,
+          errorMessage: null
+        }))
+
+        return [...currentStudents, ...newStudents]
+      })
+
+      setBatchError(null)
+    } catch (error) {
+      console.error('Error importing submission folder:', error)
+      setBatchError('Could not import submission folder.')
     }
   }
 
@@ -178,7 +224,7 @@ export function GradingPlus(): React.JSX.Element {
         totalCount: 0
       })
 
-      const compileResult = await compileCppFiles([student.filePath])
+      const compileResult = await compileCppFiles(student.filePaths)
 
       updateStudent(nextIndex, {
         compileResult
@@ -287,6 +333,10 @@ export function GradingPlus(): React.JSX.Element {
           <h2 style={{ marginBottom: '10px' }}>Batch Setup</h2>
 
           <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+            <button onClick={() => void handleImportSubmissionFolder()} className="primary-button">
+              Select Submission Folder
+            </button>
+
             <button onClick={() => void handleSelectStudentFiles()} className="primary-button">
               Select Student C++ Files
             </button>
@@ -331,7 +381,7 @@ export function GradingPlus(): React.JSX.Element {
           {students.map((student, index) => {
             return (
               <StudentGradingCard
-                key={student.filePath}
+                key={student.studentId}
                 student={student}
                 isExpanded={expandedStudentIndex === index}
               />

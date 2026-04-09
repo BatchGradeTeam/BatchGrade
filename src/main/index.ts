@@ -13,7 +13,7 @@ import { getAllAssignments, createAssignment, updateAssignment } from './databas
 import { deleteAssignment } from './database/queries'
 
 /* TEST ONLY DELETE WHEN DONE */
-import { selectFile, stringifyFile, selectCppFiles } from './utils/file'
+import { selectFile, stringifyFile, selectCppFiles, selectSubmissionFolder } from './utils/file'
 /* TEST ONLY DELETE WHEN DONE */
 
 // @ Issue 9: Implement Automated Build & Compilation
@@ -40,10 +40,10 @@ function getSupportedPlatform(): SupportedPlatform {
 
   if (process.platform === 'win32') {
     platform = 'win32'
-  }                                                                                                       
+  }
   if (process.platform === 'darwin') {
     platform = 'darwin'
-  }                                                                                                  
+  }
   if (process.platform === 'linux') {
     platform = 'linux'
   }
@@ -53,13 +53,13 @@ function getSupportedPlatform(): SupportedPlatform {
 
 /*
   @ Issue 9: If compilation fails unexpectedly due to compiler not found, revalidate the location/prompt to install
-  Scenario: 
+  Scenario:
     - GCC may be detected at startup
     - Later on, the user uninstalls it, moves it, or the manual path is wrong
     - Compile is attempted with path the app thought was valid
   Why it's needed:
-    - Without revalidation, the app may only show a vague compile failure   
-    - User then cannot tell whether their code is bad or the compiler is missing  
+    - Without revalidation, the app may only show a vague compile failure
+    - User then cannot tell whether their code is bad or the compiler is missing
   Shouldn't trigger on:
     - syntax errors
     - linker errors
@@ -193,7 +193,7 @@ app.whenReady().then(() => {
 
       return missingRes
     }
-    else { 
+    else {
       manualGccPath = filePath
 
       const manualRes: GccInstallationInfo = {
@@ -201,7 +201,7 @@ app.whenReady().then(() => {
         status: 'ready',
         platform: getSupportedPlatform(),
         message: 'Manual GCC path has been saved successfully.',
-        installInstruction: null, 
+        installInstruction: null,
         path: manualGccPath,
         source: 'manual'
       }
@@ -210,13 +210,14 @@ app.whenReady().then(() => {
 
       return manualRes
     }
-  }) 
+  })
 
   /* TEST ONLY DELETE WHEN DONE */
   // File selection
   ipcMain.handle('file:select', () => selectFile())
   ipcMain.handle('file:selectCppFiles', () => selectCppFiles())
   ipcMain.handle('file:stringify', (_e, filePath: string) => stringifyFile(filePath))
+  ipcMain.handle('file:selectSubmissionFolder', () => selectSubmissionFolder())
   /* TEST ONLY DELETE WHEN DONE */
 
   // Compilation
@@ -240,7 +241,7 @@ app.whenReady().then(() => {
     if (compileRes.compileSuccess) {
       return compileRes
     }
-    
+
     // Only revalidate GCC if the failure looks like the compiler itself is missing or cannot be started
     const isCompilerMissing = isCompilerNotFoundError(
       compileRes.stderr,

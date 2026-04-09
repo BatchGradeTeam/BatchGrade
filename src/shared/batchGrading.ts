@@ -43,10 +43,11 @@ export type BatchJudgeCaseResult = {
 export type BatchStudentSubmission = {
   studentId: string
   studentName: string
+  folderName: string
 
   // File info
-  filePath: string
-  fileName: string
+  filePaths: string[]
+  fileNames: string[]
 
   // Current grading state
   status: BatchGradingStatus
