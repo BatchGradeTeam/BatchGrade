@@ -77,6 +77,7 @@ export function GradingPlus(): React.JSX.Element {
   const [currentStudentIndex, setCurrentStudentIndex] = useState<number | null>(null)
   const [isBatchGrading, setIsBatchGrading] = useState(false)
   const [batchError, setBatchError] = useState<string | null>(null)
+  const [batchMessage, setBatchMessage] = useState<string | null>(null)
   const [expandedStudentIndex, setExpandedStudentIndex] = useState<number | null>(null)
   const [showInputMenu, setShowInputMenu] = useState(false)
   const [showOutputMenu, setShowOutputMenu] = useState(false)
@@ -161,6 +162,7 @@ export function GradingPlus(): React.JSX.Element {
       })
 
       setBatchError(null)
+      setBatchMessage(null)
     } catch (error) {
       console.error('Error selecting student files:', error)
       setBatchError('Could not select student submission files.')
@@ -206,6 +208,7 @@ export function GradingPlus(): React.JSX.Element {
       })
 
       setBatchError(null)
+      setBatchMessage(null)
     } catch (error) {
       console.error('Error importing submission folder:', error)
       setBatchError('Could not import submission folder.')
@@ -222,6 +225,7 @@ export function GradingPlus(): React.JSX.Element {
         sortFilesAlphabetically(appendUniqueFile(currentFiles, file))
       )
       setBatchError(null)
+      setBatchMessage(null)
     } catch (error) {
       console.error('Error selecting input file:', error)
       setBatchError('Could not select input file.')
@@ -234,6 +238,7 @@ export function GradingPlus(): React.JSX.Element {
 
       setSelectedInputFiles(sortFilesAlphabetically(files))
       setBatchError(null)
+      setBatchMessage(null)
     } catch (error) {
       console.error('Error selecting input folder:', error)
       setBatchError('Could not import input folder.')
@@ -250,6 +255,7 @@ export function GradingPlus(): React.JSX.Element {
         sortFilesAlphabetically(appendUniqueFile(currentFiles, file))
       )
       setBatchError(null)
+      setBatchMessage(null)
     } catch (error) {
       console.error('Error selecting output file:', error)
       setBatchError('Could not select expected output file.')
@@ -262,9 +268,91 @@ export function GradingPlus(): React.JSX.Element {
 
       setSelectedOutputFiles(sortFilesAlphabetically(files))
       setBatchError(null)
+      setBatchMessage(null)
     } catch (error) {
       console.error('Error selecting output folder:', error)
       setBatchError('Could not import output folder.')
+    }
+  }
+
+  async function gradeSingleStudent(index: number): Promise<void> {
+    setCurrentStudentIndex(index)
+    setExpandedStudentIndex(index)
+
+    const student = students[index]
+
+    updateStudent(index, {
+      status: 'grading',
+      errorMessage: null,
+      judgeResults: [],
+      passedCount: 0,
+      totalCount: 0
+    })
+
+    try {
+      const compileResult = await compileCppFiles(student.filePaths)
+
+      updateStudent(index, {
+        compileResult
+      })
+
+      if (!compileResult.compileSuccess || !compileResult.executablePath) {
+        updateStudent(index, {
+          status: 'failed',
+          errorMessage: 'Compilation failed.'
+        })
+        return
+      }
+
+      updateStudent(index, {
+        status: 'judging'
+      })
+
+      const expectedOutputs = await Promise.all(
+        selectedOutputFiles.map((filePath) => window.api.file.stringify(filePath))
+      )
+
+      const stdinValues = await Promise.all(
+        selectedInputFiles.map((filePath) => window.api.file.stringify(filePath))
+      )
+
+      const judgeResults: BatchJudgeCaseResult[] = []
+
+      for (const [i, outputFile] of selectedOutputFiles.entries()) {
+        const inputFile = selectedInputFiles[i] ?? null
+
+        const result = await window.api.compiler.judgeCpp({
+          executablePath: compileResult.executablePath,
+          stdin: stdinValues[i] ?? '',
+          expectedOutput: expectedOutputs[i] ?? '',
+          timeoutMs: 5000
+        })
+
+        judgeResults.push({
+          testNumber: i + 1,
+          inputFile,
+          outputFile,
+          result
+        })
+      }
+
+      const passedCount = judgeResults.filter((test) => test.result.passed).length
+      const totalCount = judgeResults.length
+
+      updateStudent(index, {
+        status: 'done',
+        judgeResults,
+        passedCount,
+        totalCount,
+        savedToGradebook: false
+      })
+    } catch (error) {
+      console.error('Error grading student:', error)
+
+      updateStudent(index, {
+        status: 'failed',
+        errorMessage: 'An error occurred while grading this student.'
+      })
     }
   }
 
@@ -275,7 +363,12 @@ export function GradingPlus(): React.JSX.Element {
     const nextIndex = students.findIndex((student) => student.status === 'pending')
 
     if (nextIndex === -1) {
-      setBatchError('No pending students left to grade.')
+      setBatchMessage('All students have been graded.')
+      return
+    }
+
+    if (selectedInputFiles.length === 0) {
+      setBatchError('Select at least one input file before grading.')
       return
     }
 
@@ -284,93 +377,66 @@ export function GradingPlus(): React.JSX.Element {
       return
     }
 
-    if (selectedInputFiles.length > 0 && selectedInputFiles.length !== selectedOutputFiles.length) {
+    if (selectedInputFiles.length !== selectedOutputFiles.length) {
       setBatchError('Input files must match the number of output files.')
       return
     }
 
     setIsBatchGrading(true)
     setBatchError(null)
-    setCurrentStudentIndex(nextIndex)
-    setExpandedStudentIndex(nextIndex)
-
-    const student = students[nextIndex]
+    setBatchMessage(null)
 
     try {
-      updateStudent(nextIndex, {
-        status: 'grading',
-        errorMessage: null,
-        judgeResults: [],
-        passedCount: 0,
-        totalCount: 0
-      })
+      await gradeSingleStudent(nextIndex)
+    } finally {
+      setIsBatchGrading(false)
+    }
+  }
 
-      const compileResult = await compileCppFiles(student.filePaths)
+  async function handleGradeAllStudents(): Promise<void> {
+    if (students.length === 0) {
+      setBatchError('No students available to grade.')
+      return
+    }
 
-      updateStudent(nextIndex, {
-        compileResult
-      })
+    if (selectedInputFiles.length === 0) {
+      setBatchError('Select at least one input file before grading.')
+      return
+    }
 
-      if (!compileResult.compileSuccess || !compileResult.executablePath) {
-        updateStudent(nextIndex, {
-          status: 'failed',
-          errorMessage: 'Compilation failed.'
-        })
-        return
+    if (selectedOutputFiles.length === 0) {
+      setBatchError('Select at least one expected output file before grading.')
+      return
+    }
+
+    if (selectedInputFiles.length !== selectedOutputFiles.length) {
+      setBatchError('Input files must match the number of output files.')
+      return
+    }
+
+    const pendingIndexes = students
+      .map((student, index) => ({ student, index }))
+      .filter(({ student }) => student.status === 'pending')
+      .map(({ index }) => index)
+
+    if (pendingIndexes.length === 0) {
+      setBatchMessage('All students have been graded.')
+      return
+    }
+
+    setIsBatchGrading(true)
+    setBatchError(null)
+    setBatchMessage(null)
+
+    try {
+      for (const index of pendingIndexes) {
+        await gradeSingleStudent(index)
       }
 
-      updateStudent(nextIndex, {
-        status: 'judging'
-      })
-
-      const expectedOutputs = await Promise.all(
-        selectedOutputFiles.map((filePath) => window.api.file.stringify(filePath))
-      )
-
-      const stdinValues =
-        selectedInputFiles.length === 0
-          ? selectedOutputFiles.map(() => '')
-          : await Promise.all(
-              selectedInputFiles.map((filePath) => window.api.file.stringify(filePath))
-            )
-
-      const judgeResults: BatchJudgeCaseResult[] = []
-
-      for (const [index, outputFile] of selectedOutputFiles.entries()) {
-        const inputFile = selectedInputFiles[index] ?? null
-
-        const result = await window.api.compiler.judgeCpp({
-          executablePath: compileResult.executablePath,
-          stdin: stdinValues[index] ?? '',
-          expectedOutput: expectedOutputs[index] ?? '',
-          timeoutMs: 5000
-        })
-
-        judgeResults.push({
-          testNumber: index + 1,
-          inputFile,
-          outputFile,
-          result
-        })
-      }
-
-      const passedCount = judgeResults.filter((test) => test.result.passed).length
-      const totalCount = judgeResults.length
-
-      updateStudent(nextIndex, {
-        status: 'done',
-        judgeResults,
-        passedCount,
-        totalCount,
-        savedToGradebook: false
-      })
+      setBatchMessage('All students have been graded.')
     } catch (error) {
-      console.error('Error grading student:', error)
-
-      updateStudent(nextIndex, {
-        status: 'failed',
-        errorMessage: 'An error occurred while grading this student.'
-      })
+      console.error('Error during batch grading:', error)
+      setBatchError('Batch grading failed.')
     } finally {
       setIsBatchGrading(false)
     }
@@ -404,6 +470,19 @@ export function GradingPlus(): React.JSX.Element {
             }}
           >
             <p>{batchError}</p>
+          </div>
+        )}
+
+        {batchMessage && (
+          <div
+            style={{
+              backgroundColor: '#1f3a1f',
+              border: '1px solid #22c55e',
+              padding: '10px',
+              marginBottom: '1rem'
+            }}
+          >
+            <p>{batchMessage}</p>
           </div>
         )}
 
@@ -526,6 +605,16 @@ export function GradingPlus(): React.JSX.Element {
               }
             >
               {isBatchGrading ? 'Grading...' : 'Grade Next Student'}
+            </button>
+
+            <button
+              onClick={() => void handleGradeAllStudents()}
+              disabled={isBatchGrading || students.length === 0}
+              className={
+                isBatchGrading || students.length === 0 ? 'cancel-button' : 'primary-button'
+              }
+            >
+              Grade All Students
             </button>
           </div>
 
