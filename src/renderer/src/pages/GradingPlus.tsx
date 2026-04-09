@@ -523,7 +523,11 @@ export function GradingPlus(): React.JSX.Element {
                     backgroundColor: '#1f1f1f',
                     border: '1px solid gray',
                     marginTop: '4px',
-                    zIndex: 10
+                    zIndex: 10,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '6px',
+                    padding: '6px'
                   }}
                 >
                   <button
@@ -569,7 +573,11 @@ export function GradingPlus(): React.JSX.Element {
                     backgroundColor: '#1f1f1f',
                     border: '1px solid gray',
                     marginTop: '4px',
-                    zIndex: 10
+                    zIndex: 10,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '6px',
+                    padding: '6px'
                   }}
                 >
                   <button
