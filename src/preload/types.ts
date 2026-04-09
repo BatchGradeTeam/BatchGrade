@@ -65,6 +65,7 @@ export type FileAPI = {
   selectCppFiles: () => Promise<string[]>
   stringify: (filePath: string) => Promise<string>
   selectSubmissionFolder: () => Promise<SubmissionFolderGroup[]>
+  selectFilesFromFolder: () => Promise<string[]>
 }
 
 export type SubmissionsAPI = {

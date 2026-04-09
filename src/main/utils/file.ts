@@ -117,4 +117,30 @@ async function selectSubmissionFolder(): Promise<SubmissionFolderGroup[]> {
   return submissionGroups
 }
 
-export { selectFile, stringifyFile, selectCppFiles, selectSubmissionFolder }
+/**
+ * Opens one folder and returns all files directly inside it.
+ */
+async function selectFilesFromFolder(): Promise<string[]> {
+  const { canceled, filePaths } = await dialog.showOpenDialog({
+    properties: ['openDirectory']
+  })
+
+  if (canceled || filePaths.length === 0) {
+    return []
+  }
+
+  const fs = await import('fs/promises')
+  const path = await import('path')
+
+  const folderPath = filePaths[0]
+  const entries = await fs.readdir(folderPath, { withFileTypes: true })
+
+  const files = entries
+    .filter((entry) => entry.isFile())
+    .map((entry) => path.join(folderPath, entry.name))
+    .sort((a, b) => a.localeCompare(b))
+
+  return files
+}
+
+export { selectFile, stringifyFile, selectCppFiles, selectSubmissionFolder, selectFilesFromFolder }

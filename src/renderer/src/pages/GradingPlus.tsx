@@ -7,7 +7,7 @@
  * across the whole grading queue.
  */
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { NavBar } from '../components/Navbar'
 import { Footer } from '../components/Footer'
@@ -27,6 +27,43 @@ function getFileName(filePath: string): string {
 }
 
 /**
+ * Represents one input/output test case pair (for UI preview only).
+ */
+type JudgeFilePairPreview = {
+  inputFile: string
+  outputFile: string
+}
+
+/**
+ * Builds a pairing preview by matching sorted input/output files by index.
+ *
+ * @param {string[]} inputFiles - Sorted input files
+ * @param {string[]} outputFiles - Sorted output files
+ * @returns {JudgeFilePairPreview[]} Pair preview list
+ */
+function buildJudgeFilePairPreview(
+  inputFiles: string[],
+  outputFiles: string[]
+): JudgeFilePairPreview[] {
+  const pairCount = Math.min(inputFiles.length, outputFiles.length)
+
+  return Array.from({ length: pairCount }, (_, index) => ({
+    inputFile: inputFiles[index],
+    outputFile: outputFiles[index]
+  }))
+}
+
+/**
+ * Returns a new alphabetically sorted file list.
+ *
+ * @param {string[]} files - File paths to sort
+ * @returns {string[]} Sorted file paths
+ */
+function sortFilesAlphabetically(files: string[]): string[] {
+  return [...files].sort((a, b) => a.localeCompare(b))
+}
+
+/**
  * GradingPlus page component.
  *
  * @returns {React.JSX.Element} GradingPlus page
@@ -41,6 +78,22 @@ export function GradingPlus(): React.JSX.Element {
   const [isBatchGrading, setIsBatchGrading] = useState(false)
   const [batchError, setBatchError] = useState<string | null>(null)
   const [expandedStudentIndex, setExpandedStudentIndex] = useState<number | null>(null)
+  const [showInputMenu, setShowInputMenu] = useState(false)
+  const [showOutputMenu, setShowOutputMenu] = useState(false)
+  const judgeFilePairPreview = buildJudgeFilePairPreview(selectedInputFiles, selectedOutputFiles)
+
+  useEffect(() => {
+    function handleClickOutside(): void {
+      setShowInputMenu(false)
+      setShowOutputMenu(false)
+    }
+
+    window.addEventListener('click', handleClickOutside)
+
+    return () => {
+      window.removeEventListener('click', handleClickOutside)
+    }
+  }, [])
 
   /**
    * Updates one student in the queue.
@@ -165,11 +218,25 @@ export function GradingPlus(): React.JSX.Element {
   async function handleSelectInputFile(): Promise<void> {
     try {
       const file = await window.api.file.select()
-      setSelectedInputFiles((currentFiles) => appendUniqueFile(currentFiles, file))
+      setSelectedInputFiles((currentFiles) =>
+        sortFilesAlphabetically(appendUniqueFile(currentFiles, file))
+      )
       setBatchError(null)
     } catch (error) {
       console.error('Error selecting input file:', error)
       setBatchError('Could not select input file.')
+    }
+  }
+
+  async function handleSelectInputFolder(): Promise<void> {
+    try {
+      const files = await window.api.file.selectFilesFromFolder()
+
+      setSelectedInputFiles(sortFilesAlphabetically(files))
+      setBatchError(null)
+    } catch (error) {
+      console.error('Error selecting input folder:', error)
+      setBatchError('Could not import input folder.')
     }
   }
 
@@ -179,11 +246,25 @@ export function GradingPlus(): React.JSX.Element {
   async function handleSelectOutputFile(): Promise<void> {
     try {
       const file = await window.api.file.select()
-      setSelectedOutputFiles((currentFiles) => appendUniqueFile(currentFiles, file))
+      setSelectedOutputFiles((currentFiles) =>
+        sortFilesAlphabetically(appendUniqueFile(currentFiles, file))
+      )
       setBatchError(null)
     } catch (error) {
       console.error('Error selecting output file:', error)
       setBatchError('Could not select expected output file.')
+    }
+  }
+
+  async function handleSelectOutputFolder(): Promise<void> {
+    try {
+      const files = await window.api.file.selectFilesFromFolder()
+
+      setSelectedOutputFiles(sortFilesAlphabetically(files))
+      setBatchError(null)
+    } catch (error) {
+      console.error('Error selecting output folder:', error)
+      setBatchError('Could not import output folder.')
     }
   }
 
@@ -345,13 +426,97 @@ export function GradingPlus(): React.JSX.Element {
               Select Student C++ Files
             </button>
 
-            <button onClick={() => void handleSelectInputFile()} className="primary-button">
-              Add Input File
-            </button>
+            <div style={{ position: 'relative' }}>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation()
+                  setShowInputMenu((prev) => !prev)
+                }}
+                className="primary-button"
+              >
+                Add Input ▼
+              </button>
 
-            <button onClick={() => void handleSelectOutputFile()} className="primary-button">
-              Add Output File
-            </button>
+              {showInputMenu && (
+                <div
+                  style={{
+                    position: 'absolute',
+                    backgroundColor: '#1f1f1f',
+                    border: '1px solid gray',
+                    marginTop: '4px',
+                    zIndex: 10
+                  }}
+                >
+                  <button
+                    onClick={() => {
+                      setShowInputMenu(false)
+                      void handleSelectInputFile()
+                    }}
+                    className="secondary-button"
+                    style={{ display: 'block', width: '100%' }}
+                  >
+                    Select File
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      setShowInputMenu(false)
+                      void handleSelectInputFolder()
+                    }}
+                    className="secondary-button"
+                    style={{ display: 'block', width: '100%' }}
+                  >
+                    Select Folder
+                  </button>
+                </div>
+              )}
+            </div>
+
+            <div style={{ position: 'relative' }}>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation()
+                  setShowOutputMenu((prev) => !prev)
+                }}
+                className="primary-button"
+              >
+                Add Output ▼
+              </button>
+
+              {showOutputMenu && (
+                <div
+                  style={{
+                    position: 'absolute',
+                    backgroundColor: '#1f1f1f',
+                    border: '1px solid gray',
+                    marginTop: '4px',
+                    zIndex: 10
+                  }}
+                >
+                  <button
+                    onClick={() => {
+                      setShowOutputMenu(false)
+                      void handleSelectOutputFile()
+                    }}
+                    className="secondary-button"
+                    style={{ display: 'block', width: '100%' }}
+                  >
+                    Select File
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      setShowOutputMenu(false)
+                      void handleSelectOutputFolder()
+                    }}
+                    className="secondary-button"
+                    style={{ display: 'block', width: '100%' }}
+                  >
+                    Select Folder
+                  </button>
+                </div>
+              )}
+            </div>
 
             <button
               onClick={() => void handleGradeNextStudent()}
@@ -369,10 +534,39 @@ export function GradingPlus(): React.JSX.Element {
             cases may fail due to missing input.
           </p>
 
+          <p style={{ fontSize: '13px', color: '#facc15' }}>
+            ⚠️ Input and output files are paired by alphabetical order. Make sure filenames follow
+            the same naming pattern.
+          </p>
+
           <div style={{ marginTop: '12px', fontSize: '14px', lineHeight: '1.6' }}>
             <p>Total Students: {students.length}</p>
             <p>Input Files: {selectedInputFiles.length}</p>
             <p>Output Files: {selectedOutputFiles.length}</p>
+
+            {judgeFilePairPreview.length > 0 && (
+              <div style={{ marginTop: '8px' }}>
+                <h3 style={{ marginBottom: '4px' }}>Test Case Pairing</h3>
+
+                <ul style={{ paddingLeft: '20px', margin: 0 }}>
+                  {judgeFilePairPreview.map((pair, index) => (
+                    <li
+                      key={`${pair.inputFile}-${pair.outputFile}`}
+                      style={{ fontSize: '14px', marginBottom: '4px', overflowWrap: 'anywhere' }}
+                    >
+                      Test {index + 1}: {getFileName(pair.inputFile)} →{' '}
+                      {getFileName(pair.outputFile)}
+                    </li>
+                  ))}
+                </ul>
+
+                {selectedInputFiles.length !== selectedOutputFiles.length && (
+                  <p style={{ fontSize: '13px', color: '#f87171', marginTop: '8px' }}>
+                    Warning: Input and output file counts do not match yet.
+                  </p>
+                )}
+              </div>
+            )}
             <p>Completed: {completedCount}</p>
             <p>
               Current Student:{' '}

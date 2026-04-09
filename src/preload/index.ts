@@ -28,7 +28,8 @@ const fileApi: FileAPI = {
   select: () => ipcRenderer.invoke('file:select'),
   selectCppFiles: () => ipcRenderer.invoke('file:selectCppFiles'),
   stringify: (filePath: string) => ipcRenderer.invoke('file:stringify', filePath),
-  selectSubmissionFolder: () => ipcRenderer.invoke('file:selectSubmissionFolder')
+  selectSubmissionFolder: () => ipcRenderer.invoke('file:selectSubmissionFolder'),
+  selectFilesFromFolder: () => ipcRenderer.invoke('file:selectFilesFromFolder')
 }
 
 const submissionsApi: SubmissionsAPI = {
