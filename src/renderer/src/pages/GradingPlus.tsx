@@ -295,6 +295,10 @@ export function GradingPlus(): React.JSX.Element {
     }
   }
 
+  function handleToggleStudentDetails(index: number): void {
+    setExpandedStudentIndex((currentIndex) => (currentIndex === index ? null : index))
+  }
+
   const completedCount = students.filter(
     (student) => student.status === 'done' || student.status === 'failed'
   ).length
@@ -334,7 +338,7 @@ export function GradingPlus(): React.JSX.Element {
 
           <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
             <button onClick={() => void handleImportSubmissionFolder()} className="primary-button">
-              Select Submission Folder
+              Import Submission Folder
             </button>
 
             <button onClick={() => void handleSelectStudentFiles()} className="primary-button">
@@ -384,6 +388,7 @@ export function GradingPlus(): React.JSX.Element {
                 key={student.studentId}
                 student={student}
                 isExpanded={expandedStudentIndex === index}
+                onToggle={() => handleToggleStudentDetails(index)}
               />
             )
           })}

@@ -10,6 +10,7 @@ import type { BatchStudentSubmission } from '../../../../shared/batchGrading'
 type StudentGradingCardProps = {
   student: BatchStudentSubmission
   isExpanded: boolean
+  onToggle: () => void
 }
 
 /**
@@ -20,7 +21,8 @@ type StudentGradingCardProps = {
  */
 export function StudentGradingCard({
   student,
-  isExpanded
+  isExpanded,
+  onToggle
 }: StudentGradingCardProps): React.JSX.Element {
   return (
     <div
@@ -30,13 +32,28 @@ export function StudentGradingCard({
         padding: '12px'
       }}
     >
-      <h3 style={{ marginBottom: '8px' }}>
-        {student.studentName} {student.status === 'done' ? '✅' : ''}
-      </h3>
+      <div
+        onClick={onToggle}
+        style={{
+          cursor: 'pointer',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'flex-start',
+          marginBottom: '8px'
+        }}
+      >
+        <div>
+          <h3 style={{ marginBottom: '8px' }}>
+            {student.studentName} {student.status === 'done' ? '✅' : ''}
+          </h3>
 
-      <p style={{ fontSize: '14px' }}>Student ID: {student.studentId}</p>
-      <p style={{ fontSize: '14px' }}>Folder: {student.folderName}</p>
-      <p style={{ fontSize: '14px' }}>Status: {student.status}</p>
+          <p style={{ fontSize: '14px' }}>Student ID: {student.studentId}</p>
+          <p style={{ fontSize: '14px' }}>Folder: {student.folderName}</p>
+          <p style={{ fontSize: '14px' }}>Status: {student.status}</p>
+        </div>
+
+        <span style={{ fontSize: '18px', marginLeft: '12px' }}>{isExpanded ? '▼' : '▶'}</span>
+      </div>
 
       <p style={{ fontSize: '14px', marginTop: '6px' }}>C++ Files:</p>
       <ul style={{ marginTop: '4px', paddingLeft: '20px' }}>
