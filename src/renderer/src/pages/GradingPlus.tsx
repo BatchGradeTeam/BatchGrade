@@ -7,7 +7,7 @@
  * across the whole grading queue.
  */
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { NavBar } from '../components/Navbar'
 import { Footer } from '../components/Footer'
@@ -82,6 +82,7 @@ export function GradingPlus(): React.JSX.Element {
   const [showInputMenu, setShowInputMenu] = useState(false)
   const [showOutputMenu, setShowOutputMenu] = useState(false)
   const judgeFilePairPreview = buildJudgeFilePairPreview(selectedInputFiles, selectedOutputFiles)
+  const studentCardRefs = useRef<(HTMLDivElement | null)[]>([])
 
   useEffect(() => {
     function handleClickOutside(): void {
@@ -95,6 +96,21 @@ export function GradingPlus(): React.JSX.Element {
       window.removeEventListener('click', handleClickOutside)
     }
   }, [])
+
+  useEffect(() => {
+    if (currentStudentIndex === null) {
+      return
+    }
+
+    const activeCard = studentCardRefs.current[currentStudentIndex]
+
+    if (activeCard) {
+      activeCard.scrollIntoView({
+        behavior: 'smooth',
+        block: 'center'
+      })
+    }
+  }, [currentStudentIndex])
 
   /**
    * Updates one student in the queue.
@@ -356,17 +372,7 @@ export function GradingPlus(): React.JSX.Element {
     }
   }
 
-  /**
-   * Grades the next pending student in the queue.
-   */
-  async function handleGradeNextStudent(): Promise<void> {
-    const nextIndex = students.findIndex((student) => student.status === 'pending')
-
-    if (nextIndex === -1) {
-      setBatchMessage('All students have been graded.')
-      return
-    }
-
+  async function handleGradeStudent(index: number): Promise<void> {
     if (selectedInputFiles.length === 0) {
       setBatchError('Select at least one input file before grading.')
       return
@@ -382,12 +388,16 @@ export function GradingPlus(): React.JSX.Element {
       return
     }
 
+    if (students[index].status === 'grading' || students[index].status === 'judging') {
+      return
+    }
+
     setIsBatchGrading(true)
     setBatchError(null)
     setBatchMessage(null)
 
     try {
-      await gradeSingleStudent(nextIndex)
+      await gradeSingleStudent(index)
     } finally {
       setIsBatchGrading(false)
     }
@@ -396,11 +406,6 @@ export function GradingPlus(): React.JSX.Element {
   async function handleGradeAllStudents(): Promise<void> {
     if (students.length === 0) {
       setBatchError('No students available to grade.')
-      return
-    }
-
-    if (selectedInputFiles.length === 0) {
-      setBatchError('Select at least one input file before grading.')
       return
     }
 
@@ -416,7 +421,7 @@ export function GradingPlus(): React.JSX.Element {
 
     const pendingIndexes = students
       .map((student, index) => ({ student, index }))
-      .filter(({ student }) => student.status === 'pending')
+      .filter(({ student }) => student.status === 'pending' || student.status === 'failed')
       .map(({ index }) => index)
 
     if (pendingIndexes.length === 0) {
@@ -606,16 +611,6 @@ export function GradingPlus(): React.JSX.Element {
             </div>
 
             <button
-              onClick={() => void handleGradeNextStudent()}
-              disabled={isBatchGrading || students.length === 0}
-              className={
-                isBatchGrading || students.length === 0 ? 'cancel-button' : 'primary-button'
-              }
-            >
-              {isBatchGrading ? 'Grading...' : 'Grade Next Student'}
-            </button>
-
-            <button
               onClick={() => void handleGradeAllStudents()}
               disabled={isBatchGrading || students.length === 0}
               className={
@@ -675,12 +670,20 @@ export function GradingPlus(): React.JSX.Element {
         <div style={{ display: 'grid', gap: '12px' }}>
           {students.map((student, index) => {
             return (
-              <StudentGradingCard
+              <div
                 key={student.studentId}
-                student={student}
-                isExpanded={expandedStudentIndex === index}
-                onToggle={() => handleToggleStudentDetails(index)}
-              />
+                ref={(element) => {
+                  studentCardRefs.current[index] = element
+                }}
+              >
+                <StudentGradingCard
+                  student={student}
+                  isExpanded={expandedStudentIndex === index}
+                  onToggle={() => handleToggleStudentDetails(index)}
+                  onGrade={() => void handleGradeStudent(index)}
+                  isBatchGrading={isBatchGrading}
+                />
+              </div>
             )
           })}
         </div>

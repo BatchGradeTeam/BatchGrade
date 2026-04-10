@@ -1,6 +1,6 @@
 /**
  * @file: StudentGradingCard.tsx
- * @description:Displays a single student in the Grading+ batch queue.
+ * @description: Displays a single student in the Grading+ batch queue.
  * Shows basic info for all students and detailed grading
  * results only when expanded.
  */
@@ -11,6 +11,8 @@ type StudentGradingCardProps = {
   student: BatchStudentSubmission
   isExpanded: boolean
   onToggle: () => void
+  onGrade: () => void
+  isBatchGrading: boolean
 }
 
 /**
@@ -22,8 +24,32 @@ type StudentGradingCardProps = {
 export function StudentGradingCard({
   student,
   isExpanded,
-  onToggle
+  onToggle,
+  onGrade,
+  isBatchGrading
 }: StudentGradingCardProps): React.JSX.Element {
+  function getGradeButtonLabel(): string {
+    if (student.status === 'grading' || student.status === 'judging') {
+      return 'Running...'
+    }
+
+    if (student.status === 'done') {
+      return 'Done'
+    }
+
+    if (student.status === 'failed') {
+      return 'Retry'
+    }
+
+    return 'Grade'
+  }
+
+  const disableGradeButton =
+    isBatchGrading ||
+    student.status === 'grading' ||
+    student.status === 'judging' ||
+    student.status === 'done'
+
   return (
     <div
       style={{
@@ -39,14 +65,30 @@ export function StudentGradingCard({
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'flex-start',
-          marginBottom: '8px'
+          marginBottom: '8px',
+          gap: '12px'
         }}
       >
-        <h3 style={{ marginBottom: '8px' }}>
-          {student.studentName} {student.status === 'done' ? '✅' : ''}
-        </h3>
+        <div style={{ flex: 1 }}>
+          <h3 style={{ marginBottom: '8px' }}>
+            {student.studentName} {student.status === 'done' ? '✅' : ''}
+          </h3>
+        </div>
 
-        <span style={{ fontSize: '18px', marginLeft: '12px' }}>{isExpanded ? '▼' : '▶'}</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <button
+            onClick={(e) => {
+              e.stopPropagation()
+              onGrade()
+            }}
+            disabled={disableGradeButton}
+            className={disableGradeButton ? 'cancel-button' : 'primary-button'}
+          >
+            {getGradeButtonLabel()}
+          </button>
+
+          <span style={{ fontSize: '18px' }}>{isExpanded ? '▼' : '▶'}</span>
+        </div>
       </div>
 
       {isExpanded && (
