@@ -71,19 +71,45 @@ function sortFilesAlphabetically(files: string[]): string[] {
 export function GradingPlus(): React.JSX.Element {
   const navigate = useNavigate()
 
+  // Stores all student submissions in the grading queue.
   const [students, setStudents] = useState<BatchStudentSubmission[]>([])
+
+  // Stores selected input files for judge testing.
   const [selectedInputFiles, setSelectedInputFiles] = useState<string[]>([])
+
+  // Stores selected expected output files for judge testing.
   const [selectedOutputFiles, setSelectedOutputFiles] = useState<string[]>([])
+
+  // Tracks which student is currently being graded.
   const [currentStudentIndex, setCurrentStudentIndex] = useState<number | null>(null)
+
+  // Tracks whether grading is currently running.
   const [isBatchGrading, setIsBatchGrading] = useState(false)
+
+  // Stores any error message shown to the instructor.
   const [batchError, setBatchError] = useState<string | null>(null)
+
+  // Stores success/info message shown to the instructor.
   const [batchMessage, setBatchMessage] = useState<string | null>(null)
+
+  // Tracks which student card is currently expanded.
   const [expandedStudentIndex, setExpandedStudentIndex] = useState<number | null>(null)
+
+  // Controls whether the input dropdown menu is visible.
   const [showInputMenu, setShowInputMenu] = useState(false)
+
+  // Controls whether the output dropdown menu is visible.
   const [showOutputMenu, setShowOutputMenu] = useState(false)
+
+  // Builds the current input/output pairing preview for display.
   const judgeFilePairPreview = buildJudgeFilePairPreview(selectedInputFiles, selectedOutputFiles)
+
+  // Stores references to student cards for auto-scroll behavior.
   const studentCardRefs = useRef<(HTMLDivElement | null)[]>([])
 
+  /**
+   * Closes the input/output dropdown menus when the user clicks outside.
+   */
   useEffect(() => {
     function handleClickOutside(): void {
       setShowInputMenu(false)
@@ -97,6 +123,9 @@ export function GradingPlus(): React.JSX.Element {
     }
   }, [])
 
+  /**
+   * Automatically scrolls to the current student card when grading begins.
+   */
   useEffect(() => {
     if (currentStudentIndex === null) {
       return
@@ -149,8 +178,10 @@ export function GradingPlus(): React.JSX.Element {
       const files = await window.api.file.selectCppFiles()
 
       setStudents((currentStudents) => {
+        // Track existing file paths so duplicate student files are not added again.
         const existingPaths = new Set(currentStudents.flatMap((student) => student.filePaths))
 
+        // Only keep files that are not already in the queue.
         const newFiles = files.filter((filePath) => !existingPaths.has(filePath))
 
         if (newFiles.length === 0) {
@@ -159,6 +190,7 @@ export function GradingPlus(): React.JSX.Element {
 
         const startIndex = currentStudents.length
 
+        // Convert each newly selected file into one student queue item.
         const newStudents = newFiles.map((filePath, index) => ({
           studentId: `student-${startIndex + index + 1}`,
           studentName: `Student ${startIndex + index + 1}`,
@@ -195,8 +227,10 @@ export function GradingPlus(): React.JSX.Element {
       const groups = await window.api.file.selectSubmissionFolder()
 
       setStudents((currentStudents) => {
+        // Track imported folder names so the same submission folder is not added twice.
         const existingFolderNames = new Set(currentStudents.map((student) => student.folderName))
 
+        // Only keep new student folders.
         const newGroups = groups.filter((group) => !existingFolderNames.has(group.folderName))
 
         if (newGroups.length === 0) {
@@ -205,6 +239,7 @@ export function GradingPlus(): React.JSX.Element {
 
         const startIndex = currentStudents.length
 
+        // Convert each imported folder into one student queue item.
         const newStudents = newGroups.map((group, index) => ({
           studentId: `student-${startIndex + index + 1}`,
           studentName: group.folderName,
@@ -237,9 +272,12 @@ export function GradingPlus(): React.JSX.Element {
   async function handleSelectInputFile(): Promise<void> {
     try {
       const file = await window.api.file.select()
+
+      // Add the selected file if it is new, then keep the list sorted.
       setSelectedInputFiles((currentFiles) =>
         sortFilesAlphabetically(appendUniqueFile(currentFiles, file))
       )
+
       setBatchError(null)
       setBatchMessage(null)
     } catch (error) {
@@ -248,10 +286,14 @@ export function GradingPlus(): React.JSX.Element {
     }
   }
 
+  /**
+   * Lets the instructor import all input files from a selected folder.
+   */
   async function handleSelectInputFolder(): Promise<void> {
     try {
       const files = await window.api.file.selectFilesFromFolder()
 
+      // Replace current input list with the sorted folder contents.
       setSelectedInputFiles(sortFilesAlphabetically(files))
       setBatchError(null)
       setBatchMessage(null)
@@ -267,9 +309,12 @@ export function GradingPlus(): React.JSX.Element {
   async function handleSelectOutputFile(): Promise<void> {
     try {
       const file = await window.api.file.select()
+
+      // Add the selected file if it is new, then keep the list sorted.
       setSelectedOutputFiles((currentFiles) =>
         sortFilesAlphabetically(appendUniqueFile(currentFiles, file))
       )
+
       setBatchError(null)
       setBatchMessage(null)
     } catch (error) {
@@ -278,10 +323,14 @@ export function GradingPlus(): React.JSX.Element {
     }
   }
 
+  /**
+   * Lets the instructor import all expected output files from a selected folder.
+   */
   async function handleSelectOutputFolder(): Promise<void> {
     try {
       const files = await window.api.file.selectFilesFromFolder()
 
+      // Replace current output list with the sorted folder contents.
       setSelectedOutputFiles(sortFilesAlphabetically(files))
       setBatchError(null)
       setBatchMessage(null)
@@ -291,12 +340,20 @@ export function GradingPlus(): React.JSX.Element {
     }
   }
 
+  /**
+   * Grades one student by compiling submitted files and running judge test cases.
+   *
+   * @param {number} index - Student index in the queue
+   * @returns {Promise<void>}
+   */
   async function gradeSingleStudent(index: number): Promise<void> {
+    // Mark this student as the current active grading target.
     setCurrentStudentIndex(index)
     setExpandedStudentIndex(index)
 
     const student = students[index]
 
+    // Reset prior judge results before starting a fresh grading run.
     updateStudent(index, {
       status: 'grading',
       errorMessage: null,
@@ -306,12 +363,14 @@ export function GradingPlus(): React.JSX.Element {
     })
 
     try {
+      // Compile all C++ files submitted by this student.
       const compileResult = await compileCppFiles(student.filePaths)
 
       updateStudent(index, {
         compileResult
       })
 
+      // Stop early if compilation fails.
       if (!compileResult.compileSuccess || !compileResult.executablePath) {
         updateStudent(index, {
           status: 'failed',
@@ -320,10 +379,12 @@ export function GradingPlus(): React.JSX.Element {
         return
       }
 
+      // Move to judge phase after a successful compile.
       updateStudent(index, {
         status: 'judging'
       })
 
+      // Read expected outputs and input file contents before running tests.
       const expectedOutputs = await Promise.all(
         selectedOutputFiles.map((filePath) => window.api.file.stringify(filePath))
       )
@@ -334,6 +395,7 @@ export function GradingPlus(): React.JSX.Element {
 
       const judgeResults: BatchJudgeCaseResult[] = []
 
+      // Run each paired test case one at a time.
       for (const [i, outputFile] of selectedOutputFiles.entries()) {
         const inputFile = selectedInputFiles[i] ?? null
 
@@ -352,6 +414,7 @@ export function GradingPlus(): React.JSX.Element {
         })
       }
 
+      // Count how many tests passed and store final grading results.
       const passedCount = judgeResults.filter((test) => test.result.passed).length
       const totalCount = judgeResults.length
 
@@ -372,22 +435,32 @@ export function GradingPlus(): React.JSX.Element {
     }
   }
 
+  /**
+   * Grades one selected student from the queue after validating required judge files.
+   *
+   * @param {number} index - Student index in the queue
+   * @returns {Promise<void>}
+   */
   async function handleGradeStudent(index: number): Promise<void> {
+    // Require at least one input file.
     if (selectedInputFiles.length === 0) {
       setBatchError('Select at least one input file before grading.')
       return
     }
 
+    // Require at least one expected output file.
     if (selectedOutputFiles.length === 0) {
       setBatchError('Select at least one expected output file before grading.')
       return
     }
 
+    // Require matching input/output counts.
     if (selectedInputFiles.length !== selectedOutputFiles.length) {
       setBatchError('Input files must match the number of output files.')
       return
     }
 
+    // Do nothing if this student is already being processed.
     if (students[index].status === 'grading' || students[index].status === 'judging') {
       return
     }
@@ -403,22 +476,31 @@ export function GradingPlus(): React.JSX.Element {
     }
   }
 
+  /**
+   * Grades all pending or failed students in sequence.
+   *
+   * @returns {Promise<void>}
+   */
   async function handleGradeAllStudents(): Promise<void> {
+    // Do not start if there are no students in the queue.
     if (students.length === 0) {
       setBatchError('No students available to grade.')
       return
     }
 
+    // Require at least one expected output file.
     if (selectedOutputFiles.length === 0) {
       setBatchError('Select at least one expected output file before grading.')
       return
     }
 
+    // Require matching input/output counts.
     if (selectedInputFiles.length !== selectedOutputFiles.length) {
       setBatchError('Input files must match the number of output files.')
       return
     }
 
+    // Find students that still need grading or retry.
     const pendingIndexes = students
       .map((student, index) => ({ student, index }))
       .filter(({ student }) => student.status === 'pending' || student.status === 'failed')
@@ -434,6 +516,7 @@ export function GradingPlus(): React.JSX.Element {
     setBatchMessage(null)
 
     try {
+      // Grade each pending/failed student one by one.
       for (const index of pendingIndexes) {
         await gradeSingleStudent(index)
       }
@@ -447,10 +530,16 @@ export function GradingPlus(): React.JSX.Element {
     }
   }
 
+  /**
+   * Toggles one student card between expanded and collapsed states.
+   *
+   * @param {number} index - Student index in the queue
+   */
   function handleToggleStudentDetails(index: number): void {
     setExpandedStudentIndex((currentIndex) => (currentIndex === index ? null : index))
   }
 
+  // Count how many students have finished grading, whether success or failure.
   const completedCount = students.filter(
     (student) => student.status === 'done' || student.status === 'failed'
   ).length
@@ -465,6 +554,7 @@ export function GradingPlus(): React.JSX.Element {
           Instructor batch grading workflow for compiling and judging multiple student submissions.
         </p>
 
+        {/* Error message banner */}
         {batchError && (
           <div
             style={{
@@ -478,6 +568,7 @@ export function GradingPlus(): React.JSX.Element {
           </div>
         )}
 
+        {/* Success/info message banner */}
         {batchMessage && (
           <div
             style={{
@@ -491,6 +582,7 @@ export function GradingPlus(): React.JSX.Element {
           </div>
         )}
 
+        {/* Batch setup section */}
         <div
           style={{
             border: '1px solid gray',
@@ -501,6 +593,7 @@ export function GradingPlus(): React.JSX.Element {
         >
           <h2 style={{ marginBottom: '10px' }}>Batch Setup</h2>
 
+          {/* Main setup buttons */}
           <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
             <button onClick={() => void handleImportSubmissionFolder()} className="primary-button">
               Import Submission Folder
@@ -510,6 +603,7 @@ export function GradingPlus(): React.JSX.Element {
               Select Student C++ Files
             </button>
 
+            {/* Input file menu */}
             <div style={{ position: 'relative' }}>
               <button
                 onClick={(e) => {
@@ -560,6 +654,7 @@ export function GradingPlus(): React.JSX.Element {
               )}
             </div>
 
+            {/* Output file menu */}
             <div style={{ position: 'relative' }}>
               <button
                 onClick={(e) => {
@@ -621,21 +716,25 @@ export function GradingPlus(): React.JSX.Element {
             </button>
           </div>
 
+          {/* Warning about missing input files */}
           <p style={{ marginTop: '10px', fontSize: '13px', color: '#facc15' }}>
             ⚠️ If the program requires user input, add input files before grading. Otherwise, test
             cases may fail due to missing input.
           </p>
 
+          {/* Warning about alphabetical pairing behavior */}
           <p style={{ fontSize: '13px', color: '#facc15' }}>
             ⚠️ Input and output files are paired by alphabetical order. Make sure filenames follow
             the same naming pattern.
           </p>
 
+          {/* Batch status summary */}
           <div style={{ marginTop: '12px', fontSize: '14px', lineHeight: '1.6' }}>
             <p>Total Students: {students.length}</p>
             <p>Input Files: {selectedInputFiles.length}</p>
             <p>Output Files: {selectedOutputFiles.length}</p>
 
+            {/* Preview of how test case files are paired */}
             {judgeFilePairPreview.length > 0 && (
               <div style={{ marginTop: '8px' }}>
                 <h3 style={{ marginBottom: '4px' }}>Test Case Pairing</h3>
@@ -652,6 +751,7 @@ export function GradingPlus(): React.JSX.Element {
                   ))}
                 </ul>
 
+                {/* Warn if input/output counts are still mismatched */}
                 {selectedInputFiles.length !== selectedOutputFiles.length && (
                   <p style={{ fontSize: '13px', color: '#f87171', marginTop: '8px' }}>
                     Warning: Input and output file counts do not match yet.
@@ -667,12 +767,14 @@ export function GradingPlus(): React.JSX.Element {
           </div>
         </div>
 
+        {/* Student grading queue */}
         <div style={{ display: 'grid', gap: '12px' }}>
           {students.map((student, index) => {
             return (
               <div
                 key={student.studentId}
                 ref={(element) => {
+                  // Save each card reference for auto-scroll.
                   studentCardRefs.current[index] = element
                 }}
               >
@@ -688,6 +790,7 @@ export function GradingPlus(): React.JSX.Element {
           })}
         </div>
 
+        {/* Navigation button back to home page */}
         <button
           onClick={() => navigate('/')}
           style={{
