@@ -19,9 +19,10 @@ import { useAuth } from '../components/AuthContext'
 import { NavBar } from '../components/Navbar'
 import { Footer } from '../components/Footer'
 import { CppWorkflowPanel } from '../components/compiler/CppWorkflowPanel'
-import { CompileCppResult, RunCppResult } from 'src/shared/compiler'
+import type { CompileCppResult, RunCppResult } from 'src/shared/compiler'
 import { SubmitPanel } from '../components/submission/SubmitPanel'
 import { OutputDiffPanel } from '../components/OutputDiffPanel'
+import type { Assignment } from '../../../shared/types'
 
 /**
  * StudentUploadInterface Component
@@ -39,6 +40,20 @@ export function StudentUploadInterface(): React.JSX.Element {
 
   const [runResult, setRunResult] = useState<RunCppResult | null>(null)
   const [expectedOutput, setExpectedOutput] = useState<string | null>(null)
+  const [assignments, setAssignments] = useState<Assignment[]>([])
+  const [selectedAssignmentId, setSelectedAssignmentId] = useState<string>('')
+
+  /**
+   * @brief Handles assignment selection changes from either the OutputDiffPanel
+   * dropdown or SubmitPanel, keeping both in sync.
+   *
+   * @param uuid The selected assignment UUID.
+   */
+  function handleAssignmentChange(uuid: string): void {
+    setSelectedAssignmentId(uuid)
+    const assignment = assignments.find((a) => a.uuid === uuid)
+    setExpectedOutput(assignment?.expectedOutputText ?? null)
+  }
 
   return (
     <>
@@ -54,23 +69,33 @@ export function StudentUploadInterface(): React.JSX.Element {
         <CppWorkflowPanel
           title="Student Compilation Workspace"
           description="Choose the files you want to submit, compile them, optionally run them with input, and review the output before submitting."
-          autoCompileOnSelection={true}
           allowExecution={true}
           onSelectionChange={setSelectedFiles}
           onCompileResultChange={setCompileResult}
           onRunResultChange={setRunResult}
         />
 
-        <SubmitPanel
-          compileResult={compileResult}
-          selectedFiles={selectedFiles}
-          userId={user?.uuid}
-          onExpectedOutputChange={setExpectedOutput}
-        />
-
         <OutputDiffPanel
           actualOutput={runResult?.stdout ?? null}
           expectedOutput={expectedOutput}
+          assignments={assignments}
+          selectedAssignmentId={selectedAssignmentId}
+          onAssignmentChange={handleAssignmentChange}
+        />
+
+         <SubmitPanel
+          compileResult={compileResult}
+          selectedFiles={selectedFiles}
+          userId={user?.uuid}
+          selectedAssignmentId={selectedAssignmentId}
+          onAssignmentsLoaded={(loaded) => {
+            setAssignments(loaded)
+            if (loaded.length > 0 && !selectedAssignmentId) {
+              setSelectedAssignmentId(loaded[0].uuid)
+              setExpectedOutput(loaded[0].expectedOutputText ?? null)
+            }
+          }}
+          onExpectedOutputChange={setExpectedOutput}
         />
       </div>
 

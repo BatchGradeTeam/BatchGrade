@@ -20,7 +20,7 @@
  * via FR-9/FR-11.
  */
 import { useMemo } from 'react'
-
+import type { Assignment } from '../../../shared/types'
 
 type DiffLineType = 'match' | 'missing' | 'extra'
 
@@ -34,6 +34,12 @@ type OutputDiffPanelProps = {
   actualOutput: string | null
   /** FR-5: The instructor's expected output, fetched from the assignment record. */
   expectedOutput: string | null
+  /** List of all available assignments for the dropdown. */
+  assignments: Assignment[]
+  /** Currently selected assignment UUID. */
+  selectedAssignmentId: string
+  /** Called when the student changes the assignment dropdown. */
+  onAssignmentChange: (uuid: string) => void
 }
 
 /**
@@ -145,11 +151,17 @@ function linePrefix(type: DiffLineType): string {
  *
  * @param actualOutput   The student's program stdout
  * @param expectedOutput The instructor's stored expected output
+ * @param assignments   All available assignments for the dropdown
+ * @param selectedAssignmentId Currently selected assignment UUID
+ * @param onAssignmentChange  Called when student changes the dropdown
  * @return React JSX element for the output diff panel.
  */
 export function OutputDiffPanel({
   actualOutput,
-  expectedOutput
+  expectedOutput,
+  assignments,
+  selectedAssignmentId,
+  onAssignmentChange
 }: OutputDiffPanelProps): React.JSX.Element {
   /**
    * @brief Memoized diff, recomputed only when inputs change.
@@ -183,6 +195,26 @@ export function OutputDiffPanel({
       </p>
 
 
+      <div style={{ marginBottom: '1rem' }}>
+        <label style={{ display: 'block', marginBottom: '0.4rem', fontSize: '14px', color: '#ccc' }}>
+          Assignment
+        </label>
+        <select
+          value={selectedAssignmentId}
+          onChange={(e) => onAssignmentChange(e.target.value)}
+          className="panel-input"
+          style={{ maxWidth: '480px' }}
+        >
+          {assignments.length === 0 && (
+            <option value="">No assignments available</option>
+          )}
+          {assignments.map((a) => (
+            <option key={a.uuid} value={a.uuid}>
+              {a.name}
+            </option>
+          ))}
+        </select>
+      </div>
 
 
       <div
