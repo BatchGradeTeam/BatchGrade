@@ -71,3 +71,33 @@ export type DockerInstallationInfo = {
   version: string | null
   source: 'auto' | 'manual' | null
 }
+
+// ***********************************************************************
+// Docker Compilation
+export type DockerCompileRequest = {
+  sourceFiles: string[]
+}
+
+export type DockerCompileResult = {
+  success: boolean
+  executablePath: string | null
+  stdout: string
+  stderr: string
+  message: string
+}
+
+// ***********************************************************************
+// Docker Judge
+export type DockerJudgeRequest = {
+  executablePath: string
+  stdin: string // Inputs
+  expectedOutput: string // Some output file i.e. output0.txt
+  timeoutMs: number // Alloted execution time
+}
+
+export type DockerJudgeResult = {
+  passed: boolean
+  timedOut: boolean
+  expectedOutput: string
+  actualOutput: string // The actual output from the judged program
+}

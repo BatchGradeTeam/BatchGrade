@@ -44,12 +44,20 @@ async function isDockerRunning(): Promise<boolean> {
 
 // Detect Docker installation and running status
 export async function detectDockerInstallation(): Promise<DockerInstallationInfo> {
-  const platform: SupportedPlatform = (
-    process.platform === 'win32' ? 'win32' :
-    process.platform === 'darwin' ? 'darwin' :
-    process.platform === 'linux' ? 'linux' :
-    'unknown'
-  )
+  let platform: SupportedPlatform
+  if (process.platform === 'win32') {
+    // On windows
+    platform = 'win32'
+  } else if (process.platform === 'darwin') {
+    // On macOS
+    platform = 'darwin'
+  } else if (process.platform === 'linux') {
+    // On Linux
+    platform = 'linux'
+  } else {
+    // Unknown platform
+    platform = 'unknown'
+  }
 
   const version = await checkDockerInstalled('docker')
 
