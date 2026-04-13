@@ -35,16 +35,9 @@ or
 - (Current/Updated/New) Sequence diagram:
 >
 
-**Tests Added/Updated:**
+**Unit Tests Added/Updated:**
 
 <A clear & concise description of how the changes were tested>
-
-**CI Status:**
-
-- All tests passing
-- Statement coverage >=90 (no coverage drop)
-- CI pipeline is green
->
 
 **PR Review Checklist:**
 If a box cannot be checked, **explain why there should be an exception**.
