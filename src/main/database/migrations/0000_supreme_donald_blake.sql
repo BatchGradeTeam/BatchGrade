@@ -1,4 +1,4 @@
-CREATE TABLE `instructor_assignments` (
+CREATE TABLE IF NOT EXISTS `instructor_assignments` (
 	`uuid` text PRIMARY KEY NOT NULL,
 	`name` text NOT NULL,
 	`due_date` text NOT NULL,
@@ -11,7 +11,7 @@ CREATE TABLE `instructor_assignments` (
 	`created_at` integer DEFAULT (unixepoch()) NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE `users` (
+CREATE TABLE IF NOT EXISTS `users` (
 	`uuid` text PRIMARY KEY NOT NULL,
 	`email` text NOT NULL,
 	`password` text NOT NULL,
@@ -19,15 +19,15 @@ CREATE TABLE `users` (
 	`created_at` integer DEFAULT (unixepoch()) NOT NULL
 );
 --> statement-breakpoint
-CREATE UNIQUE INDEX `users_email_unique` ON `users` (`email`);--> statement-breakpoint
-CREATE TABLE `assignments` (
+CREATE UNIQUE INDEX IF NOT EXISTS `users_email_unique` ON `users` (`email`);--> statement-breakpoint
+CREATE TABLE IF NOT EXISTS `assignments` (
 	`uuid` text PRIMARY KEY NOT NULL,
 	`title` text NOT NULL,
 	`config` blob,
 	`created_at` integer DEFAULT (unixepoch()) NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE `compile_logs` (
+CREATE TABLE IF NOT EXISTS `compile_logs` (
 	`uuid` text PRIMARY KEY NOT NULL,
 	`submission_id` text NOT NULL,
 	`status` text NOT NULL,
@@ -38,7 +38,7 @@ CREATE TABLE `compile_logs` (
 	FOREIGN KEY (`submission_id`) REFERENCES `assignments`(`uuid`) ON UPDATE no action ON DELETE no action
 );
 --> statement-breakpoint
-CREATE TABLE `grades` (
+CREATE TABLE IF NOT EXISTS `grades` (
 	`uuid` text PRIMARY KEY NOT NULL,
 	`submission_id` text NOT NULL,
 	`score` integer NOT NULL,
@@ -47,7 +47,7 @@ CREATE TABLE `grades` (
 	FOREIGN KEY (`submission_id`) REFERENCES `submissions`(`uuid`) ON UPDATE no action ON DELETE no action
 );
 --> statement-breakpoint
-CREATE TABLE `submissions` (
+CREATE TABLE IF NOT EXISTS `submissions` (
 	`uuid` text PRIMARY KEY NOT NULL,
 	`assignment_id` text NOT NULL,
 	`file_name` text DEFAULT 'N/A' NOT NULL,

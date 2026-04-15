@@ -3,23 +3,22 @@
  *
  * Description:
  * This component implements the login interface for the BatchGrade
- * application. Users must first select their role (student or instructor)
- * after which they are prompted to enter their email and password.
+ * application. Users enter their email and password, and the
+ * credentials are sent through the shared authentication context
+ * to the server-backed authentication provider.
  *
- * The component performs basic validation and retrieves user records
- * from the backend through the Electron IPC API. If a valid user is
- * found, the authentication state is updated via the AuthenContext and
- * the user is redirected to the appropriate dashboard.
+ * The component performs basic validation, attempts sign-in through
+ * AuthContext, and redirects the user to the appropriate dashboard
+ * based on the role returned by the authenticated session.
  *
  * Primary Responsibilities:
  *  - Collect login credentials (email and password)
  *  - Validate the login attempt
- *  - Authenticate the user through AuthContext
+ *  - Authenticate the user through the server auth provider
  *  - Redirect the user to the correct dashboard
  */
-import { useNavigate } from 'react-router-dom'
 import { useState } from 'react'
-import { User } from '../../../shared/types'
+import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../components/AuthContext'
 
 /**
@@ -36,14 +35,7 @@ export function Login(): React.JSX.Element {
   // -----------------------------------------------------------
   // React Router navigation hook for redirecting users
   const navigate = useNavigate()
-
-  // Access login function from global authentication context
   const { login } = useAuth()
-
-  // -----------------------------------------------------------
-  // Component State
-  // -----------------------------------------------------------
-  // Role selection removed; role is determined after login
 
   // Stores user credential input
   const [email, setEmail] = useState('')
@@ -57,67 +49,51 @@ export function Login(): React.JSX.Element {
   // -----------------------------------------------------------
   /**
    * Handles the login attempt by validating credentials
-   * and retrieving user records from the backend
+   * and authenticating the user through AuthContext
    */
   async function handleLogin(): Promise<void> {
     // Reset any previous error state
     setError(null)
 
-    // Retrieve all registered users from backend
-    const users: User[] = await window.api.users.getAll()
+    const trimmedEmail = email.trim()
 
-    // Attempt to find a user with a matching email
-    const foundUser = users.find((user) => user.email === email)
-
-    // If no matching user exists, display error
-    if (email.length === 0) {
+    if (trimmedEmail.length === 0) {
       setError('Email required')
-      return
-    } else if (!foundUser) {
-      setError('User does not exist')
       return
     }
 
-    // Basic password validation
-    // (actual password verification assumed to occur on backend)
     if (password.length === 0) {
       setError('Password required')
       return
-    } else if (password !== foundUser.password) {
-      setError('Incorrect password')
-      return
     }
 
-    // -----------------------------------------------------------
-    // Successful Login
-    // -----------------------------------------------------------
+    try {
+      const loggedInUser = await login(trimmedEmail, password)
 
-    // Update global authentication state with role from database
-    const validRoles = ['student', 'instructor'] as const
-    type Role = (typeof validRoles)[number]
-    if (validRoles.includes(foundUser.role as Role)) {
-      login({
-        uuid: foundUser.uuid,
-        email: foundUser.email,
-        role: foundUser.role as Role
-      })
-    } else {
+      if (loggedInUser.role === 'student') {
+        navigate('/studentdashboard')
+        return
+      }
+
+      if (loggedInUser.role === 'instructor') {
+        navigate('/instructordashboard')
+        return
+      }
+
       setError('Invalid user role')
-      return
-    }
-
-    // Redirect user based on role from database
-    if (foundUser.role === 'student') {
-      navigate('/studentdashboard')
-    } else if (foundUser.role === 'instructor') {
-      navigate('/instructordashboard')
+    } catch (err) {
+      const message =
+        err instanceof Error
+          ? err.message
+          : 'Login failed. Please check your email and password again.'
+      setError(message)
+      console.error(err)
     }
   }
 
   // -----------------------------------------------------------
   // Render Login Interface
   // -----------------------------------------------------------
-
   return (
     <div className="login-container">
       {/*-----------------------------------------------------------
@@ -157,15 +133,18 @@ export function Login(): React.JSX.Element {
             -----------------------------------------------------------*/}
           <div className="login-actions">
             {/* Submit login request */}
-            <button className="submit-button" onClick={handleLogin}>
+            <button className="submit-button" onClick={() => void handleLogin()}>
               Login
             </button>
 
-            <button className="secondary-button"
+            <button
+              className="secondary-button"
               onClick={() => {
                 navigate('/guestDashboard')
               }}
-            >Guest</button>
+            >
+              Guest
+            </button>
 
             {/* Cancel login and reset form */}
             <button
@@ -181,7 +160,7 @@ export function Login(): React.JSX.Element {
             </button>
           </div>
           {/* Display login error message if present */}
-          {error && <div className="error">⚠ {error}</div>}
+          {error && <div className="error">{error}</div>}
         </div>
       </div>
     </div>

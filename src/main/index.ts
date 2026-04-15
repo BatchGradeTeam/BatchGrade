@@ -116,176 +116,183 @@ function createWindow(): void {
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(() => {
-  // Set app user model id for windows
-  electronApp.setAppUserModelId('com.batchgrade.app')
+  try {
+    // Set app user model id for windows
+    electronApp.setAppUserModelId('com.batchgrade.app')
 
-  // Default open or close DevTools by F12 in development
-  // and ignore CommandOrControl + R in production.
-  // see https://github.com/alex8088/electron-toolkit/tree/master/packages/utils
-  app.on('browser-window-created', (_, window) => {
-    optimizer.watchWindowShortcuts(window)
-  })
+    // Default open or close DevTools by F12 in development
+    // and ignore CommandOrControl + R in production.
+    // see https://github.com/alex8088/electron-toolkit/tree/master/packages/utils
+    app.on('browser-window-created', (_, window) => {
+      optimizer.watchWindowShortcuts(window)
+    })
 
-  // Initialize the database
-  initDb()
+    // Initialize the database
+    initDb()
 
-  // Detect GCC during startup
-  refreshGccStatus() // For renderers (Front-end developers): Use this to query a ready-made status object.
+    // Detect GCC during startup
+    refreshGccStatus() // For renderers (Front-end developers): Use this to query a ready-made status object.
 
-  // IPC test
-  ipcMain.on('ping', () => console.log('pong'))
+    // IPC test
+    ipcMain.on('ping', () => console.log('pong'))
 
-  // Users CRUD
-  ipcMain.handle('users:getAll', () => getAllUsers())
-  ipcMain.handle('users:create', (_e, data: NewUser) => createUser(data))
-  ipcMain.handle('users:update', (_e, data: UpdateUser) => updateUser(data))
-  ipcMain.handle('users:delete', (_e, uuid: string) => deleteUser(uuid))
+    // Users CRUD
+    ipcMain.handle('users:getAll', () => getAllUsers())
+    ipcMain.handle('users:create', (_e, data: NewUser) => createUser(data))
+    ipcMain.handle('users:update', (_e, data: UpdateUser) => updateUser(data))
+    ipcMain.handle('users:delete', (_e, uuid: string) => deleteUser(uuid))
 
-  // openFile operation FR1
-  ipcMain.handle('dialog:openFile', async () => {
-  const result = await dialog.showOpenDialog({
-    properties: ['openFile'],
-    // Only allows c++ files for now
-    filters: [{ name: 'Source Files', extensions: ['cpp'] }]
-  })
-  if (result.canceled) return null
-  return result.filePaths[0]
-  })
+    // openFile operation FR1
+    ipcMain.handle('dialog:openFile', async () => {
+    const result = await dialog.showOpenDialog({
+      properties: ['openFile'],
+      // Only allows c++ files for now
+      filters: [{ name: 'Source Files', extensions: ['cpp'] }]
+    })
+    if (result.canceled) return null
+    return result.filePaths[0]
+    })
 
-  // Submissions CRUD
-  ipcMain.handle('submissions:create', (_e, data: {
-    studentId: string
-    assignmentId: string
-    fileName: string
-    filePath: string
-  }) => createSubmission(data))
+    // Submissions CRUD
+    ipcMain.handle('submissions:create', (_e, data: {
+      studentId: string
+      assignmentId: string
+      fileName: string
+      filePath: string
+    }) => createSubmission(data))
 
-  ipcMain.handle('submissions:getById', (_e, submissionId: string) =>
-    getSubmissionById(submissionId)
-  )
-  // Assignments CRUD
-  ipcMain.handle('assignments:getAll', () => getAllAssignments())
-  ipcMain.handle('assignments:create', (_event, data: NewAssignment) => createAssignment(data))
-  ipcMain.handle('assignments:update', (_event, data: UpdateAssignment) => updateAssignment(data))
-  ipcMain.handle('assignments:delete', (_event, uuid: string) => deleteAssignment(uuid))
-
-  // Compiler Status
-  ipcMain.handle('compiler:getGccStatus', async () => gccStatusPromise ?? refreshGccStatus())
-
-  // Validate the manual compiler path from the UI and make it the current GCC selection
-  ipcMain.handle('compiler:setGccPath', async (_e, filePath: string) => {
-    if ( !(await validateGccPath(filePath)) ) {
-      manualGccPath = null
-
-      const missingRes: GccInstallationInfo = {
-        compilerId: 'gcc',
-        status: 'missing',
-        platform: getSupportedPlatform(),
-        message: 'The selected path is invalid. Use a C++ compiler such as g++, c++, or clang++.',
-        installInstruction: null, // the user is prompted to install with instructions for their OS if they don't have a compiler installed
-        path: null ,
-        source: null // User can manually set the path to a GCC installation
-      }
-
-      // Keep the cached compiler status in sync with what the UI shows.
-      // Without this, compile could still use an older valid compiler path.
-      gccStatusPromise = Promise.resolve(missingRes)
-
-      return missingRes
-    }
-    else {
-      manualGccPath = filePath
-
-      const manualRes: GccInstallationInfo = {
-        compilerId: 'gcc',
-        status: 'ready',
-        platform: getSupportedPlatform(),
-        message: 'Manual GCC path has been saved successfully.',
-        installInstruction: null,
-        path: manualGccPath,
-        source: 'manual'
-      }
-
-      gccStatusPromise = Promise.resolve(manualRes)
-
-      return manualRes
-    }
-  })
-
-  /* TEST ONLY DELETE WHEN DONE */
-  // File selection
-  ipcMain.handle('file:select', () => selectFile())
-  ipcMain.handle('file:selectCppFiles', () => selectCppFiles())
-  ipcMain.handle('file:stringify', (_e, filePath: string) => stringifyFile(filePath))
-  ipcMain.handle('file:selectSubmissionFolder', () => selectSubmissionFolder())
-  ipcMain.handle('file:selectFilesFromFolder', () => selectFilesFromFolder())
-  /* TEST ONLY DELETE WHEN DONE */
-
-  // Compilation
-  ipcMain.handle('compiler:compileCpp', async (_e, request) => {
-    const gccStatus = await (gccStatusPromise ?? refreshGccStatus())
-
-    if (gccStatus.status != 'ready' || !gccStatus.path) {
-      return {
-        compileSuccess: false,
-        compilerPath: null,
-        executablePath: null,
-        sourceFiles: request.sourceFiles,
-        stdout: '',
-        stderr: '',
-        message: 'GCC is not configured yet. Configure GCC before compiling.'
-      }
-    }
-
-    // Revalidate Compiler
-    const compileRes = await compileCppFiles(gccStatus.path, request)
-    if (compileRes.compileSuccess) {
-      return compileRes
-    }
-
-    // Only revalidate GCC if the failure looks like the compiler itself is missing or cannot be started
-    const isCompilerMissing = isCompilerNotFoundError(
-      compileRes.stderr,
-      compileRes.message
+    ipcMain.handle('submissions:getById', (_e, submissionId: string) =>
+      getSubmissionById(submissionId)
     )
-    if (!isCompilerMissing) {
-      return compileRes
-    }
+    // Assignments CRUD
+    ipcMain.handle('assignments:getAll', () => getAllAssignments())
+    ipcMain.handle('assignments:create', (_event, data: NewAssignment) => createAssignment(data))
+    ipcMain.handle('assignments:update', (_event, data: UpdateAssignment) => updateAssignment(data))
+    ipcMain.handle('assignments:delete', (_event, uuid: string) => deleteAssignment(uuid))
 
-    // If GCC is still missing, return an error so the UI can guide the user back to compiler setup or installation
-    const refreshedStatus = await refreshGccStatus()
-    if (refreshedStatus.status !== 'ready' || !refreshedStatus.path) {
-      return {
-        ...compileRes,
-        compilerPath: null,
-        executablePath: null,
-        message: 'Compiler path is no longer valid. GCC was rechecked and not found.',
-        stderr: `${compileRes.stderr}\n\nBatchGrade revalidated the compiler path and could not find GCC.`
+    // Compiler Status
+    ipcMain.handle('compiler:getGccStatus', async () => gccStatusPromise ?? refreshGccStatus())
+
+    // Validate the manual compiler path from the UI and make it the current GCC selection
+    ipcMain.handle('compiler:setGccPath', async (_e, filePath: string) => {
+      if ( !(await validateGccPath(filePath)) ) {
+        manualGccPath = null
+
+        const missingRes: GccInstallationInfo = {
+          compilerId: 'gcc',
+          status: 'missing',
+          platform: getSupportedPlatform(),
+          message: 'The selected path is invalid. Use a C++ compiler such as g++, c++, or clang++.',
+          installInstruction: null, // the user is prompted to install with instructions for their OS if they don't have a compiler installed
+          path: null ,
+          source: null // User can manually set the path to a GCC installation
+        }
+
+        // Keep the cached compiler status in sync with what the UI shows.
+        // Without this, compile could still use an older valid compiler path.
+        gccStatusPromise = Promise.resolve(missingRes)
+
+        return missingRes
       }
-    }
-    return compileCppFiles(refreshedStatus.path, request)
-  })
+      else {
+        manualGccPath = filePath
 
-  // Execution
-  ipcMain.handle('compiler:runCompiledProgram', (_e, request) => {
-    return executeCppFiles(request)
-  })
+        const manualRes: GccInstallationInfo = {
+          compilerId: 'gcc',
+          status: 'ready',
+          platform: getSupportedPlatform(),
+          message: 'Manual GCC path has been saved successfully.',
+          installInstruction: null,
+          path: manualGccPath,
+          source: 'manual'
+        }
 
-  ipcMain.handle('compiler:judgeCpp', (_e, request) => {
-    return judgeCppFiles(request)
-  })
+        gccStatusPromise = Promise.resolve(manualRes)
 
-  ipcMain.handle('submissions:submitCpp', (_e, request) => {
-    return submitCppSubmission(request)
-  })
+        return manualRes
+      }
+    })
 
-  createWindow()
+    /* TEST ONLY DELETE WHEN DONE */
+    // File selection
+    ipcMain.handle('file:select', () => selectFile())
+    ipcMain.handle('file:selectCppFiles', () => selectCppFiles())
+    ipcMain.handle('file:stringify', (_e, filePath: string) => stringifyFile(filePath))
+    ipcMain.handle('file:selectSubmissionFolder', () => selectSubmissionFolder())
+    ipcMain.handle('file:selectFilesFromFolder', () => selectFilesFromFolder())
+    /* TEST ONLY DELETE WHEN DONE */
 
-  app.on('activate', function () {
-    // On macOS it's common to re-create a window in the app when the
-    // dock icon is clicked and there are no other windows open.
-    if (BrowserWindow.getAllWindows().length === 0) createWindow()
-  })
+    // Compilation
+    ipcMain.handle('compiler:compileCpp', async (_e, request) => {
+      const gccStatus = await (gccStatusPromise ?? refreshGccStatus())
+
+      if (gccStatus.status != 'ready' || !gccStatus.path) {
+        return {
+          compileSuccess: false,
+          compilerPath: null,
+          executablePath: null,
+          sourceFiles: request.sourceFiles,
+          stdout: '',
+          stderr: '',
+          message: 'GCC is not configured yet. Configure GCC before compiling.'
+        }
+      }
+
+      // Revalidate Compiler
+      const compileRes = await compileCppFiles(gccStatus.path, request)
+      if (compileRes.compileSuccess) {
+        return compileRes
+      }
+
+      // Only revalidate GCC if the failure looks like the compiler itself is missing or cannot be started
+      const isCompilerMissing = isCompilerNotFoundError(
+        compileRes.stderr,
+        compileRes.message
+      )
+      if (!isCompilerMissing) {
+        return compileRes
+      }
+
+      // If GCC is still missing, return an error so the UI can guide the user back to compiler setup or installation
+      const refreshedStatus = await refreshGccStatus()
+      if (refreshedStatus.status !== 'ready' || !refreshedStatus.path) {
+        return {
+          ...compileRes,
+          compilerPath: null,
+          executablePath: null,
+          message: 'Compiler path is no longer valid. GCC was rechecked and not found.',
+          stderr: `${compileRes.stderr}\n\nBatchGrade revalidated the compiler path and could not find GCC.`
+        }
+      }
+      return compileCppFiles(refreshedStatus.path, request)
+    })
+
+    // Execution
+    ipcMain.handle('compiler:runCompiledProgram', (_e, request) => {
+      return executeCppFiles(request)
+    })
+
+    ipcMain.handle('compiler:judgeCpp', (_e, request) => {
+      return judgeCppFiles(request)
+    })
+
+    ipcMain.handle('submissions:submitCpp', (_e, request) => {
+      return submitCppSubmission(request)
+    })
+
+    createWindow()
+
+    app.on('activate', function () {
+      // On macOS it's common to re-create a window in the app when the
+      // dock icon is clicked and there are no other windows open.
+      if (BrowserWindow.getAllWindows().length === 0) createWindow()
+    })
+  } catch (error) {
+    console.error('BatchGrade failed during startup:', error)
+    const message = error instanceof Error ? error.message : String(error)
+    dialog.showErrorBox('BatchGrade failed to start', message)
+    app.quit()
+  }
 })
 
 // Quit when all windows are closed, except on macOS. There, it's common
