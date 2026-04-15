@@ -1,7 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { selectFile, stringifyFile, selectCppFiles } from '../../src/main/utils/file'
+import { selectFile, selectCppFiles } from '../../src/main/utils/file'
 import { dialog } from 'electron'
-import fs from 'fs/promises'
 
 // ai-gen start (Gemini-3, 2)
 

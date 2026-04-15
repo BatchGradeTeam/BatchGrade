@@ -26,7 +26,7 @@ const mockDb = {
 
 beforeEach(async () => {
   vi.clearAllMocks()
-    vi.mocked(getDb).mockReturnValue(mockDb as any)
+    vi.mocked(getDb).mockReturnValue(mockDb as unknown as ReturnType<typeof getDb>)
 })
 
 describe('Submission Services Schema', () => {
