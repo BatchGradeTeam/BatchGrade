@@ -59,4 +59,4 @@ jobs:
         run: npm ci
   
       - name: Test
-        run: npm run test # Statement coverage >=85 is currently enforced
+        run: npm run test # Statement coverage >=79 is currently enforced
