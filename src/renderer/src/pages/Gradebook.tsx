@@ -30,7 +30,6 @@ type StudentRecord = {
   id: string
   name: string
   score: string
-  submissions: number
   lastSubmitted: string
   status: string
 }
@@ -144,13 +143,12 @@ const calculateStats = (students: StudentRecord[]): GradeStats => {
  * @returns CSV string content
  */
 const buildCSVContent = (students: StudentRecord[]): string => {
-  const headers = ['Student ID', 'Student Name', 'Highest Score', 'Submission Count']
+  const headers = ['Student ID', 'Student Name', 'Highest Score']
 
   const rows = students.map((student) => [
     student.id,
     student.name,
     student.score,
-    student.submissions.toString()
   ])
 
   return [headers, ...rows].map((row) => row.join(',')).join('\n')
@@ -200,7 +198,6 @@ const buildStudentRecordsFromGradebook = (
       id: latestRecord.studentId,
       name: latestRecord.studentName,
       score: `${highestRecord.score}%`,
-      submissions: studentRecords.length,
       lastSubmitted: formatSubmittedTime(latestRecord.submittedAt),
       status: latestRecord.status === 'failed' ? 'Failed' : 'Submitted'
     }
@@ -366,7 +363,6 @@ export function Gradebook(): React.JSX.Element {
                   <th style={cellStyle}>Student ID</th>
                   <th style={cellStyle}>Student Name</th>
                   <th style={cellStyle}>Highest Score</th>
-                  <th style={cellStyle}>Submission Count</th>
                   <th style={cellStyle}>Last Submission Time</th>
                   <th style={cellStyle}>Status</th>
                 </tr>
@@ -380,14 +376,13 @@ export function Gradebook(): React.JSX.Element {
                       <td style={cellStyle}>{student.id}</td>
                       <td style={cellStyle}>{student.name}</td>
                       <td style={cellStyle}>{student.score}</td>
-                      <td style={cellStyle}>{student.submissions}</td>
                       <td style={cellStyle}>{student.lastSubmitted}</td>
                       <td style={cellStyle}>{student.status}</td>
                     </tr>
                   ))
                 ) : (
                   <tr>
-                    <td style={cellStyle} colSpan={6}>
+                    <td style={cellStyle} colSpan={5}>
                       No Gradebook records found for this assignment.
                     </td>
                   </tr>
