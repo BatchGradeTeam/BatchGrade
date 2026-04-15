@@ -13,12 +13,12 @@
  */
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { INSTRUCTOR_ROLE, STUDENT_ROLE } from '../../../main/database/schema'
+import avatar from '../assets/profile.png'
+import instructorProfile from '../assets/instructor-profile.png'
+import studentProfile from '../assets/student-profile.png'
 import { useAuth } from './AuthContext'
 import { DropdownMenu } from './DropdownMenu'
-import avatar from '../assets/profile.png'
-import studentProfile from '../assets/student-profile.png'
-import instructorProfile from '../assets/instructor-profile.png'
-import { STUDENT_ROLE, INSTRUCTOR_ROLE } from '../../../main/database/schema'
 
 /**
  * Navbar Component
@@ -74,10 +74,14 @@ export function NavBar(): React.JSX.Element {
             alt="Profile"
             className="profile-image"
             onClick={() => {
-              // Log the user out of the application
-              logout()
-              // Redirect user to the Login page
-              navigate('/login')
+              void logout()
+                .then(() => {
+                  // Redirect user to the Login page
+                  navigate('/login')
+                })
+                .catch((error) => {
+                  console.error('Error signing out: ', error)
+                })
             }}
           />
         ) : (
