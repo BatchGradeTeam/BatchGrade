@@ -7,7 +7,10 @@ import type {
   RunCppRequest,
   RunCppResult,
   JudgeCppRequest,
-  JudgeCppResult
+  JudgeCppResult,
+  DockerCompileResult,
+  DockerJudgeRequest,
+  DockerJudgeResult
 } from '../shared/compiler'
 import type { SubmitCppRequest, SubmitCppResult } from '../shared/submission'
 import type { Assignment, NewAssignment, UpdateAssignment } from '../shared/types'
@@ -26,6 +29,8 @@ export type CompilerAPI = {
   compileCpp: (request: CompileCppRequest) => Promise<CompileCppResult>
   runCompiledProgram: (request: RunCppRequest) => Promise<RunCppResult>
   judgeCpp: (request: JudgeCppRequest) => Promise<JudgeCppResult>
+  dockerCompileCpp: (sourceFiles: string[]) => Promise<DockerCompileResult>
+  dockerJudgeCpp: (request: DockerJudgeRequest) => Promise<DockerJudgeResult>
 }
 
 export type AssignmentsAPI = {
