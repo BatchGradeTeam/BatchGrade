@@ -46,9 +46,7 @@
       "indexes": {
         "courses_course_code_unique": {
           "name": "courses_course_code_unique",
-          "columns": [
-            "course_code"
-          ],
+          "columns": ["course_code"],
           "isUnique": true
         }
       },
@@ -88,12 +86,8 @@
           "name": "enrollments_student_id_users_uuid_fk",
           "tableFrom": "enrollments",
           "tableTo": "users",
-          "columnsFrom": [
-            "student_id"
-          ],
-          "columnsTo": [
-            "uuid"
-          ],
+          "columnsFrom": ["student_id"],
+          "columnsTo": ["uuid"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -101,12 +95,8 @@
           "name": "enrollments_section_id_sections_uuid_fk",
           "tableFrom": "enrollments",
           "tableTo": "sections",
-          "columnsFrom": [
-            "section_id"
-          ],
-          "columnsTo": [
-            "uuid"
-          ],
+          "columnsFrom": ["section_id"],
+          "columnsTo": ["uuid"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -146,12 +136,8 @@
           "name": "instructors_uuid_users_uuid_fk",
           "tableFrom": "instructors",
           "tableTo": "users",
-          "columnsFrom": [
-            "uuid"
-          ],
-          "columnsTo": [
-            "uuid"
-          ],
+          "columnsFrom": ["uuid"],
+          "columnsTo": ["uuid"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -198,12 +184,8 @@
           "name": "sections_course_id_courses_uuid_fk",
           "tableFrom": "sections",
           "tableTo": "courses",
-          "columnsFrom": [
-            "course_id"
-          ],
-          "columnsTo": [
-            "uuid"
-          ],
+          "columnsFrom": ["course_id"],
+          "columnsTo": ["uuid"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -211,12 +193,8 @@
           "name": "sections_instructor_id_users_uuid_fk",
           "tableFrom": "sections",
           "tableTo": "users",
-          "columnsFrom": [
-            "instructor_id"
-          ],
-          "columnsTo": [
-            "uuid"
-          ],
+          "columnsFrom": ["instructor_id"],
+          "columnsTo": ["uuid"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -256,12 +234,8 @@
           "name": "students_uuid_users_uuid_fk",
           "tableFrom": "students",
           "tableTo": "users",
-          "columnsFrom": [
-            "uuid"
-          ],
-          "columnsTo": [
-            "uuid"
-          ],
+          "columnsFrom": ["uuid"],
+          "columnsTo": ["uuid"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -301,12 +275,8 @@
           "name": "teaching_assistants_uuid_users_uuid_fk",
           "tableFrom": "teaching_assistants",
           "tableTo": "users",
-          "columnsFrom": [
-            "uuid"
-          ],
-          "columnsTo": [
-            "uuid"
-          ],
+          "columnsFrom": ["uuid"],
+          "columnsTo": ["uuid"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -434,12 +404,8 @@
           "name": "assignments_section_id_sections_uuid_fk",
           "tableFrom": "assignments",
           "tableTo": "sections",
-          "columnsFrom": [
-            "section_id"
-          ],
-          "columnsTo": [
-            "uuid"
-          ],
+          "columnsFrom": ["section_id"],
+          "columnsTo": ["uuid"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -501,12 +467,8 @@
           "name": "grades_submission_id_submissions_uuid_fk",
           "tableFrom": "grades",
           "tableTo": "submissions",
-          "columnsFrom": [
-            "submission_id"
-          ],
-          "columnsTo": [
-            "uuid"
-          ],
+          "columnsFrom": ["submission_id"],
+          "columnsTo": ["uuid"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -514,12 +476,8 @@
           "name": "grades_instructor_id_users_uuid_fk",
           "tableFrom": "grades",
           "tableTo": "users",
-          "columnsFrom": [
-            "instructor_id"
-          ],
-          "columnsTo": [
-            "uuid"
-          ],
+          "columnsFrom": ["instructor_id"],
+          "columnsTo": ["uuid"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -598,12 +556,8 @@
           "name": "submissions_assignment_id_assignments_uuid_fk",
           "tableFrom": "submissions",
           "tableTo": "assignments",
-          "columnsFrom": [
-            "assignment_id"
-          ],
-          "columnsTo": [
-            "uuid"
-          ],
+          "columnsFrom": ["assignment_id"],
+          "columnsTo": ["uuid"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -611,12 +565,8 @@
           "name": "submissions_student_id_users_uuid_fk",
           "tableFrom": "submissions",
           "tableTo": "users",
-          "columnsFrom": [
-            "student_id"
-          ],
-          "columnsTo": [
-            "uuid"
-          ],
+          "columnsFrom": ["student_id"],
+          "columnsTo": ["uuid"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -669,9 +619,7 @@
       "indexes": {
         "users_email_unique": {
           "name": "users_email_unique",
-          "columns": [
-            "email"
-          ],
+          "columns": ["email"],
           "isUnique": true
         }
       },
@@ -754,12 +702,8 @@
           "name": "compile_logs_student_id_users_uuid_fk",
           "tableFrom": "compile_logs",
           "tableTo": "users",
-          "columnsFrom": [
-            "student_id"
-          ],
-          "columnsTo": [
-            "uuid"
-          ],
+          "columnsFrom": ["student_id"],
+          "columnsTo": ["uuid"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -767,12 +711,8 @@
           "name": "compile_logs_submission_id_assignments_uuid_fk",
           "tableFrom": "compile_logs",
           "tableTo": "assignments",
-          "columnsFrom": [
-            "submission_id"
-          ],
-          "columnsTo": [
-            "uuid"
-          ],
+          "columnsFrom": ["submission_id"],
+          "columnsTo": ["uuid"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -834,12 +774,8 @@
           "name": "action_logs_user_id_users_uuid_fk",
           "tableFrom": "action_logs",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "uuid"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["uuid"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }

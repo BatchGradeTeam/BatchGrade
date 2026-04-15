@@ -17,6 +17,7 @@ import { Footer } from '../components/Footer'
 import { NavBar } from '../components/Navbar'
 import { CppWorkflowPanel } from '../components/compiler/CppWorkflowPanel'
 import { DockerDetectionPanel } from '../components/DockerDetectionPanel'
+import { DockerCppGradePanel } from '../components/DockerCppGradePanel'
 import { useState } from 'react'
 import type { CompileCppResult } from '../../../shared/compiler'
 import { CppJudgePanel } from '../components/CppJudgePanel'
@@ -32,6 +33,7 @@ import { CppJudgePanel } from '../components/CppJudgePanel'
 export function Grading(): React.JSX.Element {
   const navigate = useNavigate()
   const [compileResult, setCompileResult] = useState<CompileCppResult | null>(null)
+  const [sourceFiles, setSourceFiles] = useState<string[]>([])
 
   return (
     <>
@@ -48,12 +50,15 @@ export function Grading(): React.JSX.Element {
           title="Instructor Compilation Workspace"
           description="Compile selected C++ files and optionally run the compiled program for grading checks."
           allowExecution={true}
+          onSelectionChange={setSourceFiles}
           onCompileResultChange={setCompileResult}
         />
 
         <CppJudgePanel compileResult={compileResult} />
 
         <DockerDetectionPanel />
+
+        <DockerCppGradePanel sourceFiles={sourceFiles} />
 
         <button
           onClick={() => navigate('/')}
