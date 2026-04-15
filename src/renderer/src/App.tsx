@@ -33,8 +33,12 @@ import { StudentDashboard } from './pages/StudentDashboard'
 import { InstructorDashboard } from './pages/InstructorDashboard'
 import { ProtectedRoute } from './components/ProtectedRoute'
 import { StudentUploadInterface } from './pages/StudentUploadInterface'
+import { GuestDashboard } from './pages/GuestDashboard'
+ import { GuestStudentInterface } from './pages/GuestStudentInterface'
+import { GuestBatchGradeInterface } from './pages/GuestBatchGradeInterface'
 import { STUDENT_ROLE, INSTRUCTOR_ROLE } from '../../main/database/schema'
 import { GradingPlus } from './pages/GradingPlus'
+
 
 /**
  * App Component
@@ -89,6 +93,12 @@ export function App(): React.JSX.Element {
           <Route path="/login" element={<Login />} />
           {/* SignUp Page */}
           <Route path="/signup" element={<SignUp />} />
+          {/* Guest DashBoard */}
+          <Route path="/guestDashboard" element={<GuestDashboard />} />
+          {/* Guest Batch Interface */}
+          <Route path="/guestBatchGradeInterface" element={<GuestBatchGradeInterface />} />
+          {/* Guest Student Interface */}
+          <Route path="/guestStudentInterface" element={<GuestStudentInterface />} />
           {/* Student Interface */}
           <Route
             path="/studentdashboard"
