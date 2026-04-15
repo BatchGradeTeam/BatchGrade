@@ -4,7 +4,7 @@
  * localStorage-based Gradebook integration.
  */
 
-import type { GradebookRecord } from '../../../shared/gradebook'
+import type { GradebookRecord } from '../../../shared/gradebookTypes'
 
 const GRADEBOOK_STORAGE_KEY = 'gradebookRecords'
 

@@ -14,7 +14,7 @@ import { Footer } from '../components/Footer'
 import { compileCppFiles } from '../components/compiler/cppWorkflowApi'
 import type { BatchJudgeCaseResult, BatchStudentSubmission } from '../../../shared/batchGrading'
 import { StudentGradingCard } from '@renderer/components/grading/StudentGradingCard'
-import type { GradebookRecord } from '../../../shared/gradebook'
+import type { GradebookRecord } from '../../../shared/gradebookTypes'
 import { saveGradebookRecord } from '../lib/gradebookStorage'
 
 /**
