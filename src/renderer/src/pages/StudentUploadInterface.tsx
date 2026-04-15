@@ -69,6 +69,7 @@ export function StudentUploadInterface(): React.JSX.Element {
         <CppWorkflowPanel
           title="Student Compilation Workspace"
           description="Choose the files you want to submit, compile them, optionally run them with input, and review the output before submitting."
+          autoCompileOnSelection={true}
           allowExecution={true}
           onSelectionChange={setSelectedFiles}
           onCompileResultChange={setCompileResult}
