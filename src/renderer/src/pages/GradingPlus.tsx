@@ -792,7 +792,7 @@ export function GradingPlus(): React.JSX.Element {
 
         {/* Navigation button back to home page */}
         <button
-          onClick={() => navigate('/')}
+          onClick={() => navigate('/instructordashboard')}
           style={{
             padding: '9px 14px',
             backgroundColor: '#2563eb',
