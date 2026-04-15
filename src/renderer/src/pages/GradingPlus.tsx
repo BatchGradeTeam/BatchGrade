@@ -3,8 +3,8 @@
  * @description:
  * This page implements the instructor-only batch grading workflow.
  * It allows the instructor to load multiple student C++ submissions,
- * run compile and judge checks one student at a time, and track progress
- * across the whole grading queue.
+ * run compile and judge checks one at a time, save results to the
+ * local Gradebook storage, and track progress across the whole grading queue.
  */
 
 import { useState, useEffect, useRef } from 'react'
@@ -14,6 +14,8 @@ import { Footer } from '../components/Footer'
 import { compileCppFiles } from '../components/compiler/cppWorkflowApi'
 import type { BatchJudgeCaseResult, BatchStudentSubmission } from '../../../shared/batchGrading'
 import { StudentGradingCard } from '@renderer/components/grading/StudentGradingCard'
+import type { GradebookRecord } from '../../../shared/gradebook'
+import { saveGradebookRecord } from '../lib/gradebookStorage'
 
 /**
  * Returns the file name from a full file path.
@@ -61,6 +63,35 @@ function buildJudgeFilePairPreview(
  */
 function sortFilesAlphabetically(files: string[]): string[] {
   return [...files].sort((a, b) => a.localeCompare(b))
+}
+
+/**
+ * Builds one Gradebook record from a finished grading result.
+ *
+ * @param student - Student submission info
+ * @param passedCount - Number of passed test cases
+ * @param totalCount - Total number of test cases
+ * @param status - Final grading status
+ * @returns Gradebook record ready to save
+ */
+function buildGradebookRecord(
+  student: BatchStudentSubmission,
+  passedCount: number,
+  totalCount: number,
+  status: 'done' | 'failed'
+): GradebookRecord {
+  const score = totalCount > 0 ? Math.round((passedCount / totalCount) * 100) : 0
+
+  return {
+    studentId: student.studentId,
+    studentName: student.studentName,
+    assignmentId: 'assignment-1',
+    score,
+    passedCount,
+    totalCount,
+    status,
+    submittedAt: Date.now()
+  }
 }
 
 /**
@@ -341,7 +372,8 @@ export function GradingPlus(): React.JSX.Element {
   }
 
   /**
-   * Grades one student by compiling submitted files and running judge test cases.
+   * Grades one student by compiling submitted files, running judge test cases,
+   * and saving the final result to Gradebook storage.
    *
    * @param {number} index - Student index in the queue
    * @returns {Promise<void>}
@@ -372,9 +404,13 @@ export function GradingPlus(): React.JSX.Element {
 
       // Stop early if compilation fails.
       if (!compileResult.compileSuccess || !compileResult.executablePath) {
+        const failedRecord = buildGradebookRecord(student, 0, 0, 'failed')
+        await saveGradebookRecord(failedRecord)
+
         updateStudent(index, {
           status: 'failed',
-          errorMessage: 'Compilation failed.'
+          errorMessage: 'Compilation failed.',
+          savedToGradebook: true
         })
         return
       }
@@ -414,23 +450,29 @@ export function GradingPlus(): React.JSX.Element {
         })
       }
 
-      // Count how many tests passed and store final grading results.
+      // Count passed tests, save the Gradebook record, and store final grading results.
       const passedCount = judgeResults.filter((test) => test.result.passed).length
       const totalCount = judgeResults.length
+      const savedRecord = buildGradebookRecord(student, passedCount, totalCount, 'done')
+      await saveGradebookRecord(savedRecord)
 
       updateStudent(index, {
         status: 'done',
         judgeResults,
         passedCount,
         totalCount,
-        savedToGradebook: false
+        savedToGradebook: true
       })
     } catch (error) {
       console.error('Error grading student:', error)
 
+      const failedRecord = buildGradebookRecord(student, 0, 0, 'failed')
+      await saveGradebookRecord(failedRecord)
+
       updateStudent(index, {
         status: 'failed',
-        errorMessage: 'An error occurred while grading this student.'
+        errorMessage: 'An error occurred while grading this student.',
+        savedToGradebook: true
       })
     }
   }
