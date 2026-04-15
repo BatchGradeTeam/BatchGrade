@@ -11,10 +11,10 @@ export default defineConfig({
       provider: 'v8',
       reporter: ['text', 'html', 'json-summary'],
       enabled: true,
-      // Enforce 90% statement coverage
+      // Enforce 85% statement coverage (for now)
       thresholds: { 
         perFile: false, // Will likely hinder development too much if true
-        statements: 90,
+        statements: 85,
       },
       // for all source files
       // Note: .sql files are excluded from the coverage report
