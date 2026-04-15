@@ -59,4 +59,3 @@ export function getLanguage(id: Language): LanguageConfig {
   }
   return configs[id]
 }
-
