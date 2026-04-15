@@ -66,6 +66,20 @@ If needed, install Node.js for your appropriate Operating System from here: <htt
 npm install
 ```
 
+### Environment Variables
+
+For development, a `.env` file must be created in the project root directory.
+
+The required environment variables are available in the Discord server (see pinned messages).
+
+```bash
+# .env
+VARIABLE_NAME=value
+```
+
+The `.env` file is included in `.gitignore` and must not be committed. **Never commit sensitive credentials or secrets to the repository.**
+
+
 ### Development
 
 Starts the app in development mode with hot-reloading.
