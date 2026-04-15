@@ -15,6 +15,7 @@
  *  - Integration with a file upload system for source code bundles
  *  - Real-time validation of submission contents before final submission
  */
+import type { Assignment } from '../../../../shared/types'
 import type { CompileCppResult } from '../../../../shared/compiler'
 import { useSubmitWorkflow } from './useSubmitWorkflow'
 
@@ -22,6 +23,9 @@ type SubmitPanelProps = {
   compileResult: CompileCppResult | null
   selectedFiles: string[]
   userId: string | undefined
+  selectedAssignmentId: string
+  onAssignmentsLoaded?: (assignments: Assignment[]) => void
+  onExpectedOutputChange?: (expectedOutput: string | null) => void
 }
 
 /**
@@ -36,18 +40,35 @@ type SubmitPanelProps = {
 export function SubmitPanel({
   compileResult,
   selectedFiles,
-  userId
+  userId,
+  selectedAssignmentId,
+  onAssignmentsLoaded
 }: SubmitPanelProps): React.JSX.Element {
   const {
-    assignments,
-    selectedAssignmentId,
     selectedAssignment,
     submitResult,
     errorMessage,
     isSubmitting,
-    setSelectedAssignmentId,
     handleSubmit
-  } = useSubmitWorkflow({ compileResult, selectedFiles, userId })
+  } = useSubmitWorkflow({
+    compileResult, 
+    selectedFiles, 
+    userId,
+    selectedAssignmentId,
+    onAssignmentsLoaded
+  })
+
+  /**
+   * @brief FR-5: Notify parent of the initial assignment's expected output.
+   *
+   * @details
+   * The dropdown defaults to the first assignment on load but onChange
+   * never fires for the initial value, so OutputDiffPanel has no expected
+   * output until the user manually changes the selection. This effect
+   * fires whenever selectedAssignment changes — including on first load —
+   * ensuring the parent always has the current expected output.
+   */
+
 
   return (
     <div
@@ -78,25 +99,10 @@ export function SubmitPanel({
         </div>
       )}
 
-      <label style={{ display: 'block', marginBottom: '0.5rem' }}>Assignment</label>
-      <select
-        value={selectedAssignmentId}
-        onChange={(e) => {
-          setSelectedAssignmentId(e.target.value)
-        }}
-        className="panel-input"
-        style={{ maxWidth: '480px', marginBottom: '1rem' }}
-      >
-        {assignments.length === 0 && <option value="">No assignments available</option>}
-        {assignments.map((assignment) => (
-          <option key={assignment.uuid} value={assignment.uuid}>
-            {assignment.name}
-          </option>
-        ))}
-      </select>
 
       {selectedAssignment && (
         <div style={{ marginBottom: '1rem', fontSize: '14px', lineHeight: '1.6' }}>
+          <p><strong>Assignment:</strong> {selectedAssignment.name}</p>
           <p>Due Date: {selectedAssignment.dueDate}</p>
           <p>Grading Criteria: {selectedAssignment.gradingCriteria}</p>
         </div>

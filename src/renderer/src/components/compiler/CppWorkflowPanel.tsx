@@ -11,8 +11,11 @@
  *  - A section for checking GCC compiler status and setting a manual path if needed
  *  - A section for selecting C++ files and compiling them, with output display
  *  - An optional section for running the compiled executable with custom input
+ * 
+ *  onRunResultChange is passed down into useCppWorkflow so the parent page
+ *  can receive runResult.stdout and feed it into OutputDiffPanel.
  */
-import type { CompileCppResult } from '../../../../shared/compiler'
+import type { CompileCppResult, RunCppResult } from '../../../../shared/compiler'
 import { useCppWorkflow } from '../../components/compiler/useCPPWorkflow'
 
 type CppWorkflowPanelProps = {
@@ -21,6 +24,7 @@ type CppWorkflowPanelProps = {
   allowExecution: boolean
   onSelectionChange?: (files: string[]) => void
   onCompileResultChange?: (result: CompileCppResult | null) => void
+  onRunResultChange?: (result: RunCppResult | null) => void
   autoCompileOnSelection?: boolean
 }
 
@@ -40,6 +44,7 @@ export function CppWorkflowPanel({
   allowExecution,
   onSelectionChange,
   onCompileResultChange,
+  onRunResultChange,
   autoCompileOnSelection = false
 }: CppWorkflowPanelProps): React.JSX.Element {
   const {
@@ -61,6 +66,7 @@ export function CppWorkflowPanel({
   } = useCppWorkflow({
     onSelectionChange,
     onCompileResultChange,
+    onRunResultChange,
     autoCompileOnSelection
   })
 

@@ -37,6 +37,7 @@ import { GuestDashboard } from './pages/GuestDashboard'
  import { GuestStudentInterface } from './pages/GuestStudentInterface'
 import { GuestBatchGradeInterface } from './pages/GuestBatchGradeInterface'
 import { STUDENT_ROLE, INSTRUCTOR_ROLE } from '../../main/database/schema'
+import { GradingPlus } from './pages/GradingPlus'
 
 
 /**
@@ -140,6 +141,15 @@ export function App(): React.JSX.Element {
             element={
               <ProtectedRoute requiredRoles={[INSTRUCTOR_ROLE]}>
                 <Grading />
+              </ProtectedRoute>
+            }
+          />
+          {/* Grading+ (Batch Grading) Interface */}
+          <Route
+            path="/grading-plus"
+            element={
+              <ProtectedRoute requiredRoles={[INSTRUCTOR_ROLE]}>
+                <GradingPlus />
               </ProtectedRoute>
             }
           />

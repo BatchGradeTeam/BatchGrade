@@ -35,6 +35,8 @@ import {
 type UseCppWorkflowProps = {
   onSelectionChange?: (files: string[]) => void
   onCompileResultChange?: (result: CompileCppResult | null) => void
+  // Called whenever a run completes so the parent can feed stdout into OutputDiffPanel
+  onRunResultChange?: (result: RunCppResult | null) => void
   autoCompileOnSelection?: boolean
 }
 
@@ -71,6 +73,7 @@ type UseCppWorkflowReturn = {
 export function useCppWorkflow({
   onSelectionChange,
   onCompileResultChange,
+  onRunResultChange,
   autoCompileOnSelection = false
 }: UseCppWorkflowProps): UseCppWorkflowReturn {
   const [gccStatus, setGccStatus] = useState<GccInstallationInfo | null>(null)
@@ -110,6 +113,10 @@ export function useCppWorkflow({
   useEffect(() => {
     onCompileResultChange?.(compileResult)
   }, [compileResult, onCompileResultChange])
+  // Stores result and pass it
+  useEffect(() => {
+    onRunResultChange?.(runResult)
+  }, [runResult, onRunResultChange])
 
   // This automatically compiles newly selected files, iff the user asked for auto compile and valid C++ compiler is ready
   useEffect(() => {

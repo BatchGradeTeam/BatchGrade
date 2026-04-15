@@ -60,6 +60,11 @@ export function DropdownMenu({ isOpen, onClose }: DropdownMenuProps): React.JSX.
       allowedRoles: [INSTRUCTOR_ROLE]
     },
     {
+      label: 'Grading+',
+      path: '/grading-plus',
+      allowedRoles: [INSTRUCTOR_ROLE]
+    },
+    {
       label: 'About',
       path: '/about'
     }
