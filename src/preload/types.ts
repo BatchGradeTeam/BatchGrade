@@ -1,11 +1,15 @@
 import type { User, NewUser, UpdateUser } from '../shared/types'
-import type { GccInstallationInfo, CompileCppRequest, CompileCppResult, RunCppRequest, RunCppResult } from '../shared/compiler'
-import type { SubmitCppRequest, SubmitCppResult } from '../shared/submission'
 import type {
-  Assignment,
-  NewAssignment,
-  UpdateAssignment
-} from '../shared/types'
+  GccInstallationInfo,
+  CompileCppRequest,
+  CompileCppResult,
+  RunCppRequest,
+  RunCppResult,
+  JudgeCppRequest,
+  JudgeCppResult
+} from '../shared/compiler'
+import type { SubmitCppRequest, SubmitCppResult } from '../shared/submission'
+import type { Assignment, NewAssignment, UpdateAssignment } from '../shared/types'
 
 export type UsersAPI = {
   getAll: () => Promise<User[]>
@@ -19,6 +23,7 @@ export type CompilerAPI = {
   setGccPath: (filePath: string) => Promise<GccInstallationInfo>
   compileCpp: (request: CompileCppRequest) => Promise<CompileCppResult>
   runCompiledProgram: (request: RunCppRequest) => Promise<RunCppResult>
+  judgeCpp: (request: JudgeCppRequest) => Promise<JudgeCppResult>
 }
 
 export type AssignmentsAPI = {
@@ -49,10 +54,18 @@ export type AssignmentsAPI = {
   delete: (uuid: string) => Promise<Assignment>
 }
 
+export type SubmissionFolderGroup = {
+  folderName: string
+  folderPath: string
+  cppFiles: string[]
+}
+
 export type FileAPI = {
   select: () => Promise<string | undefined>
   selectCppFiles: () => Promise<string[]>
   stringify: (filePath: string) => Promise<string>
+  selectSubmissionFolder: () => Promise<SubmissionFolderGroup[]>
+  selectFilesFromFolder: () => Promise<string[]>
 }
 
 export type SubmissionsAPI = {

@@ -1,20 +1,42 @@
-// Signup Page
-
+/**
+ * SignUp.tsx
+ *
+ * Description:
+ * This component serves as the registration page for BatchGrade.
+ * It keeps the main branch's navigation and hero layout while
+ * rendering a server-backed account creation form for students
+ * and instructors.
+ *
+ * The page layout consists of:
+ *  - A navigation bar
+ *  - A hero section containing registration context and system actions
+ *  - A registration form powered by AuthContext
+ *  - A footer
+ */
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { INSTRUCTOR_ROLE, STUDENT_ROLE } from '../../../shared/types'
+import { Footer } from '../components/Footer'
+import { IpcPing } from '../components/IpcPing'
+import { NavBar } from '../components/Navbar'
 import { useAuth } from '../components/AuthContext'
 
-function SignUp(): React.JSX.Element {
+/**
+ * SignUp Component
+ *
+ * The SignUp component renders the registration page interface
+ * and creates accounts through the shared authentication context.
+ *
+ * @returns SignUp(): React.JSX.Element
+ */
+export function SignUp(): React.JSX.Element {
   const navigate = useNavigate()
   const { signup } = useAuth()
 
   const [role, setRole] = useState<typeof STUDENT_ROLE | typeof INSTRUCTOR_ROLE>(STUDENT_ROLE)
-
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
-
   const [error, setError] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSignupSuccessful, setIsSignupSuccessful] = useState(false)
@@ -42,11 +64,10 @@ function SignUp(): React.JSX.Element {
       return
     }
 
-    const trimmedEmail = email.trim()
     setIsSubmitting(true)
 
     try {
-      const result = await signup(trimmedEmail, password, role)
+      const result = await signup(email.trim(), password, role)
 
       if (!result.user) {
         setError('Could not confirm account creation. Please try again.')
@@ -64,19 +85,42 @@ function SignUp(): React.JSX.Element {
   }
 
   return (
-    <div className="login-container">
-      <div className="login-title">
-        <header className="header">
-          <h1 className="title">
-            <span className="react">Create Account</span>
-          </h1>
-        </header>
-      </div>
+    <>
+      {/*-----------------------------------------------------------
+        Navigation Bar
+        -----------------------------------------------------------*/}
+      <NavBar />
 
-      <div className="login-item">
-        <div className="login-modal">
+      {/*-----------------------------------------------------------
+        Hero Section
+          Main landing content and registration controls
+        -----------------------------------------------------------*/}
+      <div className="signup-container">
+        <div className="signup-item">
+          {/* Application Title */}
+          <header className="header">
+            <h1 className="title">Sign Up</h1>
+            <p className="subtitle">Register & Connect with BatchGrade</p>
+          </header>
+
+          {/*-----------------------------------------------------------
+            System Actions
+              Used for development/testing utilities
+            -----------------------------------------------------------*/}
+          <div className="actions">
+            <div className="action">
+              <IpcPing />
+            </div>
+          </div>
+        </div>
+
+        <div className="signup-item">
+          {/*-----------------------------------------------------------
+            Registration Form
+              Creates a server-backed account through AuthContext
+            -----------------------------------------------------------*/}
           <div className="login-form">
-            <h2>Sign Up</h2>
+            <h2>Create Account</h2>
 
             {isSignupSuccessful ? (
               <>
@@ -93,10 +137,6 @@ function SignUp(): React.JSX.Element {
                 <div className="login-actions">
                   <button className="submit-button" onClick={() => navigate('/login')}>
                     Go to Login
-                  </button>
-
-                  <button className="secondary-button" onClick={() => navigate('/')}>
-                    Go Home
                   </button>
                 </div>
               </>
@@ -141,7 +181,7 @@ function SignUp(): React.JSX.Element {
                   onChange={(e) => setConfirmPassword(e.target.value)}
                 />
 
-                {error && <div className="login-error">{error}</div>}
+                {error && <div className="error">{error}</div>}
                 {isSubmitting && (
                   <div
                     style={{
@@ -154,20 +194,16 @@ function SignUp(): React.JSX.Element {
                 )}
 
                 <div className="login-actions">
-                  <button className="submit-button" onClick={handleSignUp} disabled={isSubmitting}>
+                  <button
+                    className="submit-button"
+                    onClick={() => void handleSignUp()}
+                    disabled={isSubmitting}
+                  >
                     {isSubmitting ? 'Creating Account...' : 'Create Account'}
                   </button>
 
                   <button
                     className="secondary-button"
-                    onClick={() => navigate('/')}
-                    disabled={isSubmitting}
-                  >
-                    Go Home
-                  </button>
-
-                  <button
-                    className="cancel-button"
                     onClick={() => navigate('/login')}
                     disabled={isSubmitting}
                   >
@@ -179,8 +215,11 @@ function SignUp(): React.JSX.Element {
           </div>
         </div>
       </div>
-    </div>
+
+      {/*-----------------------------------------------------------
+        Page Footer
+        -----------------------------------------------------------*/}
+      <Footer />
+    </>
   )
 }
-
-export default SignUp

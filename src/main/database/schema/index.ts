@@ -1,5 +1,3 @@
 export * from './user'
+export * from './local'
 export * from './assignment'
-export * from './academic'
-export * from './log'
-export * from './gradebook'

@@ -17,15 +17,15 @@ async function executeCppFiles(request: RunCppRequest): Promise<RunCppResult> {
     const child = spawn(request.executablePath, [], {
       cwd: dirname(request.executablePath),
       windowsHide: true
-    })  
-  
+    })
+
     let programTimedOut = false
     // Stop programs that take forever
     const timeout = setTimeout(() => {
       programTimedOut = true
       child.kill()
     }, request.timeoutMs)
-  
+
     // Listen for stdout
     let stdout = ''
     child.stdout.on('data', (chunk) => {

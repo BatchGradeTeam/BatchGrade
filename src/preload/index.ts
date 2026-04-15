@@ -1,6 +1,13 @@
 import { contextBridge, ipcRenderer } from 'electron'
 import { electronAPI } from '@electron-toolkit/preload'
-import type { AppAPI, AssignmentsAPI, CompilerAPI, FileAPI, SubmissionsAPI, UsersAPI } from './types'
+import type {
+  AppAPI,
+  AssignmentsAPI,
+  CompilerAPI,
+  FileAPI,
+  SubmissionsAPI,
+  UsersAPI
+} from './types'
 
 const usersApi: UsersAPI = {
   getAll: () => ipcRenderer.invoke('users:getAll'),
@@ -13,13 +20,16 @@ const compilerApi: CompilerAPI = {
   getGccStatus: () => ipcRenderer.invoke('compiler:getGccStatus'),
   setGccPath: (filePath: string) => ipcRenderer.invoke('compiler:setGccPath', filePath),
   compileCpp: (request) => ipcRenderer.invoke('compiler:compileCpp', request),
-  runCompiledProgram: (request) => ipcRenderer.invoke('compiler:runCompiledProgram', request)
+  runCompiledProgram: (request) => ipcRenderer.invoke('compiler:runCompiledProgram', request),
+  judgeCpp: (request) => ipcRenderer.invoke('compiler:judgeCpp', request)
 }
 
 const fileApi: FileAPI = {
   select: () => ipcRenderer.invoke('file:select'),
   selectCppFiles: () => ipcRenderer.invoke('file:selectCppFiles'),
-  stringify: (filePath: string) => ipcRenderer.invoke('file:stringify', filePath)
+  stringify: (filePath: string) => ipcRenderer.invoke('file:stringify', filePath),
+  selectSubmissionFolder: () => ipcRenderer.invoke('file:selectSubmissionFolder'),
+  selectFilesFromFolder: () => ipcRenderer.invoke('file:selectFilesFromFolder')
 }
 
 const submissionsApi: SubmissionsAPI = {

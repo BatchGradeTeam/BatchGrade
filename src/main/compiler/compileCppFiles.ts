@@ -18,7 +18,10 @@ import { getCommonWorkingDirectory, getCppImplementationFiles } from '../utils/s
 
 const execFileAsync = promisify(execFile)
 
-async function compileCppFiles(compilerPath: string, request: CompileCppRequest): Promise<CompileCppResult> {
+async function compileCppFiles(
+  compilerPath: string,
+  request: CompileCppRequest
+): Promise<CompileCppResult> {
   const cppFiles = getCppImplementationFiles(request.sourceFiles)
 
   if (cppFiles.length == 0) {
@@ -76,7 +79,6 @@ async function compileCppFiles(compilerPath: string, request: CompileCppRequest)
       message: 'Compilation failed.'
     }
   }
-
 }
 
 export { compileCppFiles }

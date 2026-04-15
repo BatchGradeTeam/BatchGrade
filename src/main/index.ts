@@ -6,11 +6,14 @@ import icon from '../../resources/icon.png?asset'
 import { initDb } from './database/index'
 import type { NewUser, UpdateUser, NewAssignment, UpdateAssignment } from './database/schema'
 import { getAllUsers, createUser, updateUser, deleteUser } from './database/queries'
+import { createSubmission, getSubmissionById } from './database/queries/submissionServices'
+import { dialog } from 'electron'
+
 import { getAllAssignments, createAssignment, updateAssignment } from './database/queries'
 import { deleteAssignment } from './database/queries'
 
 /* TEST ONLY DELETE WHEN DONE */
-import { selectFile, stringifyFile, selectCppFiles } from './utils/file'
+import { selectFile, stringifyFile, selectCppFiles, selectSubmissionFolder, selectFilesFromFolder} from './utils/file'
 /* TEST ONLY DELETE WHEN DONE */
 
 // @ Issue 9: Implement Automated Build & Compilation
@@ -19,6 +22,7 @@ import type { GccInstallationInfo, SupportedPlatform } from '../shared/compiler'
 
 import { compileCppFiles } from './compiler/compileCppFiles'
 import { executeCppFiles } from './compiler/executeCppFiles'
+import { judgeCppFiles } from './compiler/judgeCppFiles'
 import { submitCppSubmission } from './submissions/submitCppSubmission'
 
 let gccStatusPromise: Promise<GccInstallationInfo> | undefined
@@ -36,10 +40,10 @@ function getSupportedPlatform(): SupportedPlatform {
 
   if (process.platform === 'win32') {
     platform = 'win32'
-  }                                                                                                       
+  }
   if (process.platform === 'darwin') {
     platform = 'darwin'
-  }                                                                                                  
+  }
   if (process.platform === 'linux') {
     platform = 'linux'
   }
@@ -49,13 +53,13 @@ function getSupportedPlatform(): SupportedPlatform {
 
 /*
   @ Issue 9: If compilation fails unexpectedly due to compiler not found, revalidate the location/prompt to install
-  Scenario: 
+  Scenario:
     - GCC may be detected at startup
     - Later on, the user uninstalls it, moves it, or the manual path is wrong
     - Compile is attempted with path the app thought was valid
   Why it's needed:
-    - Without revalidation, the app may only show a vague compile failure   
-    - User then cannot tell whether their code is bad or the compiler is missing  
+    - Without revalidation, the app may only show a vague compile failure
+    - User then cannot tell whether their code is bad or the compiler is missing
   Shouldn't trigger on:
     - syntax errors
     - linker errors
@@ -137,6 +141,28 @@ app.whenReady().then(() => {
   ipcMain.handle('users:update', (_e, data: UpdateUser) => updateUser(data))
   ipcMain.handle('users:delete', (_e, uuid: string) => deleteUser(uuid))
 
+  // openFile operation FR1
+  ipcMain.handle('dialog:openFile', async () => {
+  const result = await dialog.showOpenDialog({
+    properties: ['openFile'],
+    // Only allows c++ files for now
+    filters: [{ name: 'Source Files', extensions: ['cpp'] }]
+  })
+  if (result.canceled) return null
+  return result.filePaths[0]
+  })
+
+  // Submissions CRUD
+  ipcMain.handle('submissions:create', (_e, data: {
+    studentId: string
+    assignmentId: string
+    fileName: string
+    filePath: string
+  }) => createSubmission(data))
+
+  ipcMain.handle('submissions:getById', (_e, submissionId: string) =>
+    getSubmissionById(submissionId)
+  )
   // Assignments CRUD
   ipcMain.handle('assignments:getAll', () => getAllAssignments())
   ipcMain.handle('assignments:create', (_event, data: NewAssignment) => createAssignment(data))
@@ -149,7 +175,9 @@ app.whenReady().then(() => {
   // Validate the manual compiler path from the UI and make it the current GCC selection
   ipcMain.handle('compiler:setGccPath', async (_e, filePath: string) => {
     if ( !(await validateGccPath(filePath)) ) {
-      return {
+      manualGccPath = null
+
+      const missingRes: GccInstallationInfo = {
         compilerId: 'gcc',
         status: 'missing',
         platform: getSupportedPlatform(),
@@ -158,8 +186,14 @@ app.whenReady().then(() => {
         path: null ,
         source: null // User can manually set the path to a GCC installation
       }
+
+      // Keep the cached compiler status in sync with what the UI shows.
+      // Without this, compile could still use an older valid compiler path.
+      gccStatusPromise = Promise.resolve(missingRes)
+
+      return missingRes
     }
-    else { 
+    else {
       manualGccPath = filePath
 
       const manualRes: GccInstallationInfo = {
@@ -167,7 +201,7 @@ app.whenReady().then(() => {
         status: 'ready',
         platform: getSupportedPlatform(),
         message: 'Manual GCC path has been saved successfully.',
-        installInstruction: null, 
+        installInstruction: null,
         path: manualGccPath,
         source: 'manual'
       }
@@ -176,13 +210,15 @@ app.whenReady().then(() => {
 
       return manualRes
     }
-  }) 
+  })
 
   /* TEST ONLY DELETE WHEN DONE */
   // File selection
   ipcMain.handle('file:select', () => selectFile())
   ipcMain.handle('file:selectCppFiles', () => selectCppFiles())
   ipcMain.handle('file:stringify', (_e, filePath: string) => stringifyFile(filePath))
+  ipcMain.handle('file:selectSubmissionFolder', () => selectSubmissionFolder())
+  ipcMain.handle('file:selectFilesFromFolder', () => selectFilesFromFolder())
   /* TEST ONLY DELETE WHEN DONE */
 
   // Compilation
@@ -206,7 +242,7 @@ app.whenReady().then(() => {
     if (compileRes.compileSuccess) {
       return compileRes
     }
-    
+
     // Only revalidate GCC if the failure looks like the compiler itself is missing or cannot be started
     const isCompilerMissing = isCompilerNotFoundError(
       compileRes.stderr,
@@ -233,6 +269,10 @@ app.whenReady().then(() => {
   // Execution
   ipcMain.handle('compiler:runCompiledProgram', (_e, request) => {
     return executeCppFiles(request)
+  })
+
+  ipcMain.handle('compiler:judgeCpp', (_e, request) => {
+    return judgeCppFiles(request)
   })
 
   ipcMain.handle('submissions:submitCpp', (_e, request) => {

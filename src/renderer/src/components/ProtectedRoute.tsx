@@ -26,7 +26,7 @@ interface ProtectedRouteProps {
   fallbackPath?: string
 }
 
-export default function ProtectedRoute({
+export function ProtectedRoute({
   children,
   requiredRoles,
   fallbackPath = '/'

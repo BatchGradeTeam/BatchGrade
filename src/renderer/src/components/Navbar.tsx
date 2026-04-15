@@ -9,13 +9,16 @@
  *
  * If the user is logged in, a profile avatar is displayed
  * which currently functions as a logout trigger. If the
- * user is not logged in, login and signup buttons are shown instead.
+ * user is not logged in, a login button is shown instead.
  */
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useAuth } from './AuthContext'
-import DropdownMenu from './DropdownMenu'
+import { INSTRUCTOR_ROLE, STUDENT_ROLE } from '../../../main/database/schema'
 import avatar from '../assets/profile.png'
+import instructorProfile from '../assets/instructor-profile.png'
+import studentProfile from '../assets/student-profile.png'
+import { useAuth } from './AuthContext'
+import { DropdownMenu } from './DropdownMenu'
 
 /**
  * Navbar Component
@@ -25,16 +28,24 @@ import avatar from '../assets/profile.png'
  *
  * @returns NavBar(): React.JSX.Element
  */
-function NavBar(): React.JSX.Element {
+export function NavBar(): React.JSX.Element {
   // -----------------------------------------------------------
   // Navigation Hook
   // -----------------------------------------------------------
   // Enables navigation between application routes
   const navigate = useNavigate()
   // Access authentication state and logout function
-  const { isLoggedIn, logout } = useAuth()
+  const { isLoggedIn, user, logout } = useAuth()
   // Menu state for collapsible menu
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+
+  // Determine which profile image to display based on user role
+  const profileImage =
+    user?.role === STUDENT_ROLE
+      ? studentProfile
+      : user?.role === INSTRUCTOR_ROLE
+        ? instructorProfile
+        : avatar
 
   return (
     <div className="navbar-container">
@@ -48,7 +59,7 @@ function NavBar(): React.JSX.Element {
             ☰
           </button>
           {/* Application Title */}
-          <span className="navbar-title">BatchGrade</span>
+          <h1 className="navbar-title hover-underline">BatchGrade</h1>
         </div>
         {/*-----------------------------------------------------------
           Authentication Controls
@@ -59,13 +70,14 @@ function NavBar(): React.JSX.Element {
               when clicked. Future implementations may include
               a dropdown profile menu */
           <img
-            src={avatar}
+            src={profileImage}
             alt="Profile"
             className="profile-image"
             onClick={() => {
               void logout()
                 .then(() => {
-                  navigate('/')
+                  // Redirect user to the Login page
+                  navigate('/login')
                 })
                 .catch((error) => {
                   console.error('Error signing out: ', error)
@@ -74,15 +86,10 @@ function NavBar(): React.JSX.Element {
           />
         ) : (
           /* Logged-Out State:
-              Display login and signup buttons */
-          <div className="navbar-auth-actions">
-            <button className="secondary-button" onClick={() => navigate('/signup')}>
-              Sign Up
-            </button>
-            <button className="primary-button" onClick={() => navigate('/login')}>
-              Login
-            </button>
-          </div>
+              Display login button */
+          <button className="primary-button" onClick={() => navigate('/login')}>
+            Login
+          </button>
         )}
       </nav>
 
@@ -93,5 +100,3 @@ function NavBar(): React.JSX.Element {
     </div>
   )
 }
-
-export default NavBar

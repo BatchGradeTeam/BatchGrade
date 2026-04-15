@@ -1,59 +1,86 @@
+/**
+ * Login.tsx
+ *
+ * Description:
+ * This component implements the login interface for the BatchGrade
+ * application. Users enter their email and password, and the
+ * credentials are sent through the shared authentication context
+ * to the server-backed authentication provider.
+ *
+ * The component performs basic validation, attempts sign-in through
+ * AuthContext, and redirects the user to the appropriate dashboard
+ * based on the role returned by the authenticated session.
+ *
+ * Primary Responsibilities:
+ *  - Collect login credentials (email and password)
+ *  - Validate the login attempt
+ *  - Authenticate the user through the server auth provider
+ *  - Redirect the user to the correct dashboard
+ */
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-// import type { User } from '../../../shared/types'
-import { INSTRUCTOR_ROLE, STUDENT_ROLE } from '../../../shared/types'
 import { useAuth } from '../components/AuthContext'
 
-function Login(): React.JSX.Element {
+/**
+ * Login Component
+ *
+ * Provides the login interface and authentication logic
+ * for users attempting to access the BatchGrade Platform
+ *
+ * @returns Login(): React.JSX.Element
+ */
+export function Login(): React.JSX.Element {
+  // -----------------------------------------------------------
+  // Navigation Hook
+  // -----------------------------------------------------------
+  // React Router navigation hook for redirecting users
   const navigate = useNavigate()
-  const { login, logout } = useAuth()
+  const { login } = useAuth()
 
-  const [role, setRole] = useState<typeof STUDENT_ROLE | typeof INSTRUCTOR_ROLE | null>(null) // Track role the user selects -> initialized as null
-
-  // Controlled input state for login form
+  // Stores user credential input
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
 
-  const [error, setError] = useState<string | null>(null) // Store any error message
+  // Stores login error messages
+  const [error, setError] = useState<string | null>(null)
 
+  // -----------------------------------------------------------
+  // Login Handler
+  // -----------------------------------------------------------
+  /**
+   * Handles the login attempt by validating credentials
+   * and authenticating the user through AuthContext
+   */
   async function handleLogin(): Promise<void> {
-    setError(null) // Clear any previous errors before attempting login
+    // Reset any previous error state
+    setError(null)
 
-    // const users: User[] = await window.api.users.getAll()
-    // const foundUser = users.find((user) => user.email === email)
-    // if (!foundUser) {
-    //   // Check if user exists
-    //   setError('User does not exist.') // FIXME: idk if we would want to keep this (security purposes)
-    //   return
-    // }
+    const trimmedEmail = email.trim()
 
-    // All users must have a password
+    if (trimmedEmail.length === 0) {
+      setError('Email required')
+      return
+    }
+
     if (password.length === 0) {
       setError('Password required')
       return
     }
 
-    // if (role !== foundUser.role) {
-    //   setError('Selected role does not match user role') // FIXME: again security issue...
-    //   return
-    // }
-
-    // Actually try logging in (through AuthContext)
     try {
-      const loggedInUser = await login(email, password)
-      if (role !== loggedInUser.role) {
-        await logout()
-        setError(
-          `This account is registered as a ${loggedInUser.role}. Please use the ${loggedInUser.role} login option.` // FIXME: Probably need to change for security purposes
-        )
+      const loggedInUser = await login(trimmedEmail, password)
+
+      if (loggedInUser.role === 'student') {
+        navigate('/studentdashboard')
         return
       }
 
-      if (loggedInUser.role === STUDENT_ROLE) {
-        navigate('/studentdashboard')
-      } else if (loggedInUser.role === INSTRUCTOR_ROLE) {
+      if (loggedInUser.role === 'instructor') {
         navigate('/instructordashboard')
+        return
       }
+
+      setError('Invalid user role')
     } catch (err) {
       const message =
         err instanceof Error
@@ -64,88 +91,78 @@ function Login(): React.JSX.Element {
     }
   }
 
+  // -----------------------------------------------------------
+  // Render Login Interface
+  // -----------------------------------------------------------
   return (
     <div className="login-container">
+      {/*-----------------------------------------------------------
+        Login Header
+      -----------------------------------------------------------*/}
       <div className="login-title">
         <header className="header">
-          <h1 className="title">
-            <span className="react">Login</span>
-          </h1>
-          <p className="creator">Please select approriate role:</p>
+          <h1 className="title">BatchGrade</h1>
+          <p className="subtitle">Automated grading made easy</p>
         </header>
       </div>
 
       <div className="login-item">
-        {!role && (
-          <main className="main">
-            <div className="home-buttons">
-              <button className="role-buttons student" onClick={() => setRole(STUDENT_ROLE)}>
-                Student Login
-              </button>
+        <div className="login-form">
+          <p className="subtitle">Welcome back!</p>
+          <h2>Please enter your credentials</h2>
+          {/* Email input */}
+          <input
+            type="text"
+            placeholder="Email"
+            className="login-input"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
 
-              <button className="role-buttons instructor" onClick={() => setRole(INSTRUCTOR_ROLE)}>
-                Instructor Login
-              </button>
+          {/* Password input */}
+          <input
+            type="password"
+            placeholder="Password"
+            className="login-input"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
 
-              <button className="secondary-button" onClick={() => navigate('/')}>
-                Go Home
-              </button>
-            </div>
-          </main>
-        )}
+          {/*-----------------------------------------------------------
+              Login Action Buttons
+            -----------------------------------------------------------*/}
+          <div className="login-actions">
+            {/* Submit login request */}
+            <button className="submit-button" onClick={() => void handleLogin()}>
+              Login
+            </button>
 
-        {role && (
-          <div className="login-modal">
-            <div className="login-form">
-              <h2>{role === STUDENT_ROLE ? 'Student Login' : 'Instructor Login'}</h2>
+            <button
+              className="secondary-button"
+              onClick={() => {
+                navigate('/guestDashboard')
+              }}
+            >
+              Guest
+            </button>
 
-              <input
-                type="text"
-                placeholder="Email"
-                className="login-input"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-
-              <input
-                type="password"
-                placeholder="Password"
-                className="login-input"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
-
-              {error && <div className="login-error">{error}</div>}
-
-              <div className="login-actions">
-                <button className="submit-button" onClick={handleLogin}>
-                  Login
-                </button>
-
-                <button
-                  className="cancel-button"
-                  onClick={() => {
-                    setRole(null)
-                    setEmail('')
-                    setPassword('')
-                    setError(null)
-                  }}
-                >
-                  Cancel
-                </button>
-              </div>
-
-              <div className="create-account">
-                <button className="secondary-button" onClick={() => navigate('/signup')}>
-                  Create Account
-                </button>
-              </div>
-            </div>
+            {/* Cancel login and reset form */}
+            <button
+              className="secondary-button"
+              onClick={() => {
+                setEmail('')
+                setPassword('')
+                setError(null)
+                navigate('/signup')
+              }}
+            >
+              Sign Up
+            </button>
           </div>
-        )}
+          {/* Display login error message if present */}
+          {error && <div className="error">{error}</div>}
+        </div>
       </div>
     </div>
   )
 }
-
-export default Login

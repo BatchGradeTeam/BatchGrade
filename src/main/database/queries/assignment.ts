@@ -116,10 +116,11 @@ export function updateAssignment(data: UpdateAssignment): Assignment {
 // @returns the deleted assignment
 export function deleteAssignment(uuid: string): Assignment {
   // delete the assignment form the database
-  const deleted = getDb().delete(assignmentsInstrc)
-                         .where(eq(assignmentsInstrc.uuid, uuid))
-                         .returning()
-                         .get()
+  const deleted = getDb()
+    .delete(assignmentsInstrc)
+    .where(eq(assignmentsInstrc.uuid, uuid))
+    .returning()
+    .get()
 
   // if not successful, throw error - not found with uuid
   if (!deleted) {

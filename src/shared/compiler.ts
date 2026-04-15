@@ -7,7 +7,7 @@ export type GccInstallationInfo = {
   platform: SupportedPlatform
   message: string
   installInstruction: string | null // the user is prompted to install with instructions for their OS if they don't have a compiler installed
-  path: string | null 
+  path: string | null
   source: 'auto' | 'manual' | null // User can manually set the path to a GCC installation
 }
 
@@ -41,4 +41,20 @@ export type RunCppResult = {
   stdout: string
   stderr: string
   message: string
+}
+
+// ***********************************************************************
+// Judge
+export type JudgeCppRequest = {
+  executablePath: string
+  stdin: string // Inputs
+  expectedOutput: string // Some output file i.e. output0.txt
+  timeoutMs: number // Alloted execution time
+}
+
+export type JudgeCppResult = {
+  passed: boolean
+  timedOut: boolean
+  expectedOutput: string
+  actualOutput: string // The actual output from the judged program
 }

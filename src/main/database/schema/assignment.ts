@@ -10,7 +10,7 @@ export type UpdateAssignment = Pick<Assignment, 'uuid'> & Partial<NewAssignment>
  *
  * Stores assignments configurations for MVP-5
  */
-export const assignmentsInstrc = sqliteTable('assignments', {
+export const assignmentsInstrc = sqliteTable('instructor_assignments', {
   uuid: text('uuid')
     .primaryKey()
     .$defaultFn(() => crypto.randomUUID()),
