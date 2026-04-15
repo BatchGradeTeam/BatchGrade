@@ -17,9 +17,11 @@
  * Displays the highest score each student achieved for a selected assignment.
  */
 
-import { useState } from 'react' // Import React hook used to manage component state
+import { useState, useEffect } from 'react' // Import React hooks used for component state and side effects
 import { NavBar } from '../components/Navbar' // Import the navigation bar component
 import { Footer } from '../components/Footer' // Import the footer component
+import type { GradebookRecord } from '../../../shared/gradebookTypes'
+import { loadGradebookRecords } from '../lib/gradebookStorage'
 
 // =============================================================================
 // Helper Types
@@ -154,79 +156,55 @@ const buildCSVContent = (students: StudentRecord[]): string => {
   return [headers, ...rows].map((row) => row.join(',')).join('\n')
 }
 
-// =============================================================================
-// Mock data representing gradebook records for each assignment.
-// This data would come from the backend database (FR-7).
-// =============================================================================
-const gradebookData = {
-  'Assignment 1': [
-    {
-      id: '1001',
-      name: 'Garen Crownguard',
-      score: '92%',
-      submissions: 3,
-      lastSubmitted: '2026-03-10 11:42 AM',
-      status: 'Submitted'
-    },
-    {
-      id: '1002',
-      name: 'Wu Kong',
-      score: '88%',
-      submissions: 2,
-      lastSubmitted: '2026-03-10 09:15 AM',
-      status: 'Submitted'
-    },
-    {
-      id: '1003',
-      name: 'Quinn Valor',
-      score: '95%',
-      submissions: 4,
-      lastSubmitted: '2026-03-11 02:30 PM',
-      status: 'Submitted'
-    },
-    {
-      id: '1004',
-      name: 'Govos Usan',
-      score: '--',
-      submissions: 0,
-      lastSubmitted: '--',
-      status: 'Missing'
+/**
+ * Formats a saved timestamp into a readable local date/time string.
+ *
+ * @param timestamp - Unix timestamp in milliseconds
+ * @returns Formatted date string
+ */
+const formatSubmittedTime = (timestamp: number): string => {
+  return new Date(timestamp).toLocaleString()
+}
+
+/**
+ * Builds Gradebook table rows from saved Gradebook records.
+ * Keeps the highest score per student and counts total submissions.
+ *
+ * @param records - All saved Gradebook records
+ * @param assignmentId - Selected assignment id
+ * @returns Student records for the Gradebook table
+ */
+const buildStudentRecordsFromGradebook = (
+  records: GradebookRecord[],
+  assignmentId: string
+): StudentRecord[] => {
+  const assignmentRecords = records.filter((record) => record.assignmentId === assignmentId)
+
+  const groupedRecords = new Map<string, GradebookRecord[]>()
+
+  assignmentRecords.forEach((record) => {
+    const existing = groupedRecords.get(record.studentId) ?? []
+    groupedRecords.set(record.studentId, [...existing, record])
+  })
+
+  return Array.from(groupedRecords.values()).map((studentRecords) => {
+    const highestRecord = studentRecords.reduce((best, current) =>
+      current.score > best.score ? current : best
+    )
+
+    const latestRecord = studentRecords.reduce((latest, current) =>
+      current.submittedAt > latest.submittedAt ? current : latest
+    )
+
+    return {
+      id: latestRecord.studentId,
+      name: latestRecord.studentName,
+      score: `${highestRecord.score}%`,
+      submissions: studentRecords.length,
+      lastSubmitted: formatSubmittedTime(latestRecord.submittedAt),
+      status: latestRecord.status === 'failed' ? 'Failed' : 'Submitted'
     }
-  ],
-  'Assignment 2': [
-    {
-      id: '1001',
-      name: 'Garen Crownguard',
-      score: '95%',
-      submissions: 4,
-      lastSubmitted: '2026-03-12 10:05 AM',
-      status: 'Submitted'
-    },
-    {
-      id: '1002',
-      name: 'Wu Kong',
-      score: '90%',
-      submissions: 3,
-      lastSubmitted: '2026-03-11 04:20 PM',
-      status: 'Submitted'
-    },
-    {
-      id: '1003',
-      name: 'Quinn Valor',
-      score: '91%',
-      submissions: 2,
-      lastSubmitted: '2026-03-12 08:45 AM',
-      status: 'Submitted'
-    },
-    {
-      id: '1004',
-      name: 'Govos Usan',
-      score: '--',
-      submissions: 0,
-      lastSubmitted: '--',
-      status: 'Missing'
-    }
-  ]
+  })
 }
 
 // =============================================================================
@@ -234,8 +212,11 @@ const gradebookData = {
 // Displays the highest score each student achieved for the selected assignment
 // =============================================================================
 export function Gradebook(): React.JSX.Element {
-  // State variable that tracks which assignment is currently selected
-  const [selectedAssignment, setSelectedAssignment] = useState('Assignment 1')
+  // Stores the currently selected assignment id.
+  const [selectedAssignment, setSelectedAssignment] = useState('assignment-1')
+
+  // Stores all saved Gradebook records loaded from localStorage.
+  const [gradebookRecords, setGradebookRecords] = useState<GradebookRecord[]>([])
 
   // Tracks text entered in the search box
   const [searchTerm, setSearchTerm] = useState('')
@@ -243,8 +224,29 @@ export function Gradebook(): React.JSX.Element {
   // Tracks which sorting option is selected
   const [sortOption, setSortOption] = useState('name-asc')
 
-  // Retrieve the student list corresponding to the selected assignment
-  const students = gradebookData[selectedAssignment as keyof typeof gradebookData]
+  /**
+   * Loads saved Gradebook records when the page is opened.
+   */
+  useEffect(() => {
+    async function fetchGradebookRecords(): Promise<void> {
+      const records = await loadGradebookRecords()
+      setGradebookRecords(records)
+    }
+
+    void fetchGradebookRecords()
+  }, [])
+
+  // Build assignment dropdown options from saved Gradebook records.
+  const assignmentOptions = Array.from(
+    new Set(gradebookRecords.map((record) => record.assignmentId))
+  )
+
+  const effectiveSelectedAssignment = assignmentOptions.includes(selectedAssignment)
+    ? selectedAssignment
+    : (assignmentOptions[0] ?? 'assignment-1')
+
+  // Build Gradebook student rows for the selected assignment.
+  const students = buildStudentRecordsFromGradebook(gradebookRecords, effectiveSelectedAssignment)
 
   // Filter students by name or ID based on search input
   const filteredStudents = filterStudents(students, searchTerm)
@@ -270,7 +272,7 @@ export function Gradebook(): React.JSX.Element {
     // Assignment 1-gradebook.csv
     const link = document.createElement('a')
     link.href = url
-    link.setAttribute('download', `${selectedAssignment}-gradebook.csv`)
+    link.setAttribute('download', `${effectiveSelectedAssignment}-gradebook.csv`)
     document.body.appendChild(link)
 
     // Simulates user clicking download
@@ -298,11 +300,18 @@ export function Gradebook(): React.JSX.Element {
             {/* Dropdown that allows instructors to switch assignments (FR-8) */}
             <select
               id="assignment-select"
-              value={selectedAssignment}
+              value={effectiveSelectedAssignment}
               onChange={(e) => setSelectedAssignment(e.target.value)}
             >
-              <option>Assignment 1</option>
-              <option>Assignment 2</option>
+              {assignmentOptions.length > 0 ? (
+                assignmentOptions.map((assignmentId) => (
+                  <option key={assignmentId} value={assignmentId}>
+                    {assignmentId}
+                  </option>
+                ))
+              ) : (
+                <option value="assignment-1">assignment-1</option>
+              )}
             </select>
           </div>
 
@@ -365,16 +374,24 @@ export function Gradebook(): React.JSX.Element {
 
               {/* Table body generated dynamically from student data */}
               <tbody>
-                {sortedStudents.map((student) => (
-                  <tr key={student.id}>
-                    <td style={cellStyle}>{student.id}</td>
-                    <td style={cellStyle}>{student.name}</td>
-                    <td style={cellStyle}>{student.score}</td>
-                    <td style={cellStyle}>{student.submissions}</td>
-                    <td style={cellStyle}>{student.lastSubmitted}</td>
-                    <td style={cellStyle}>{student.status}</td>
+                {sortedStudents.length > 0 ? (
+                  sortedStudents.map((student) => (
+                    <tr key={student.id}>
+                      <td style={cellStyle}>{student.id}</td>
+                      <td style={cellStyle}>{student.name}</td>
+                      <td style={cellStyle}>{student.score}</td>
+                      <td style={cellStyle}>{student.submissions}</td>
+                      <td style={cellStyle}>{student.lastSubmitted}</td>
+                      <td style={cellStyle}>{student.status}</td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td style={cellStyle} colSpan={6}>
+                      No Gradebook records found for this assignment.
+                    </td>
                   </tr>
-                ))}
+                )}
               </tbody>
             </table>
           </div>
@@ -383,6 +400,7 @@ export function Gradebook(): React.JSX.Element {
           <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '8px' }}>
             <button
               onClick={handleExportCSV}
+              disabled={sortedStudents.length === 0}
               style={{
                 fontSize: '12px', // smaller text
                 padding: '4px 8px', // smaller button
