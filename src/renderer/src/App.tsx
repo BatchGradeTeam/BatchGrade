@@ -32,7 +32,7 @@ import { Gradebook } from './pages/Gradebook'
 import { StudentDashboard } from './pages/StudentDashboard'
 import { InstructorDashboard } from './pages/InstructorDashboard'
 import { ProtectedRoute } from './components/ProtectedRoute'
-import { StudentUploadInterface } from './pages/studentUploadInterface'
+import { StudentUploadInterface } from './pages/StudentUploadInterface'
 import { STUDENT_ROLE, INSTRUCTOR_ROLE } from '../../main/database/schema'
 import { GradingPlus } from './pages/GradingPlus'
 

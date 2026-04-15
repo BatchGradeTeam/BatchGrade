@@ -16,17 +16,17 @@ type UseSubmitWorkflowProps = {
   compileResult: CompileCppResult | null
   selectedFiles: string[]
   userId: string | undefined
+  selectedAssignmentId: string
+  onAssignmentsLoaded?: (assignments: Assignment[]) => void
 }
 
 // Return type for the useSubmitWorkflow hook
 type UseSubmitWorkflowReturn = {
   assignments: Assignment[]
-  selectedAssignmentId: string
   selectedAssignment: Assignment | null
   submitResult: SubmitCppResult | null
   errorMessage: string | null
   isSubmitting: boolean
-  setSelectedAssignmentId: React.Dispatch<React.SetStateAction<string>>
   handleSubmit: () => Promise<void>
 }
 
@@ -44,10 +44,11 @@ type UseSubmitWorkflowReturn = {
 export function useSubmitWorkflow({
   compileResult,
   selectedFiles,
-  userId
+  userId,
+  selectedAssignmentId,
+  onAssignmentsLoaded
 }: UseSubmitWorkflowProps): UseSubmitWorkflowReturn {
   const [assignments, setAssignments] = useState<Assignment[]>([])
-  const [selectedAssignmentId, setSelectedAssignmentId] = useState('')
   const [submitResult, setSubmitResult] = useState<SubmitCppResult | null>(null)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -57,9 +58,7 @@ export function useSubmitWorkflow({
       .getAll()
       .then((result) => {
         setAssignments(result)
-        if (result.length > 0) {
-          setSelectedAssignmentId(result[0].uuid)
-        }
+        onAssignmentsLoaded?.(result)
       })
       .catch((error) => {
         console.error('Error loading assignments:', error)
@@ -140,12 +139,10 @@ export function useSubmitWorkflow({
 
   return {
     assignments,
-    selectedAssignmentId,
     selectedAssignment,
     submitResult,
     errorMessage,
     isSubmitting,
-    setSelectedAssignmentId,
     handleSubmit
   }
 }
