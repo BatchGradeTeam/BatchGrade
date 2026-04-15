@@ -25,6 +25,8 @@ import { compileCppFiles } from './compiler/compileCppFiles'
 import { executeCppFiles } from './compiler/executeCppFiles'
 import { judgeCppFiles } from './compiler/judgeCppFiles'
 import { submitCppSubmission } from './submissions/submitCppSubmission'
+import { dockerCompile } from './compiler/dockerCompile'
+import { dockerJudge } from './compiler/dockerJudge'
 
 let gccStatusPromise: Promise<GccInstallationInfo> | undefined
 let manualGccPath: string | null = null
@@ -267,6 +269,16 @@ app.whenReady().then(() => {
 
   ipcMain.handle('compiler:judgeCpp', (_e, request) => {
     return judgeCppFiles(request)
+  })
+
+  // Docker Compilation
+  ipcMain.handle('compiler:dockerCompileCpp', async (_e, sourceFiles: string[]) => {
+    return dockerCompile({ sourceFiles, language: 'cpp' })
+  })
+
+  // Docker Judge
+  ipcMain.handle('compiler:dockerJudgeCpp', async (_e, request) => {
+    return dockerJudge({ ...request, language: 'cpp' })
   })
 
   ipcMain.handle('submissions:submitCpp', (_e, request) => {
