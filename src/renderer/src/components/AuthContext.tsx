@@ -34,7 +34,7 @@
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react'
 
 import type { User as SupabaseUser } from '@supabase/supabase-js'
-import { STUDENT_ROLE, VALID_ROLES } from '../../../shared/types'
+import { VALID_ROLES } from '../../../shared/types'
 import { supabase } from '../lib/supabase'
 import { getProfile } from '../lib/profiles'
 
@@ -93,12 +93,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<AuthUser | null>(null) // stores the current user's email and role (or null if no user is logged in)
 
   // Ensures the user role is always one of the allowed roles.
-  const toRole = (candidate: unknown): (typeof VALID_ROLES)[number] => {
+  const toRole = (candidate: unknown): ((typeof VALID_ROLES)[number] | null) => {
     if (VALID_ROLES.includes(candidate as (typeof VALID_ROLES)[number])) {
       return candidate as (typeof VALID_ROLES)[number]
     }
 
-    return STUDENT_ROLE // If the stored role is invalid or missing, default to student
+    return null
   }
 
   // Maps the Supabase user object into smaller AuthUser shape used by the app context
@@ -108,11 +108,16 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
 
     const roleCandidate = userRecord?.app_metadata?.role ?? userRecord?.user_metadata?.role
+    const role = toRole(roleCandidate)
+
+    if (!role) {
+      return null
+    }
 
     return {
       uuid: userRecord?.id,
       email: userRecord?.email,
-      role: toRole(roleCandidate)
+      role
     }
   }
 
@@ -135,11 +140,18 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
     try {
       const profile = await getProfile()
+      const role = toRole(profile?.role)
+
+      if (!role) {
+        setUser(null)
+        setIsLoggedIn(false)
+        return null
+      }
 
       const nextUser: AuthUser = {
         uuid: authUser.id,
         email: authUser.email ?? profile?.email ?? '',
-        role: toRole(profile?.role)
+        role
       }
 
       setUser(nextUser)
