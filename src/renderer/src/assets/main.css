@@ -348,6 +348,7 @@ footer {
 .navbar .primary-button {
   margin: 0;
 }
+
 .profile-image {
   width: 40px;
   height: 40px;
@@ -674,11 +675,11 @@ footer {
   justify-content: space-between;
   width: 100%;
   max-width: 90vw;
-  margin: 6rem auto 1rem auto;
+  margin: 8rem auto 3rem auto;
   padding: 2rem;
   gap: 2rem;
   color: var(--ev-c-white);
-  background: -webkit-linear-gradient(45deg, var(--ev-c-blue-2), var(--ev-c-blue-4));
+  background: -webkit-linear-gradient(180deg, var(--ev-c-blue-2), var(--ev-c-blue-3));
   border-radius: 30px;
   box-shadow: 0 10px 30px rgba(0,0,0,0.2);
 }
@@ -953,17 +954,17 @@ footer {
 .dashboard-toolbar {
   display: flex;
   gap: 1rem;
-  margin-bottom: 1.5rem;
+  margin-top: 1.5rem;
 }
 
 .dashboard-empty-state {
   width: 100%;
-  max-width: 900px;
   padding: 1.25rem 1.5rem;
   border-radius: 12px;
-  background: var(--ev-c-white);
-  border: 1px solid #a2c1e5;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  background-color: var(--ev-c-white);
+  color: var(--ev-c-text-3);
+  border-radius: 30px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
 }
 
 .dashboard-empty-state h2 {
@@ -979,13 +980,11 @@ footer {
 
 .panel-shell {
   width: 100%;
-  max-width: 980px;
   background: var(--ev-c-white);
   color: var(--ev-c-gray-1);
   padding: 1.5rem;
-  border-radius: 14px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
-  border: 1px solid #d9e2ec;
+  border-radius: 30px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
 }
 
 .panel-header {

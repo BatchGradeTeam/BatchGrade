@@ -85,21 +85,6 @@ export function InstructorDashboard(): React.JSX.Element {
       </div>
       <div className="dashboard-container">
         {/*-----------------------------------------------------------
-          Instructor Action Toolbar
-        -----------------------------------------------------------*/}
-        <div className="dashboard-toolbar">
-          {!showAssignmentConfig ? (
-            <button className="primary-button" onClick={openAssignmentConfig}>
-              Assignment Creation
-            </button>
-          ) : (
-            <button className="secondary-button" onClick={closeAssignmentConfig}>
-              Close Assignment Configuration
-            </button>
-          )}
-        </div>
-
-        {/*-----------------------------------------------------------
           Assignment Configuration Workspace
         -----------------------------------------------------------*/}
         {showAssignmentConfig ? (
@@ -113,6 +98,20 @@ export function InstructorDashboard(): React.JSX.Element {
             </p>
           </div>
         )}
+        {/*-----------------------------------------------------------
+          Instructor Action Toolbar
+        -----------------------------------------------------------*/}
+        <div className="dashboard-toolbar">
+          {!showAssignmentConfig ? (
+            <button className="primary-button" onClick={openAssignmentConfig}>
+              Assignment Creation
+            </button>
+          ) : (
+            <button className="secondary-button" onClick={closeAssignmentConfig}>
+              Close Assignment Configuration
+            </button>
+          )}
+        </div>
       </div>
 
       {/*-----------------------------------------------------------
