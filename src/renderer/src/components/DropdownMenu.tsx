@@ -31,38 +31,60 @@ export function DropdownMenu({ isOpen, onClose }: DropdownMenuProps): React.JSX.
     label: string
     path: string
     allowedRoles?: MenuRole[]
+    guestOnly?: boolean
   }
 
   const menuItems: MenuItem[] = [
     {
       label: 'Instructor Dashboard',
       path: '/instructordashboard',
-      allowedRoles: [INSTRUCTOR_ROLE]
+      allowedRoles: [INSTRUCTOR_ROLE],
+      guestOnly: false,
     },
     {
       label: 'Student Dashboard',
       path: '/studentdashboard',
-      allowedRoles: [STUDENT_ROLE]
+      allowedRoles: [STUDENT_ROLE],
+      guestOnly: false,
     },
     {
       label: 'Student Upload Interface',
       path: '/studentuploadinterface',
-      allowedRoles: [STUDENT_ROLE]
+      allowedRoles: [STUDENT_ROLE],
+      guestOnly: false,
     },
     {
       label: 'Gradebook',
       path: '/gradebook',
-      allowedRoles: [INSTRUCTOR_ROLE]
+      allowedRoles: [INSTRUCTOR_ROLE],
+      guestOnly: false,
     },
     {
       label: 'Grading',
       path: '/grading',
-      allowedRoles: [INSTRUCTOR_ROLE]
+      allowedRoles: [INSTRUCTOR_ROLE],
+      guestOnly: false,
     },
     {
       label: 'Grading+',
       path: '/grading-plus',
-      allowedRoles: [INSTRUCTOR_ROLE]
+      allowedRoles: [INSTRUCTOR_ROLE],
+      guestOnly: false,
+    },
+    {
+      label: 'Guest Portal',
+      path: '/guestDashboard',
+      guestOnly: true,
+    },
+    {
+      label: 'Guest Student Interface',
+      path: '/guestStudentInterface',
+      guestOnly: true,
+    },
+    {
+      label: 'Guest Batch Grading Interface',
+      path: '/guestBatchGradeInterface',
+      guestOnly: true,
     },
     {
       label: 'About',
@@ -71,6 +93,9 @@ export function DropdownMenu({ isOpen, onClose }: DropdownMenuProps): React.JSX.
   ]
 
   const visibleMenuItems = menuItems.filter((item) => {
+    if (item.guestOnly) {
+      return !user
+    }
     if (!item.allowedRoles) {
       return true
     }
