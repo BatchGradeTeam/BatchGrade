@@ -34,7 +34,7 @@ export function GuestStudentInterface(): React.JSX.Element {
   const [compileResult, setCompileResult] = useState<CompileCppResult | null>(null)
 
   // This is just an easy work around, so that way we dont trigger selectFiles, compileResult not used
-  console.log(selectedFiles);
+  console.log(selectedFiles)
   console.log(compileResult)
 
   return (
@@ -65,7 +65,7 @@ export function GuestStudentInterface(): React.JSX.Element {
       </div>
 
       <div className="button-container">
-        <button className="secondary-button" onClick={() => navigate('/studentdashboard')}>
+        <button className="secondary-button" onClick={() => navigate('/guestDashboard')}>
           Go Home
         </button>
       </div>
