@@ -14,10 +14,7 @@ export function GuestBatchGradeInterface(): React.JSX.Element {
       </div>
 
       <div className="button-container">
-        <button 
-          className="secondary-button"
-          onClick={() => navigate('/guestDashboard')}
-        >
+        <button className="secondary-button" onClick={() => navigate('/guestDashboard')}>
           Back to Dashboard
         </button>
       </div>

@@ -9,9 +9,8 @@ export const assignments = sqliteTable('assignments', {
   uuid: text('uuid')
     .primaryKey()
     .$defaultFn(() => crypto.randomUUID()),
-  title: text('title')
-    .notNull(),
-  config: blob('config', { mode: 'buffer'}),
+  title: text('title').notNull(),
+  config: blob('config', { mode: 'buffer' }),
   createdAt: integer('created_at', { mode: 'number' })
     .notNull()
     .default(sql`(unixepoch())`)
@@ -28,16 +27,10 @@ export const submissions = sqliteTable('submissions', {
   assignmentId: text('assignment_id')
     .notNull()
     .references(() => assignments.uuid),
-  fileName: text('file_name')
-    .notNull()
-    .default('N/A'),
-  fileContent: text('file_content')
-    .notNull(),
-  fileSize: integer('file_size')
-    .notNull(),
-  status: text('status')
-    .notNull()
-    .default('not submitted'), // "submittted", "pending", "not submitted"
+  fileName: text('file_name').notNull().default('N/A'),
+  fileContent: text('file_content').notNull(),
+  fileSize: integer('file_size').notNull(),
+  status: text('status').notNull().default('not submitted') // "submittted", "pending", "not submitted"
 })
 
 /**
@@ -53,8 +46,7 @@ export const grades = sqliteTable('grades', {
     .references(() => submissions.uuid),
   score: integer('score').notNull(),
   feedback: text('feedback'),
-  gradedAt: integer('graded_at')
-    .default(sql`(unixepoch())`)
+  gradedAt: integer('graded_at').default(sql`(unixepoch())`)
 })
 
 /**
@@ -73,5 +65,5 @@ export const compileLogs = sqliteTable('compile_logs', {
   exitCode: integer('exit_code'),
   stdout: text('stdout'), // The standard output
   stderr: text('stderr'), // The error message if it failed
-  duration: integer('duration'), // How long the code ran in ms
+  duration: integer('duration') // How long the code ran in ms
 })

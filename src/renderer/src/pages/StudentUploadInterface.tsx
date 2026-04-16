@@ -84,7 +84,7 @@ export function StudentUploadInterface(): React.JSX.Element {
           onAssignmentChange={handleAssignmentChange}
         />
 
-         <SubmitPanel
+        <SubmitPanel
           compileResult={compileResult}
           selectedFiles={selectedFiles}
           userId={user?.uuid}

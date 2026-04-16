@@ -39,52 +39,52 @@ export function DropdownMenu({ isOpen, onClose }: DropdownMenuProps): React.JSX.
       label: 'Instructor Dashboard',
       path: '/instructordashboard',
       allowedRoles: [INSTRUCTOR_ROLE],
-      guestOnly: false,
+      guestOnly: false
     },
     {
       label: 'Student Dashboard',
       path: '/studentdashboard',
       allowedRoles: [STUDENT_ROLE],
-      guestOnly: false,
+      guestOnly: false
     },
     {
       label: 'Student Upload Interface',
       path: '/studentuploadinterface',
       allowedRoles: [STUDENT_ROLE],
-      guestOnly: false,
+      guestOnly: false
     },
     {
       label: 'Gradebook',
       path: '/gradebook',
       allowedRoles: [INSTRUCTOR_ROLE],
-      guestOnly: false,
+      guestOnly: false
     },
     {
       label: 'Grading',
       path: '/grading',
       allowedRoles: [INSTRUCTOR_ROLE],
-      guestOnly: false,
+      guestOnly: false
     },
     {
       label: 'Grading+',
       path: '/grading-plus',
       allowedRoles: [INSTRUCTOR_ROLE],
-      guestOnly: false,
+      guestOnly: false
     },
     {
       label: 'Guest Portal',
       path: '/guestDashboard',
-      guestOnly: true,
+      guestOnly: true
     },
     {
       label: 'Guest Student Interface',
       path: '/guestStudentInterface',
-      guestOnly: true,
+      guestOnly: true
     },
     {
       label: 'Guest Batch Grading Interface',
       path: '/guestBatchGradeInterface',
-      guestOnly: true,
+      guestOnly: true
     },
     {
       label: 'About',

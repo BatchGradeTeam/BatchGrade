@@ -44,19 +44,14 @@ export function SubmitPanel({
   selectedAssignmentId,
   onAssignmentsLoaded
 }: SubmitPanelProps): React.JSX.Element {
-  const {
-    selectedAssignment,
-    submitResult,
-    errorMessage,
-    isSubmitting,
-    handleSubmit
-  } = useSubmitWorkflow({
-    compileResult, 
-    selectedFiles, 
-    userId,
-    selectedAssignmentId,
-    onAssignmentsLoaded
-  })
+  const { selectedAssignment, submitResult, errorMessage, isSubmitting, handleSubmit } =
+    useSubmitWorkflow({
+      compileResult,
+      selectedFiles,
+      userId,
+      selectedAssignmentId,
+      onAssignmentsLoaded
+    })
 
   /**
    * @brief FR-5: Notify parent of the initial assignment's expected output.
@@ -68,7 +63,6 @@ export function SubmitPanel({
    * fires whenever selectedAssignment changes — including on first load —
    * ensuring the parent always has the current expected output.
    */
-
 
   return (
     <div
@@ -99,10 +93,11 @@ export function SubmitPanel({
         </div>
       )}
 
-
       {selectedAssignment && (
         <div style={{ marginBottom: '1rem', fontSize: '14px', lineHeight: '1.6' }}>
-          <p><strong>Assignment:</strong> {selectedAssignment.name}</p>
+          <p>
+            <strong>Assignment:</strong> {selectedAssignment.name}
+          </p>
           <p>Due Date: {selectedAssignment.dueDate}</p>
           <p>Grading Criteria: {selectedAssignment.gradingCriteria}</p>
         </div>

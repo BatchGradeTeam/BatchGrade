@@ -70,7 +70,7 @@ export function AssignmentConfigPanel(): React.JSX.Element {
    * The path is passed directly to the compiler
    * handler so the main process can resolve it on disk.
    */
-  const [selectedFilePaths, setSelectedFilePaths] = useState<string[]>([])
+  const [selectedFilePath, setSelectedFilePath] = useState<string | null>(null)
 
   /**
    * @brief Display name of the selected solution file.
@@ -79,7 +79,7 @@ export function AssignmentConfigPanel(): React.JSX.Element {
    * Derived from selectedFilePath and shown in the UI so the instructor
    * can confirm which file is staged.
    */
-  const [selectedFileNames, setSelectedFileNames] = useState<string[]>([])
+  const [selectedFileName, setSelectedFileName] = useState<string | null>(null)
 
   /**
    * @brief Tracks whether the compile-and-run pipeline is in progress.
@@ -158,8 +158,8 @@ export function AssignmentConfigPanel(): React.JSX.Element {
       solutionType: (assignment.solutionType ?? 'text') as 'file' | 'text',
       expectedOutputText: assignment.expectedOutputText ?? ''
     })
-    setSelectedFilePaths([])
-    setSelectedFileNames([])
+    setSelectedFilePath(null)
+    setSelectedFileName(null)
     setCompiledOutput(null)
     setDeleteConfirm(null)
     setStatusMessage(null)
@@ -174,8 +174,8 @@ export function AssignmentConfigPanel(): React.JSX.Element {
   function cancelEdit(): void {
     setEditingUuid(null)
     setForm(emptyForm)
-    setSelectedFilePaths([])
-    setSelectedFileNames([])
+    setSelectedFilePath(null)
+    setSelectedFileName(null)
     setCompiledOutput(null)
     setDeleteConfirm(null)
     setStatusMessage(null)
@@ -197,18 +197,19 @@ export function AssignmentConfigPanel(): React.JSX.Element {
       const paths = await window.api.file.selectCppFiles()
       if (!paths || paths.length === 0) return
 
+      const filePath = paths[0]
       // Extract basename for display
-      const fileNames = paths.map((p) => p.split(/[\\/]/).pop() ?? p)
+      const fileName = filePath.split(/[\\/]/).pop() ?? filePath
 
-      setSelectedFilePaths(paths)
-      setSelectedFileNames(fileNames)
+      setSelectedFilePath(filePath)
+      setSelectedFileName(fileName)
       setCompiledOutput(null)
       setError(null)
       setIsSubmitting(true)
 
       // Step 1: Compile
       const compileResult = await window.api.compiler.compileCpp({
-        sourceFiles: paths
+        sourceFiles: [filePath]
       })
 
       if (!compileResult.compileSuccess || !compileResult.executablePath) {
@@ -282,7 +283,7 @@ export function AssignmentConfigPanel(): React.JSX.Element {
       return false
     }
 
-    if (form.solutionType === 'file' && selectedFilePaths.length === 0 && !editingUuid) {
+    if (form.solutionType === 'file' && !selectedFilePath && !editingUuid) {
       setError('Please select a solution file before submission.')
       return false
     }
@@ -323,9 +324,9 @@ export function AssignmentConfigPanel(): React.JSX.Element {
           gradingCriteria: trimmedCriteria,
           solutionType: form.solutionType,
           solutionFileName:
-            form.solutionType === 'file' ? (selectedFileNames.join(', ') ?? undefined) : undefined,
+            form.solutionType === 'file' ? (selectedFileName ?? undefined) : undefined,
           solutionFilePath:
-            form.solutionType === 'file' ? (selectedFilePaths.join(', ') ?? undefined) : undefined,
+            form.solutionType === 'file' ? (selectedFilePath ?? undefined) : undefined,
           expectedOutputText:
             form.solutionType === 'text' ? trimmedExpectedOutput : (compiledOutput ?? undefined)
         })
@@ -336,8 +337,8 @@ export function AssignmentConfigPanel(): React.JSX.Element {
           dueDate: trimmedDueDate,
           gradingCriteria: trimmedCriteria,
           solutionType: form.solutionType,
-          solutionFileName: form.solutionType === 'file' ? JSON.stringify(selectedFileNames) : null,
-          solutionFilePath: form.solutionType === 'file' ? JSON.stringify(selectedFilePaths) : null,
+          solutionFileName: form.solutionType === 'file' ? (selectedFileName ?? null) : null,
+          solutionFilePath: form.solutionType === 'file' ? (selectedFilePath ?? null) : null,
           expectedOutputText: form.solutionType === 'text' ? trimmedExpectedOutput : compiledOutput,
           createdByUserUuid: null
         })
@@ -345,8 +346,8 @@ export function AssignmentConfigPanel(): React.JSX.Element {
       }
 
       setForm(emptyForm)
-      setSelectedFilePaths([])
-      setSelectedFileNames([])
+      setSelectedFilePath(null)
+      setSelectedFileName(null)
       setCompiledOutput(null)
       setEditingUuid(null)
       setDeleteConfirm(null)
@@ -492,29 +493,18 @@ export function AssignmentConfigPanel(): React.JSX.Element {
           </div>
         ) : (
           <div className="solution-box">
-            <label className="field-label">
-              Upload solution file(s) (.cpp, .h, .hpp, .cc, .cxx)
-            </label>
+            <label className="field-label">Upload solution file (.cpp)</label>
 
             <button
               type="button"
               onClick={() => void handleSelectFile()}
-              className="btn-ghost"
+              className="primary-button"
               disabled={isSubmitting}
             >
               {isSubmitting ? 'Compiling solution…' : 'Select .cpp File'}
             </button>
 
-            {selectedFileNames.length > 0 && (
-              <div className="helper-text">
-                <p>Selected files:</p>
-                <ul>
-                  {selectedFileNames.map((name) => (
-                    <li key={name}>{name}</li>
-                  ))}
-                </ul>
-              </div>
-            )}
+            {selectedFileName && <p className="helper-text">Selected file: {selectedFileName}</p>}
 
             {/* FR11: Preview compiled output once the pipeline has run */}
             {compiledOutput !== null && (
@@ -531,7 +521,11 @@ export function AssignmentConfigPanel(): React.JSX.Element {
           <p>Submit the assignment only after the solution input has been provided.</p>
         </div>
 
-        <button onClick={() => void handleSubmit()} className="btn-primary" disabled={isSubmitting}>
+        <button
+          onClick={() => void handleSubmit()}
+          className="submit-button"
+          disabled={isSubmitting}
+        >
           {isSubmitting ? 'Saving…' : editingUuid ? 'Update Assignment' : '+ Create Assignment'}
         </button>
 

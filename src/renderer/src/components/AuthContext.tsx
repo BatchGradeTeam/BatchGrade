@@ -93,7 +93,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<AuthUser | null>(null) // stores the current user's email and role (or null if no user is logged in)
 
   // Ensures the user role is always one of the allowed roles.
-  const toRole = (candidate: unknown): ((typeof VALID_ROLES)[number] | null) => {
+  const toRole = (candidate: unknown): (typeof VALID_ROLES)[number] | null => {
     if (VALID_ROLES.includes(candidate as (typeof VALID_ROLES)[number])) {
       return candidate as (typeof VALID_ROLES)[number]
     }
@@ -122,7 +122,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   }
 
   // Refreshes the user's profile from the database, so we always have the latest role and metadata.
-  const refreshProfile = async() : Promise<AuthUser | null> => {
+  const refreshProfile = async (): Promise<AuthUser | null> => {
     const {
       data: { user: authUser },
       error
@@ -164,7 +164,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setIsLoggedIn(Boolean(fallbackUser))
       return fallbackUser
     }
-
   }
 
   // Restores any existing Supabase session when the app first loads and subscribes to future authentication state changes
@@ -233,7 +232,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   }, [])
 
   // Handles user login with Supabase then refreshes the user's profile to update authentication state and user information
-  const login = async (email: string, password: string) : Promise<AuthUser> => {
+  const login = async (email: string, password: string): Promise<AuthUser> => {
     const { error } = await supabase.auth.signInWithPassword({
       email,
       password
@@ -249,7 +248,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
     return loggedInUser
   }
-  
+
   // Handles user signup with Supabase authentication.
   // This returns as soon as auth confirms the user record was created so the UI
   // can show a stable success state without waiting on profile restoration.
@@ -300,7 +299,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   // provides authentication state and functions to any component wrapped inside this provider
   return (
-    <AuthContext.Provider value={{ isLoggedIn, isAuthLoading, user, login, signup, logout, refreshProfile }}>
+    <AuthContext.Provider
+      value={{ isLoggedIn, isAuthLoading, user, login, signup, logout, refreshProfile }}
+    >
       {children}
     </AuthContext.Provider>
   )
