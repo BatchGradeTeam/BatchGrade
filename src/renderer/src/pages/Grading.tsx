@@ -15,10 +15,7 @@
 import { useNavigate } from 'react-router-dom'
 import { Footer } from '../components/Footer'
 import { NavBar } from '../components/Navbar'
-import { CppWorkflowPanel } from '../components/compiler/CppWorkflowPanel'
-import { useState } from 'react'
-import type { CompileCppResult } from '../../../shared/compiler'
-import { CppJudgePanel } from '../components/CppJudgePanel'
+import { GradingPanel } from '../components/instructor/GradingPanel'
 
 /**
  * Grading Component
@@ -30,43 +27,13 @@ import { CppJudgePanel } from '../components/CppJudgePanel'
  */
 export function Grading(): React.JSX.Element {
   const navigate = useNavigate()
-  const [compileResult, setCompileResult] = useState<CompileCppResult | null>(null)
 
   return (
     <>
       <NavBar />
 
       <div style={{ padding: '6rem' }}>
-        <h1>Grading Page</h1>
-        <p>
-          Instructor workflow for compiling and running submissions. Execution remains a separate
-          step so it can move behind a sandbox boundary later.
-        </p>
-
-        <CppWorkflowPanel
-          title="Instructor Compilation Workspace"
-          description="Compile selected C++ files and optionally run the compiled program for grading checks."
-          allowExecution={true}
-          autoCompileOnSelection={true}
-          onCompileResultChange={setCompileResult}
-        />
-
-        <CppJudgePanel compileResult={compileResult} />
-
-        <button
-          onClick={() => navigate('/')}
-          style={{
-            padding: '9px 14px',
-            backgroundColor: '#2563eb',
-            color: 'white',
-            border: '2px solid #93c5fd',
-            borderRadius: '6px',
-            fontWeight: 'bold',
-            cursor: 'pointer'
-          }}
-        >
-          Go to home
-        </button>
+        <GradingPanel showHomeButton={true} onGoHome={() => navigate('/')} />
       </div>
 
       <Footer />

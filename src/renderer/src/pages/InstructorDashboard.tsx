@@ -20,6 +20,11 @@ import { useAuth } from '../components/AuthContext'
 import { NavBar } from '../components/Navbar'
 import { Footer } from '../components/Footer'
 import AssignmentConfigPanel from '../components/AssignmentConfigPanel'
+import { GradebookPanel } from '../components/instructor/GradebookPanel'
+import { GradingPanel } from '../components/instructor/GradingPanel'
+import { GradingPlusPanel } from '../components/instructor/GradingPlusPanel'
+
+type InstructorWorkspace = 'none' | 'assignment' | 'gradebook' | 'grading' | 'gradingPlus'
 
 /**
  * InstructorDashboard component
@@ -39,9 +44,9 @@ export function InstructorDashboard(): React.JSX.Element {
   const { logout } = useAuth()
 
   /**
-   * @brief Tracks whether the assignment configuration workspace is visible.
+   * @brief Tracks which workspace panel is currently visible.
    */
-  const [showAssignmentConfig, setShowAssignmentConfig] = useState<boolean>(false)
+  const [activeWorkspace, setActiveWorkspace] = useState<InstructorWorkspace>('none')
 
   /**
    * @brief Opens the assignment configuration panel.
@@ -49,7 +54,7 @@ export function InstructorDashboard(): React.JSX.Element {
    * @return Nothing.
    */
   function openAssignmentConfig(): void {
-    setShowAssignmentConfig(true)
+    setActiveWorkspace('assignment')
   }
 
   /**
@@ -58,7 +63,23 @@ export function InstructorDashboard(): React.JSX.Element {
    * @return Nothing.
    */
   function closeAssignmentConfig(): void {
-    setShowAssignmentConfig(false)
+    setActiveWorkspace('none')
+  }
+
+  function openGradebook(): void {
+    setActiveWorkspace('gradebook')
+  }
+
+  function openGrading(): void {
+    setActiveWorkspace('grading')
+  }
+
+  function openGradingPlus(): void {
+    setActiveWorkspace('gradingPlus')
+  }
+
+  function getWorkspaceButtonClass(workspace: Exclude<InstructorWorkspace, 'none'>): string {
+    return `primary-button dashboard-tab-button${activeWorkspace === workspace ? ' active' : ''}`
   }
 
   return (
@@ -87,30 +108,50 @@ export function InstructorDashboard(): React.JSX.Element {
         {/*-----------------------------------------------------------
           Assignment Configuration Workspace
         -----------------------------------------------------------*/}
-        {showAssignmentConfig ? (
-          <AssignmentConfigPanel />
-        ) : (
-          <div className="dashboard-empty-state">
-            <h2>Get started</h2>
-            <p>
-              Select <strong>Assignment Creation</strong> to begin creating an assignment. Choose a
-              solution input type, and submit the instructor solution.
-            </p>
-          </div>
-        )}
+        <div key={activeWorkspace} className="dashboard-panel-transition">
+          {activeWorkspace === 'assignment' ? (
+            <AssignmentConfigPanel />
+          ) : activeWorkspace === 'gradebook' ? (
+            <GradebookPanel />
+          ) : activeWorkspace === 'grading' ? (
+            <GradingPanel />
+          ) : activeWorkspace === 'gradingPlus' ? (
+            <GradingPlusPanel />
+          ) : (
+            <div className="dashboard-empty-state">
+              <h2>Get started</h2>
+              <p>
+                Select an instructor tool below to open it inside this dashboard workspace. You can
+                switch between assignment creation, gradebook, single grading, and batch grading
+                without leaving this page.
+              </p>
+            </div>
+          )}
+        </div>
         {/*-----------------------------------------------------------
           Instructor Action Toolbar
         -----------------------------------------------------------*/}
         <div className="dashboard-toolbar">
-          {!showAssignmentConfig ? (
-            <button className="primary-button" onClick={openAssignmentConfig}>
-              Assignment Creation
-            </button>
-          ) : (
+          {activeWorkspace !== 'none' && (
             <button className="secondary-button" onClick={closeAssignmentConfig}>
-              Close Assignment Configuration
+              Close Workspace
             </button>
           )}
+          <button className={getWorkspaceButtonClass('assignment')} onClick={openAssignmentConfig}>
+            Assignment Creation
+          </button>
+          <button className={getWorkspaceButtonClass('gradebook')} onClick={openGradebook}>
+            Gradebook
+          </button>
+          <button className={getWorkspaceButtonClass('grading')} onClick={openGrading}>
+            Grading
+          </button>
+          <button className={getWorkspaceButtonClass('gradingPlus')} onClick={openGradingPlus}>
+            Grading+
+          </button>
+          <button className="primary-button" onClick={() => navigate('/about')}>
+            About
+          </button>
         </div>
       </div>
 
