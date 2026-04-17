@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
 import { compileCppFiles } from '../compiler/cppWorkflowApi'
 import type { BatchJudgeCaseResult, BatchStudentSubmission } from '../../../../shared/batchGrading'
+import type { GradebookRecord } from '../../../../shared/gradebookTypes'
+import { saveGradebookRecord } from '../../lib/gradebookStorage'
 import { StudentGradingCard } from './StudentGradingCard'
 
 interface GradingPlusPanelProps {
@@ -35,6 +37,26 @@ function buildJudgeFilePairPreview(
 
 function sortFilesAlphabetically(files: string[]): string[] {
   return [...files].sort((a, b) => a.localeCompare(b))
+}
+
+function buildGradebookRecord(
+  student: BatchStudentSubmission,
+  passedCount: number,
+  totalCount: number,
+  status: 'done' | 'failed'
+): GradebookRecord {
+  const score = totalCount > 0 ? Math.round((passedCount / totalCount) * 100) : 0
+
+  return {
+    studentId: student.studentId,
+    studentName: student.studentName,
+    assignmentId: 'assignment-1',
+    score,
+    passedCount,
+    totalCount,
+    status,
+    submittedAt: Date.now()
+  }
 }
 
 export function GradingPlusPanel({
@@ -251,9 +273,13 @@ export function GradingPlusPanel({
       })
 
       if (!compileResult.compileSuccess || !compileResult.executablePath) {
+        const failedRecord = buildGradebookRecord(student, 0, 0, 'failed')
+        await saveGradebookRecord(failedRecord)
+
         updateStudent(index, {
           status: 'failed',
-          errorMessage: 'Compilation failed.'
+          errorMessage: 'Compilation failed.',
+          savedToGradebook: true
         })
         return
       }
@@ -292,20 +318,26 @@ export function GradingPlusPanel({
 
       const passedCount = judgeResults.filter((test) => test.result.passed).length
       const totalCount = judgeResults.length
+      const savedRecord = buildGradebookRecord(student, passedCount, totalCount, 'done')
+      await saveGradebookRecord(savedRecord)
 
       updateStudent(index, {
         status: 'done',
         judgeResults,
         passedCount,
         totalCount,
-        savedToGradebook: false
+        savedToGradebook: true
       })
     } catch (error) {
       console.error('Error grading student:', error)
 
+      const failedRecord = buildGradebookRecord(student, 0, 0, 'failed')
+      await saveGradebookRecord(failedRecord)
+
       updateStudent(index, {
         status: 'failed',
-        errorMessage: 'An error occurred while grading this student.'
+        errorMessage: 'An error occurred while grading this student.',
+        savedToGradebook: true
       })
     }
   }

@@ -1,4 +1,6 @@
-import { useState, type CSSProperties } from 'react'
+import { useEffect, useState, type CSSProperties } from 'react'
+import type { GradebookRecord } from '../../../../shared/gradebookTypes'
+import { clearGradebookRecords, loadGradebookRecords } from '../../lib/gradebookStorage'
 
 // =============================================================================
 // Helper Types
@@ -7,7 +9,6 @@ type StudentRecord = {
   id: string
   name: string
   score: string
-  submissions: number
   lastSubmitted: string
   status: string
 }
@@ -86,87 +87,53 @@ const calculateStats = (students: StudentRecord[]): GradeStats => {
  * Builds CSV-formatted string content for gradebook export.
  */
 const buildCSVContent = (students: StudentRecord[]): string => {
-  const headers = ['Student ID', 'Student Name', 'Highest Score', 'Submission Count']
+  const headers = ['Student ID', 'Student Name', 'Highest Score']
 
-  const rows = students.map((student) => [
-    student.id,
-    student.name,
-    student.score,
-    student.submissions.toString()
-  ])
+  const rows = students.map((student) => [student.id, student.name, student.score])
 
   return [headers, ...rows].map((row) => row.join(',')).join('\n')
 }
 
-const gradebookData = {
-  'Assignment 1': [
-    {
-      id: '1001',
-      name: 'Garen Crownguard',
-      score: '92%',
-      submissions: 3,
-      lastSubmitted: '2026-03-10 11:42 AM',
-      status: 'Submitted'
-    },
-    {
-      id: '1002',
-      name: 'Wu Kong',
-      score: '88%',
-      submissions: 2,
-      lastSubmitted: '2026-03-10 09:15 AM',
-      status: 'Submitted'
-    },
-    {
-      id: '1003',
-      name: 'Quinn Valor',
-      score: '95%',
-      submissions: 4,
-      lastSubmitted: '2026-03-11 02:30 PM',
-      status: 'Submitted'
-    },
-    {
-      id: '1004',
-      name: 'Govos Usan',
-      score: '--',
-      submissions: 0,
-      lastSubmitted: '--',
-      status: 'Missing'
+/**
+ * Formats a saved timestamp into a readable local date/time string.
+ */
+const formatSubmittedTime = (timestamp: number): string => {
+  return new Date(timestamp).toLocaleString()
+}
+
+/**
+ * Builds Gradebook table rows from saved Gradebook records.
+ */
+const buildStudentRecordsFromGradebook = (
+  records: GradebookRecord[],
+  assignmentId: string
+): StudentRecord[] => {
+  const assignmentRecords = records.filter((record) => record.assignmentId === assignmentId)
+
+  const groupedRecords = new Map<string, GradebookRecord[]>()
+
+  assignmentRecords.forEach((record) => {
+    const existing = groupedRecords.get(record.studentId) ?? []
+    groupedRecords.set(record.studentId, [...existing, record])
+  })
+
+  return Array.from(groupedRecords.values()).map((studentRecords) => {
+    const highestRecord = studentRecords.reduce((best, current) =>
+      current.score > best.score ? current : best
+    )
+
+    const latestRecord = studentRecords.reduce((latest, current) =>
+      current.submittedAt > latest.submittedAt ? current : latest
+    )
+
+    return {
+      id: latestRecord.studentId,
+      name: latestRecord.studentName,
+      score: `${highestRecord.score}%`,
+      lastSubmitted: formatSubmittedTime(latestRecord.submittedAt),
+      status: latestRecord.status === 'failed' ? 'Failed' : 'Submitted'
     }
-  ],
-  'Assignment 2': [
-    {
-      id: '1001',
-      name: 'Garen Crownguard',
-      score: '95%',
-      submissions: 4,
-      lastSubmitted: '2026-03-12 10:05 AM',
-      status: 'Submitted'
-    },
-    {
-      id: '1002',
-      name: 'Wu Kong',
-      score: '90%',
-      submissions: 3,
-      lastSubmitted: '2026-03-11 04:20 PM',
-      status: 'Submitted'
-    },
-    {
-      id: '1003',
-      name: 'Quinn Valor',
-      score: '91%',
-      submissions: 2,
-      lastSubmitted: '2026-03-12 08:45 AM',
-      status: 'Submitted'
-    },
-    {
-      id: '1004',
-      name: 'Govos Usan',
-      score: '--',
-      submissions: 0,
-      lastSubmitted: '--',
-      status: 'Missing'
-    }
-  ]
+  })
 }
 
 const cellStyle: CSSProperties = {
@@ -176,14 +143,39 @@ const cellStyle: CSSProperties = {
 }
 
 export function GradebookPanel(): React.JSX.Element {
-  const [selectedAssignment, setSelectedAssignment] = useState('Assignment 1')
+  const [selectedAssignment, setSelectedAssignment] = useState('')
+  const [gradebookRecords, setGradebookRecords] = useState<GradebookRecord[]>([])
   const [searchTerm, setSearchTerm] = useState('')
   const [sortOption, setSortOption] = useState('name-asc')
 
-  const students = gradebookData[selectedAssignment as keyof typeof gradebookData]
+  useEffect(() => {
+    async function fetchGradebookRecords(): Promise<void> {
+      const records = await loadGradebookRecords()
+      setGradebookRecords(records)
+    }
+
+    void fetchGradebookRecords()
+  }, [])
+
+  const assignmentOptions = Array.from(
+    new Set(gradebookRecords.map((record) => record.assignmentId))
+  )
+  const hasAssignments = assignmentOptions.length > 0
+
+  const effectiveSelectedAssignment = assignmentOptions.includes(selectedAssignment)
+    ? selectedAssignment
+    : (assignmentOptions[0] ?? '')
+
+  const students = buildStudentRecordsFromGradebook(gradebookRecords, effectiveSelectedAssignment)
   const filteredStudents = filterStudents(students, searchTerm)
   const sortedStudents = sortStudents(filteredStudents, sortOption)
   const { averageScore, highestScore, lowestScore } = calculateStats(students)
+
+  const handleClearRecentlyGraded = async (): Promise<void> => {
+    await clearGradebookRecords()
+    setGradebookRecords([])
+    setSelectedAssignment('')
+  }
 
   const handleExportCSV = (): void => {
     const csvContent = buildCSVContent(sortedStudents)
@@ -192,7 +184,7 @@ export function GradebookPanel(): React.JSX.Element {
 
     const link = document.createElement('a')
     link.href = url
-    link.setAttribute('download', `${selectedAssignment}-gradebook.csv`)
+    link.setAttribute('download', `${effectiveSelectedAssignment}-gradebook.csv`)
     document.body.appendChild(link)
 
     link.click()
@@ -211,11 +203,19 @@ export function GradebookPanel(): React.JSX.Element {
             <label htmlFor="assignment-select">Select Assignment: </label>
             <select
               id="assignment-select"
-              value={selectedAssignment}
+              value={hasAssignments ? effectiveSelectedAssignment : ''}
               onChange={(e) => setSelectedAssignment(e.target.value)}
+              disabled={!hasAssignments}
             >
-              <option>Assignment 1</option>
-              <option>Assignment 2</option>
+              {hasAssignments ? (
+                assignmentOptions.map((assignmentId) => (
+                  <option key={assignmentId} value={assignmentId}>
+                    Recently Graded
+                  </option>
+                ))
+              ) : (
+                <option value="">No assignments</option>
+              )}
             </select>
           </div>
 
@@ -265,34 +265,61 @@ export function GradebookPanel(): React.JSX.Element {
                   <th style={cellStyle}>Student ID</th>
                   <th style={cellStyle}>Student Name</th>
                   <th style={cellStyle}>Highest Score</th>
-                  <th style={cellStyle}>Submission Count</th>
                   <th style={cellStyle}>Last Submission Time</th>
                   <th style={cellStyle}>Status</th>
                 </tr>
               </thead>
               <tbody>
-                {sortedStudents.map((student) => (
-                  <tr key={student.id}>
-                    <td style={cellStyle}>{student.id}</td>
-                    <td style={cellStyle}>{student.name}</td>
-                    <td style={cellStyle}>{student.score}</td>
-                    <td style={cellStyle}>{student.submissions}</td>
-                    <td style={cellStyle}>{student.lastSubmitted}</td>
-                    <td style={cellStyle}>{student.status}</td>
+                {!hasAssignments ? (
+                  <tr>
+                    <td style={cellStyle} colSpan={5}>
+                      No graded assignments available.
+                    </td>
                   </tr>
-                ))}
+                ) : sortedStudents.length === 0 ? (
+                  <tr>
+                    <td style={cellStyle} colSpan={5}>
+                      No records for this assignment.
+                    </td>
+                  </tr>
+                ) : (
+                  sortedStudents.map((student) => (
+                    <tr key={student.id}>
+                      <td style={cellStyle}>{student.id}</td>
+                      <td style={cellStyle}>{student.name}</td>
+                      <td style={cellStyle}>{student.score}</td>
+                      <td style={cellStyle}>{student.lastSubmitted}</td>
+                      <td style={cellStyle}>{student.status}</td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>
 
-          <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '8px' }}>
+          <div
+            style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '8px' }}
+          >
             <button
-              onClick={handleExportCSV}
+              onClick={() => void handleClearRecentlyGraded()}
+              disabled={!hasAssignments}
               style={{
                 fontSize: '12px',
                 padding: '4px 8px',
-                opacity: 0.8,
-                cursor: 'pointer'
+                opacity: hasAssignments ? 0.8 : 0.5,
+                cursor: hasAssignments ? 'pointer' : 'not-allowed'
+              }}
+            >
+              Clear Recently Graded
+            </button>
+            <button
+              onClick={handleExportCSV}
+              disabled={sortedStudents.length === 0}
+              style={{
+                fontSize: '12px',
+                padding: '4px 8px',
+                opacity: sortedStudents.length === 0 ? 0.5 : 0.8,
+                cursor: sortedStudents.length === 0 ? 'not-allowed' : 'pointer'
               }}
             >
               Export CSV
