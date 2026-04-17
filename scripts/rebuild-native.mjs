@@ -14,15 +14,19 @@ const prebuildInstallBin = require.resolve('prebuild-install/bin.js', {
   paths: [betterSqliteDir]
 })
 
-const result = spawnSync(process.execPath, [prebuildInstallBin, '-r', 'electron', '-t', electronVersion], {
-  cwd: betterSqliteDir,
-  stdio: 'inherit',
-  env: {
-    ...process.env,
-    npm_config_runtime: 'electron',
-    npm_config_target: electronVersion
+const result = spawnSync(
+  process.execPath,
+  [prebuildInstallBin, '-r', 'electron', '-t', electronVersion],
+  {
+    cwd: betterSqliteDir,
+    stdio: 'inherit',
+    env: {
+      ...process.env,
+      npm_config_runtime: 'electron',
+      npm_config_target: electronVersion
+    }
   }
-})
+)
 
 if (result.status !== 0) {
   process.exit(result.status ?? 1)

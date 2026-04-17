@@ -119,7 +119,6 @@ function computeDiff(expected: string[], actual: string[]): DiffLine[] {
   return result
 }
 
-
 function lineStyle(type: DiffLineType): React.CSSProperties {
   switch (type) {
     case 'missing':
@@ -128,16 +127,23 @@ function lineStyle(type: DiffLineType): React.CSSProperties {
       return { backgroundColor: '#002200', color: '#69db7c', borderLeft: '3px solid #40c057' }
     case 'match':
     default:
-      return { backgroundColor: 'transparent', color: '#e0e0e0', borderLeft: '3px solid transparent' }
+      return {
+        backgroundColor: 'transparent',
+        color: '#e0e0e0',
+        borderLeft: '3px solid transparent'
+      }
   }
 }
 
 function linePrefix(type: DiffLineType): string {
   switch (type) {
-    case 'missing': return '− '
-    case 'extra':   return '+ '
+    case 'missing':
+      return '− '
+    case 'extra':
+      return '+ '
     case 'match':
-    default:        return '  '
+    default:
+      return '  '
   }
 }
 
@@ -171,9 +177,9 @@ export function OutputDiffPanel({
     return computeDiff(toLines(expectedOutput), toLines(actualOutput))
   }, [expectedOutput, actualOutput])
 
-  const matchCount    = diffLines.filter((l) => l.type === 'match').length
-  const missingCount  = diffLines.filter((l) => l.type === 'missing').length
-  const extraCount    = diffLines.filter((l) => l.type === 'extra').length
+  const matchCount = diffLines.filter((l) => l.type === 'match').length
+  const missingCount = diffLines.filter((l) => l.type === 'missing').length
+  const extraCount = diffLines.filter((l) => l.type === 'extra').length
   const totalExpected = diffLines.filter((l) => l.type !== 'extra').length
 
   const isReady = expectedOutput !== null && actualOutput !== null
@@ -187,16 +193,16 @@ export function OutputDiffPanel({
         backgroundColor: '#2b2b2b'
       }}
     >
-      
       <h2 style={{ marginBottom: '0.5rem' }}>Output Comparison</h2>
       <p style={{ marginBottom: '1rem', fontSize: '14px', color: '#ccc' }}>
         Your output is compared line-by-line against the instructor&apos;s expected output.
         Whitespace differences are ignored.
       </p>
 
-
       <div style={{ marginBottom: '1rem' }}>
-        <label style={{ display: 'block', marginBottom: '0.4rem', fontSize: '14px', color: '#ccc' }}>
+        <label
+          style={{ display: 'block', marginBottom: '0.4rem', fontSize: '14px', color: '#ccc' }}
+        >
           Assignment
         </label>
         <select
@@ -205,9 +211,7 @@ export function OutputDiffPanel({
           className="panel-input"
           style={{ maxWidth: '480px' }}
         >
-          {assignments.length === 0 && (
-            <option value="">No assignments available</option>
-          )}
+          {assignments.length === 0 && <option value="">No assignments available</option>}
           {assignments.map((a) => (
             <option key={a.uuid} value={a.uuid}>
               {a.name}
@@ -216,68 +220,66 @@ export function OutputDiffPanel({
         </select>
       </div>
 
-
       <div
-        style={{ 
-          display: 'flex', 
-          gap: '1.5rem', 
-          marginBottom: '1rem', 
-          fontSize: '13px', 
+        style={{
+          display: 'flex',
+          gap: '1.5rem',
+          marginBottom: '1rem',
+          fontSize: '13px',
           flexWrap: 'wrap'
         }}
       >
         <span style={{ color: '#e0e0e0' }}>
-          <span 
-            style={{ 
-              display: 'inline-block', 
-              width: '12px', 
-              height: '12px', 
-              backgroundColor: '#555', 
-              marginRight: '6px', 
-              verticalAlign: 'middle' 
-            }} 
+          <span
+            style={{
+              display: 'inline-block',
+              width: '12px',
+              height: '12px',
+              backgroundColor: '#555',
+              marginRight: '6px',
+              verticalAlign: 'middle'
+            }}
           />
           Match
         </span>
         <span style={{ color: '#ff6b6b' }}>
-          <span 
-            style={{ 
-              display: 'inline-block', 
-              width: '12px', 
-              height: '12px', 
-              backgroundColor: '#3b0000', 
-              border: '1px solid #ff4444', 
-              marginRight: '6px', 
-              verticalAlign: 'middle' 
-            }} 
+          <span
+            style={{
+              display: 'inline-block',
+              width: '12px',
+              height: '12px',
+              backgroundColor: '#3b0000',
+              border: '1px solid #ff4444',
+              marginRight: '6px',
+              verticalAlign: 'middle'
+            }}
           />
           Missing / Wrong Output
         </span>
         <span style={{ color: '#69db7c' }}>
-          <span 
-            style={{ 
-              display: 'inline-block', 
-              width: '12px', 
-              height: '12px', 
-              backgroundColor: '#002200', 
-              border: '1px solid #40c057', 
-              marginRight: '6px', 
-              verticalAlign: 'middle' 
-            }} 
+          <span
+            style={{
+              display: 'inline-block',
+              width: '12px',
+              height: '12px',
+              backgroundColor: '#002200',
+              border: '1px solid #40c057',
+              marginRight: '6px',
+              verticalAlign: 'middle'
+            }}
           />
           Superfluous Output
         </span>
       </div>
 
-
       {!isReady && (
         <div
-          style={{ 
-            border: '1px solid #444', 
-            padding: '12px', 
-            backgroundColor: '#1f1f1f', 
-            color: '#aaa', 
-            fontSize: '14px' 
+          style={{
+            border: '1px solid #444',
+            padding: '12px',
+            backgroundColor: '#1f1f1f',
+            color: '#aaa',
+            fontSize: '14px'
           }}
         >
           {actualOutput === null && expectedOutput === null && (
@@ -291,7 +293,6 @@ export function OutputDiffPanel({
           )}
         </div>
       )}
-
 
       {isReady && diffLines.length > 0 && (
         <div
@@ -322,29 +323,44 @@ export function OutputDiffPanel({
       ---------------------------------------------------------------- */}
       {isReady && (
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-
           {/* Actual output column */}
           <div>
             <h4 style={{ fontSize: '15px', marginBottom: '6px' }}>
               Your Output{' '}
-              
-              <span style={{ fontWeight: 'normal', color: '#aaa', fontSize: '13px' }}>(actual)</span>
+              <span style={{ fontWeight: 'normal', color: '#aaa', fontSize: '13px' }}>
+                (actual)
+              </span>
             </h4>
             <pre
               style={{
-                whiteSpace: 'pre-wrap', overflowWrap: 'anywhere', backgroundColor: '#111',
-                border: '1px solid #444', padding: 0, margin: 0,
-                maxHeight: '320px', overflowY: 'auto', fontSize: '12px', fontFamily: 'monospace'
+                whiteSpace: 'pre-wrap',
+                overflowWrap: 'anywhere',
+                backgroundColor: '#111',
+                border: '1px solid #444',
+                padding: 0,
+                margin: 0,
+                maxHeight: '320px',
+                overflowY: 'auto',
+                fontSize: '12px',
+                fontFamily: 'monospace'
               }}
             >
               {diffLines.map((line, idx) =>
                 line.type !== 'missing' ? (
                   <div key={idx} style={{ ...lineStyle(line.type), padding: '2px 8px' }}>
-                    {linePrefix(line.type)}{line.value}
+                    {linePrefix(line.type)}
+                    {line.value}
                   </div>
                 ) : (
                   /* Transparent placeholder to keep rows aligned with actual column */
-                  <div key={idx} style={{ padding: '2px 8px', color: 'transparent', borderLeft: '3px solid transparent' }}>
+                  <div
+                    key={idx}
+                    style={{
+                      padding: '2px 8px',
+                      color: 'transparent',
+                      borderLeft: '3px solid transparent'
+                    }}
+                  >
                     {'  —'}
                   </div>
                 )
@@ -356,27 +372,38 @@ export function OutputDiffPanel({
           <div>
             <h4 style={{ fontSize: '15px', marginBottom: '6px' }}>
               Expected Output{' '}
-              <span style={{ fontWeight: 'normal', color: '#aaa', fontSize: '13px' }}>(instructor)</span>
+              <span style={{ fontWeight: 'normal', color: '#aaa', fontSize: '13px' }}>
+                (instructor)
+              </span>
             </h4>
             <pre
               style={{
-                whiteSpace: 'pre-wrap', overflowWrap: 'anywhere', backgroundColor: '#111',
-                border: '1px solid #444', padding: 0, margin: 0,
-                maxHeight: '320px', overflowY: 'auto', fontSize: '12px', fontFamily: 'monospace'
+                whiteSpace: 'pre-wrap',
+                overflowWrap: 'anywhere',
+                backgroundColor: '#111',
+                border: '1px solid #444',
+                padding: 0,
+                margin: 0,
+                maxHeight: '320px',
+                overflowY: 'auto',
+                fontSize: '12px',
+                fontFamily: 'monospace'
               }}
             >
               {diffLines.map((line, idx) =>
                 line.type !== 'extra' ? (
                   <div key={idx} style={{ ...lineStyle(line.type), padding: '2px 8px' }}>
-                    {linePrefix(line.type === 'match' ? 'match' : 'missing')}{line.value}
+                    {linePrefix(line.type === 'match' ? 'match' : 'missing')}
+                    {line.value}
                   </div>
                 ) : (
                   /* Transparent placeholder to keep rows aligned with expected column */
-                  <div 
-                    key={idx} style={{ 
-                    padding: '2px 8px', 
-                    color: 'transparent', 
-                    borderLeft: '3px solid transparent' 
+                  <div
+                    key={idx}
+                    style={{
+                      padding: '2px 8px',
+                      color: 'transparent',
+                      borderLeft: '3px solid transparent'
                     }}
                   >
                     {'  —'}
@@ -385,7 +412,6 @@ export function OutputDiffPanel({
               )}
             </pre>
           </div>
-
         </div>
       )}
     </div>

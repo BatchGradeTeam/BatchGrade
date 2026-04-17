@@ -145,11 +145,7 @@ const calculateStats = (students: StudentRecord[]): GradeStats => {
 const buildCSVContent = (students: StudentRecord[]): string => {
   const headers = ['Student ID', 'Student Name', 'Highest Score']
 
-  const rows = students.map((student) => [
-    student.id,
-    student.name,
-    student.score,
-  ])
+  const rows = students.map((student) => [student.id, student.name, student.score])
 
   return [headers, ...rows].map((row) => row.join(',')).join('\n')
 }
