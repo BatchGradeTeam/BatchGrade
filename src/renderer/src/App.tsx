@@ -13,10 +13,8 @@
  *  - SignUp (registration page)
  *  - About (project information)
  *  - Student Dashboard
- *    - Student Upload Interface
  *  - Instructor Dashboard
- *    - Grading Interface
- *    - Gradebook Interface
+ *  - Guest Dashboard
  *
  * The routing system is wrapped in an AuthProvider to allow all
  * pages within the application to access shared authentication
@@ -27,9 +25,6 @@ import { INSTRUCTOR_ROLE, STUDENT_ROLE } from '../../main/database/schema'
 import { AuthProvider } from './components/AuthContext'
 import { ProtectedRoute } from './components/ProtectedRoute'
 import { About } from './pages/About'
-import { Gradebook } from './pages/Gradebook'
-import { Grading } from './pages/Grading'
-import { GradingPlus } from './pages/GradingPlus'
 import { GuestBatchGradeInterface } from './pages/GuestBatchGradeInterface'
 import { GuestDashboard } from './pages/GuestDashboard'
 import { GuestStudentInterface } from './pages/GuestStudentInterface'
@@ -37,7 +32,6 @@ import { InstructorDashboard } from './pages/InstructorDashboard'
 import { Login } from './pages/Login'
 import { SignUp } from './pages/SignUp'
 import { StudentDashboard } from './pages/StudentDashboard'
-import { StudentUploadInterface } from './pages/StudentUploadInterface'
 
 /**
  * App Component
@@ -55,7 +49,7 @@ import { StudentUploadInterface } from './pages/StudentUploadInterface'
  *    '/login'    -> Login page
  *    '/studentdashboard'   -> Student interface
  *    '/instructordashboard'    -> Instructor interface
- *    '/grading'    -> Grading interface
+ *    '/guestDashboard'    -> Guest interface
  *
  * Additional routes can be added by:
  *    1. Creating a new page component inside the /page directory.
@@ -112,42 +106,6 @@ export function App(): React.JSX.Element {
             element={
               <ProtectedRoute requiredRoles={[INSTRUCTOR_ROLE]}>
                 <InstructorDashboard />
-              </ProtectedRoute>
-            }
-          />
-          {/* Student Upload Interface (role-protected) */}
-          <Route
-            path="/studentuploadinterface"
-            element={
-              <ProtectedRoute requiredRoles={[STUDENT_ROLE]}>
-                <StudentUploadInterface />
-              </ProtectedRoute>
-            }
-          />
-          {/* Gradebook Interface (role-protected) */}
-          <Route
-            path="/gradebook"
-            element={
-              <ProtectedRoute requiredRoles={[INSTRUCTOR_ROLE]}>
-                <Gradebook />
-              </ProtectedRoute>
-            }
-          />
-          {/* Grading Interface */}
-          <Route
-            path="/grading"
-            element={
-              <ProtectedRoute requiredRoles={[INSTRUCTOR_ROLE]}>
-                <Grading />
-              </ProtectedRoute>
-            }
-          />
-          {/* Grading+ (Batch Grading) Interface */}
-          <Route
-            path="/grading-plus"
-            element={
-              <ProtectedRoute requiredRoles={[INSTRUCTOR_ROLE]}>
-                <GradingPlus />
               </ProtectedRoute>
             }
           />

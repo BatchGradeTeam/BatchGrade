@@ -1,27 +1,6 @@
-/**
- * Gradebook.tsx
- *
- * Description:
- * This component implements the Gradebook interface for instructors
- * within the BatchGrade platform. The Gradebook allows instructors to
- * view the highest score achieved by each student for a selected assignment,
- * along with submission details and class statistics.
- *
- * Key features include:
- *  - Assignment selection dropdown to switch between different assignments
- *  - Search functionality to filter students by name or ID
- *  - Sorting options to organize students by name or score
- *  - Class statistics summary showing average, highest, and lowest scores
- *  - Export functionality to download the currently displayed gradebook as a CSV file
- * MVP-4 Frontend Implementation
- * Displays the highest score each student achieved for a selected assignment.
- */
-
-import { useState, useEffect } from 'react' // Import React hooks used for component state and side effects
-import { NavBar } from '../components/Navbar' // Import the navigation bar component
-import { Footer } from '../components/Footer' // Import the footer component
-import type { GradebookRecord } from '../../../shared/gradebookTypes'
-import { loadGradebookRecords, clearGradebookRecords } from '../lib/gradebookStorage'
+import { useEffect, useState, type CSSProperties } from 'react'
+import type { GradebookRecord } from '../../../../shared/gradebookTypes'
+import { clearGradebookRecords, loadGradebookRecords } from '../../lib/gradebookStorage'
 
 // =============================================================================
 // Helper Types
@@ -40,15 +19,8 @@ type GradeStats = {
   lowestScore: number | string
 }
 
-// =============================================================================
-// Helper Functions
-// =============================================================================
-
 /**
  * Converts a score string into a numeric value.
- *
- * @param score - Score string (e.g., "92%" or "--")
- * @returns Parsed numeric score, or null if the score is missing
  */
 const parseScore = (score: string): number | null => {
   return score === '--' ? null : parseInt(score)
@@ -56,11 +28,6 @@ const parseScore = (score: string): number | null => {
 
 /**
  * Filters students based on a search term.
- * Matches against student name (case-insensitive) or student ID.
- *
- * @param students - List of student records
- * @param searchTerm - User input for searching
- * @returns Filtered list of students
  */
 const filterStudents = (students: StudentRecord[], searchTerm: string): StudentRecord[] => {
   const normalizedSearch = searchTerm.toLowerCase()
@@ -73,16 +40,6 @@ const filterStudents = (students: StudentRecord[], searchTerm: string): StudentR
 
 /**
  * Sorts students based on the selected sort option.
- *
- * Supported options:
- * - "name-asc"
- * - "name-desc"
- * - "score-asc"
- * - "score-desc"
- *
- * @param students - List of student records
- * @param sortOption - Selected sorting option
- * @returns New sorted array of students
  */
 const sortStudents = (students: StudentRecord[], sortOption: string): StudentRecord[] => {
   return [...students].sort((a, b) => {
@@ -101,10 +58,6 @@ const sortStudents = (students: StudentRecord[], sortOption: string): StudentRec
 
 /**
  * Calculates class statistics including average, highest, and lowest scores.
- * Only valid numeric scores are considered.
- *
- * @param students - List of student records
- * @returns Object containing average, highest, and lowest scores
  */
 const calculateStats = (students: StudentRecord[]): GradeStats => {
   const validScores = students
@@ -132,15 +85,6 @@ const calculateStats = (students: StudentRecord[]): GradeStats => {
 
 /**
  * Builds CSV-formatted string content for gradebook export.
- *
- * Includes:
- * - Student ID
- * - Student Name
- * - Highest Score
- * - Submission Count
- *
- * @param students - List of student records to export
- * @returns CSV string content
  */
 const buildCSVContent = (students: StudentRecord[]): string => {
   const headers = ['Student ID', 'Student Name', 'Highest Score']
@@ -152,9 +96,6 @@ const buildCSVContent = (students: StudentRecord[]): string => {
 
 /**
  * Formats a saved timestamp into a readable local date/time string.
- *
- * @param timestamp - Unix timestamp in milliseconds
- * @returns Formatted date string
  */
 const formatSubmittedTime = (timestamp: number): string => {
   return new Date(timestamp).toLocaleString()
@@ -162,11 +103,6 @@ const formatSubmittedTime = (timestamp: number): string => {
 
 /**
  * Builds Gradebook table rows from saved Gradebook records.
- * Keeps the highest score per student and counts total submissions.
- *
- * @param records - All saved Gradebook records
- * @param assignmentId - Selected assignment id
- * @returns Student records for the Gradebook table
  */
 const buildStudentRecordsFromGradebook = (
   records: GradebookRecord[],
@@ -200,26 +136,18 @@ const buildStudentRecordsFromGradebook = (
   })
 }
 
-// =============================================================================
-// Gradebook page component
-// Displays the highest score each student achieved for the selected assignment
-// =============================================================================
-export function Gradebook(): React.JSX.Element {
-  // Stores the currently selected assignment id.
+const cellStyle: CSSProperties = {
+  border: '1px solid #555',
+  padding: '10px',
+  textAlign: 'left'
+}
+
+export function GradebookPanel(): React.JSX.Element {
   const [selectedAssignment, setSelectedAssignment] = useState('')
-
-  // Stores all saved Gradebook records loaded from localStorage.
   const [gradebookRecords, setGradebookRecords] = useState<GradebookRecord[]>([])
-
-  // Tracks text entered in the search box
   const [searchTerm, setSearchTerm] = useState('')
-
-  // Tracks which sorting option is selected
   const [sortOption, setSortOption] = useState('name-asc')
 
-  /**
-   * Loads saved Gradebook records when the page is opened.
-   */
   useEffect(() => {
     async function fetchGradebookRecords(): Promise<void> {
       const records = await loadGradebookRecords()
@@ -229,78 +157,50 @@ export function Gradebook(): React.JSX.Element {
     void fetchGradebookRecords()
   }, [])
 
-  // Build assignment dropdown options from saved Gradebook records.
   const assignmentOptions = Array.from(
     new Set(gradebookRecords.map((record) => record.assignmentId))
   )
-
-  // Check if there are any assignments available based on loaded records
   const hasAssignments = assignmentOptions.length > 0
 
   const effectiveSelectedAssignment = assignmentOptions.includes(selectedAssignment)
     ? selectedAssignment
     : (assignmentOptions[0] ?? '')
 
-  // Build Gradebook student rows for the selected assignment.
   const students = buildStudentRecordsFromGradebook(gradebookRecords, effectiveSelectedAssignment)
-
-  // Filter students by name or ID based on search input
   const filteredStudents = filterStudents(students, searchTerm)
-
-  // Sort filtered students based on selected sort option
   const sortedStudents = sortStudents(filteredStudents, sortOption)
-
-  // Calculate class statistics for the selected assignment
   const { averageScore, highestScore, lowestScore } = calculateStats(students)
 
-  // Clears all saved Gradebook records and resets the page state.
   const handleClearRecentlyGraded = async (): Promise<void> => {
     await clearGradebookRecords()
     setGradebookRecords([])
     setSelectedAssignment('')
   }
 
-  // ai-gen start (ChatGPT-5.3, 1)
-  // Export currently displayed gradebook rows to a CSV file
   const handleExportCSV = (): void => {
-    // Build CSV content from the currently displayed students
     const csvContent = buildCSVContent(sortedStudents)
-
-    // Create downloadable file
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
     const url = URL.createObjectURL(blob)
 
-    // Creates a hidden link
-    // Sets file name like:
-    // Assignment 1-gradebook.csv
     const link = document.createElement('a')
     link.href = url
     link.setAttribute('download', `${effectiveSelectedAssignment}-gradebook.csv`)
     document.body.appendChild(link)
 
-    // Simulates user clicking download
     link.click()
 
-    // Removes the temporary link and frees memory
     document.body.removeChild(link)
     URL.revokeObjectURL(url)
   }
-  // ai-gen end
 
   return (
-    // Main page container
-    <div style={{ color: 'var(--ev-c-gray-1)' }}>
-      <NavBar />
-      <div style={{ paddingTop: '100px' }}>
+    <div className="panel-shell">
+      <div style={{ color: 'var(--ev-c-gray-1)' }}>
         <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '0 24px' }}>
-          {/* Page title */}
           <h1>Assignment Gradebook</h1>
 
-          {/* Assignment selection dropdown */}
           <div style={{ margin: '16px 0' }}>
             <label htmlFor="assignment-select">Select Assignment: </label>
-
-            {/* Dropdown that allows instructors to switch assignments (FR-8) */}
             <select
               id="assignment-select"
               value={hasAssignments ? effectiveSelectedAssignment : ''}
@@ -319,7 +219,6 @@ export function Gradebook(): React.JSX.Element {
             </select>
           </div>
 
-          {/* Class statistics summary */}
           <div style={{ display: 'flex', gap: '24px', margin: '20px 0', fontWeight: 'bold' }}>
             <div>
               <span>Class Average: {averageScore === '--' ? '--' : `${averageScore}%`}</span>
@@ -332,7 +231,6 @@ export function Gradebook(): React.JSX.Element {
             </div>
           </div>
 
-          {/* Student search input */}
           <div style={{ margin: '16px 0' }}>
             <label htmlFor="student-search">Search Student: </label>
             <input
@@ -345,7 +243,6 @@ export function Gradebook(): React.JSX.Element {
             />
           </div>
 
-          {/* Sort dropdown */}
           <div style={{ margin: '16px 0' }}>
             <label htmlFor="sort-select">Sort By: </label>
             <select
@@ -361,10 +258,8 @@ export function Gradebook(): React.JSX.Element {
             </select>
           </div>
 
-          {/* Table displaying students and their highest scores */}
           <div style={{ overflowX: 'auto', marginBottom: '16px' }}>
             <table style={{ borderCollapse: 'collapse', width: '100%' }}>
-              {/* Table header */}
               <thead>
                 <tr>
                   <th style={cellStyle}>Student ID</th>
@@ -374,8 +269,6 @@ export function Gradebook(): React.JSX.Element {
                   <th style={cellStyle}>Status</th>
                 </tr>
               </thead>
-
-              {/* Table body generated dynamically from student data */}
               <tbody>
                 {!hasAssignments ? (
                   <tr>
@@ -404,7 +297,6 @@ export function Gradebook(): React.JSX.Element {
             </table>
           </div>
 
-          {/* Clear Recently Graded and Export CSV Buttons */}
           <div
             style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '8px' }}
           >
@@ -420,7 +312,6 @@ export function Gradebook(): React.JSX.Element {
             >
               Clear Recently Graded
             </button>
-
             <button
               onClick={handleExportCSV}
               disabled={sortedStudents.length === 0}
@@ -436,14 +327,6 @@ export function Gradebook(): React.JSX.Element {
           </div>
         </div>
       </div>
-      <Footer />
     </div>
   )
-}
-
-// Reusable styling for table cells
-const cellStyle: React.CSSProperties = {
-  border: '1px solid #555',
-  padding: '10px',
-  textAlign: 'left'
 }
