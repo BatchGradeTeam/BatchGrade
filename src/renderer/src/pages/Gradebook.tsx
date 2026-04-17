@@ -17,9 +17,11 @@
  * Displays the highest score each student achieved for a selected assignment.
  */
 
-import { useState } from 'react' // Import React hook used to manage component state
+import { useState, useEffect } from 'react' // Import React hooks used for component state and side effects
 import { NavBar } from '../components/Navbar' // Import the navigation bar component
 import { Footer } from '../components/Footer' // Import the footer component
+import type { GradebookRecord } from '../../../shared/gradebookTypes'
+import { loadGradebookRecords, clearGradebookRecords } from '../lib/gradebookStorage'
 
 // =============================================================================
 // Helper Types
@@ -28,7 +30,6 @@ type StudentRecord = {
   id: string
   name: string
   score: string
-  submissions: number
   lastSubmitted: string
   status: string
 }
@@ -142,91 +143,61 @@ const calculateStats = (students: StudentRecord[]): GradeStats => {
  * @returns CSV string content
  */
 const buildCSVContent = (students: StudentRecord[]): string => {
-  const headers = ['Student ID', 'Student Name', 'Highest Score', 'Submission Count']
+  const headers = ['Student ID', 'Student Name', 'Highest Score']
 
-  const rows = students.map((student) => [
-    student.id,
-    student.name,
-    student.score,
-    student.submissions.toString()
-  ])
+  const rows = students.map((student) => [student.id, student.name, student.score])
 
   return [headers, ...rows].map((row) => row.join(',')).join('\n')
 }
 
-// =============================================================================
-// Mock data representing gradebook records for each assignment.
-// This data would come from the backend database (FR-7).
-// =============================================================================
-const gradebookData = {
-  'Assignment 1': [
-    {
-      id: '1001',
-      name: 'Garen Crownguard',
-      score: '92%',
-      submissions: 3,
-      lastSubmitted: '2026-03-10 11:42 AM',
-      status: 'Submitted'
-    },
-    {
-      id: '1002',
-      name: 'Wu Kong',
-      score: '88%',
-      submissions: 2,
-      lastSubmitted: '2026-03-10 09:15 AM',
-      status: 'Submitted'
-    },
-    {
-      id: '1003',
-      name: 'Quinn Valor',
-      score: '95%',
-      submissions: 4,
-      lastSubmitted: '2026-03-11 02:30 PM',
-      status: 'Submitted'
-    },
-    {
-      id: '1004',
-      name: 'Govos Usan',
-      score: '--',
-      submissions: 0,
-      lastSubmitted: '--',
-      status: 'Missing'
+/**
+ * Formats a saved timestamp into a readable local date/time string.
+ *
+ * @param timestamp - Unix timestamp in milliseconds
+ * @returns Formatted date string
+ */
+const formatSubmittedTime = (timestamp: number): string => {
+  return new Date(timestamp).toLocaleString()
+}
+
+/**
+ * Builds Gradebook table rows from saved Gradebook records.
+ * Keeps the highest score per student and counts total submissions.
+ *
+ * @param records - All saved Gradebook records
+ * @param assignmentId - Selected assignment id
+ * @returns Student records for the Gradebook table
+ */
+const buildStudentRecordsFromGradebook = (
+  records: GradebookRecord[],
+  assignmentId: string
+): StudentRecord[] => {
+  const assignmentRecords = records.filter((record) => record.assignmentId === assignmentId)
+
+  const groupedRecords = new Map<string, GradebookRecord[]>()
+
+  assignmentRecords.forEach((record) => {
+    const existing = groupedRecords.get(record.studentId) ?? []
+    groupedRecords.set(record.studentId, [...existing, record])
+  })
+
+  return Array.from(groupedRecords.values()).map((studentRecords) => {
+    const highestRecord = studentRecords.reduce((best, current) =>
+      current.score > best.score ? current : best
+    )
+
+    const latestRecord = studentRecords.reduce((latest, current) =>
+      current.submittedAt > latest.submittedAt ? current : latest
+    )
+
+    return {
+      id: latestRecord.studentId,
+      name: latestRecord.studentName,
+      score: `${highestRecord.score}%`,
+      lastSubmitted: formatSubmittedTime(latestRecord.submittedAt),
+      status: latestRecord.status === 'failed' ? 'Failed' : 'Submitted'
     }
-  ],
-  'Assignment 2': [
-    {
-      id: '1001',
-      name: 'Garen Crownguard',
-      score: '95%',
-      submissions: 4,
-      lastSubmitted: '2026-03-12 10:05 AM',
-      status: 'Submitted'
-    },
-    {
-      id: '1002',
-      name: 'Wu Kong',
-      score: '90%',
-      submissions: 3,
-      lastSubmitted: '2026-03-11 04:20 PM',
-      status: 'Submitted'
-    },
-    {
-      id: '1003',
-      name: 'Quinn Valor',
-      score: '91%',
-      submissions: 2,
-      lastSubmitted: '2026-03-12 08:45 AM',
-      status: 'Submitted'
-    },
-    {
-      id: '1004',
-      name: 'Govos Usan',
-      score: '--',
-      submissions: 0,
-      lastSubmitted: '--',
-      status: 'Missing'
-    }
-  ]
+  })
 }
 
 // =============================================================================
@@ -234,8 +205,11 @@ const gradebookData = {
 // Displays the highest score each student achieved for the selected assignment
 // =============================================================================
 export function Gradebook(): React.JSX.Element {
-  // State variable that tracks which assignment is currently selected
-  const [selectedAssignment, setSelectedAssignment] = useState('Assignment 1')
+  // Stores the currently selected assignment id.
+  const [selectedAssignment, setSelectedAssignment] = useState('')
+
+  // Stores all saved Gradebook records loaded from localStorage.
+  const [gradebookRecords, setGradebookRecords] = useState<GradebookRecord[]>([])
 
   // Tracks text entered in the search box
   const [searchTerm, setSearchTerm] = useState('')
@@ -243,8 +217,32 @@ export function Gradebook(): React.JSX.Element {
   // Tracks which sorting option is selected
   const [sortOption, setSortOption] = useState('name-asc')
 
-  // Retrieve the student list corresponding to the selected assignment
-  const students = gradebookData[selectedAssignment as keyof typeof gradebookData]
+  /**
+   * Loads saved Gradebook records when the page is opened.
+   */
+  useEffect(() => {
+    async function fetchGradebookRecords(): Promise<void> {
+      const records = await loadGradebookRecords()
+      setGradebookRecords(records)
+    }
+
+    void fetchGradebookRecords()
+  }, [])
+
+  // Build assignment dropdown options from saved Gradebook records.
+  const assignmentOptions = Array.from(
+    new Set(gradebookRecords.map((record) => record.assignmentId))
+  )
+
+  // Check if there are any assignments available based on loaded records
+  const hasAssignments = assignmentOptions.length > 0
+
+  const effectiveSelectedAssignment = assignmentOptions.includes(selectedAssignment)
+    ? selectedAssignment
+    : (assignmentOptions[0] ?? '')
+
+  // Build Gradebook student rows for the selected assignment.
+  const students = buildStudentRecordsFromGradebook(gradebookRecords, effectiveSelectedAssignment)
 
   // Filter students by name or ID based on search input
   const filteredStudents = filterStudents(students, searchTerm)
@@ -254,6 +252,13 @@ export function Gradebook(): React.JSX.Element {
 
   // Calculate class statistics for the selected assignment
   const { averageScore, highestScore, lowestScore } = calculateStats(students)
+
+  // Clears all saved Gradebook records and resets the page state.
+  const handleClearRecentlyGraded = async (): Promise<void> => {
+    await clearGradebookRecords()
+    setGradebookRecords([])
+    setSelectedAssignment('')
+  }
 
   // ai-gen start (ChatGPT-5.3, 1)
   // Export currently displayed gradebook rows to a CSV file
@@ -270,7 +275,7 @@ export function Gradebook(): React.JSX.Element {
     // Assignment 1-gradebook.csv
     const link = document.createElement('a')
     link.href = url
-    link.setAttribute('download', `${selectedAssignment}-gradebook.csv`)
+    link.setAttribute('download', `${effectiveSelectedAssignment}-gradebook.csv`)
     document.body.appendChild(link)
 
     // Simulates user clicking download
@@ -298,11 +303,19 @@ export function Gradebook(): React.JSX.Element {
             {/* Dropdown that allows instructors to switch assignments (FR-8) */}
             <select
               id="assignment-select"
-              value={selectedAssignment}
+              value={hasAssignments ? effectiveSelectedAssignment : ''}
               onChange={(e) => setSelectedAssignment(e.target.value)}
+              disabled={!hasAssignments}
             >
-              <option>Assignment 1</option>
-              <option>Assignment 2</option>
+              {hasAssignments ? (
+                assignmentOptions.map((assignmentId) => (
+                  <option key={assignmentId} value={assignmentId}>
+                    Recently Graded
+                  </option>
+                ))
+              ) : (
+                <option value="">No assignments</option>
+              )}
             </select>
           </div>
 
@@ -357,7 +370,6 @@ export function Gradebook(): React.JSX.Element {
                   <th style={cellStyle}>Student ID</th>
                   <th style={cellStyle}>Student Name</th>
                   <th style={cellStyle}>Highest Score</th>
-                  <th style={cellStyle}>Submission Count</th>
                   <th style={cellStyle}>Last Submission Time</th>
                   <th style={cellStyle}>Status</th>
                 </tr>
@@ -365,29 +377,58 @@ export function Gradebook(): React.JSX.Element {
 
               {/* Table body generated dynamically from student data */}
               <tbody>
-                {sortedStudents.map((student) => (
-                  <tr key={student.id}>
-                    <td style={cellStyle}>{student.id}</td>
-                    <td style={cellStyle}>{student.name}</td>
-                    <td style={cellStyle}>{student.score}</td>
-                    <td style={cellStyle}>{student.submissions}</td>
-                    <td style={cellStyle}>{student.lastSubmitted}</td>
-                    <td style={cellStyle}>{student.status}</td>
+                {!hasAssignments ? (
+                  <tr>
+                    <td style={cellStyle} colSpan={5}>
+                      No graded assignments available.
+                    </td>
                   </tr>
-                ))}
+                ) : sortedStudents.length === 0 ? (
+                  <tr>
+                    <td style={cellStyle} colSpan={5}>
+                      No records for this assignment.
+                    </td>
+                  </tr>
+                ) : (
+                  sortedStudents.map((student) => (
+                    <tr key={student.id}>
+                      <td style={cellStyle}>{student.id}</td>
+                      <td style={cellStyle}>{student.name}</td>
+                      <td style={cellStyle}>{student.score}</td>
+                      <td style={cellStyle}>{student.lastSubmitted}</td>
+                      <td style={cellStyle}>{student.status}</td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>
 
-          {/* Export CSV Button at the bottom-right corner of the table */}
-          <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '8px' }}>
+          {/* Clear Recently Graded and Export CSV Buttons */}
+          <div
+            style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '8px' }}
+          >
+            <button
+              onClick={() => void handleClearRecentlyGraded()}
+              disabled={!hasAssignments}
+              style={{
+                fontSize: '12px',
+                padding: '4px 8px',
+                opacity: hasAssignments ? 0.8 : 0.5,
+                cursor: hasAssignments ? 'pointer' : 'not-allowed'
+              }}
+            >
+              Clear Recently Graded
+            </button>
+
             <button
               onClick={handleExportCSV}
+              disabled={sortedStudents.length === 0}
               style={{
-                fontSize: '12px', // smaller text
-                padding: '4px 8px', // smaller button
-                opacity: 0.8, // slightly subtle
-                cursor: 'pointer'
+                fontSize: '12px',
+                padding: '4px 8px',
+                opacity: sortedStudents.length === 0 ? 0.5 : 0.8,
+                cursor: sortedStudents.length === 0 ? 'not-allowed' : 'pointer'
               }}
             >
               Export CSV

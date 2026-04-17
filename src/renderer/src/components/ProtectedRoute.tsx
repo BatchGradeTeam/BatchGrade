@@ -7,7 +7,7 @@
  * This component checks if the current user is authenticated and,
  * optionally, whether they have the required role(s) to access a route.
  * If not, it redirects them to an appropriate page (login or home).
- * 
+ *
  * While authentication state is still being restored, the component temporarily
  * renders a loading message so routes do not redirect prematurely before the user's
  * session has been checked
