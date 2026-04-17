@@ -21,8 +21,11 @@ import { useAuth } from '../components/AuthContext'
 import { CppWorkflowPanel } from '../components/compiler/CppWorkflowPanel'
 import { OutputDiffPanel } from '../components/OutputDiffPanel'
 import { SubmitPanel } from '../components/submission/SubmitPanel'
+import { AboutPanel } from '../components/AboutPanel'
 import type { CompileCppResult, RunCppResult } from 'src/shared/compiler'
 import type { Assignment } from '../../../shared/types'
+
+type StudentWorkspace = 'none' | 'compile' | 'about'
 
 /**
  * StudentDashboard Component
@@ -37,7 +40,7 @@ export function StudentDashboard(): React.JSX.Element {
   const navigate = useNavigate()
   const { logout, user } = useAuth()
 
-  const [showCompileWorkspace, setShowCompileWorkspace] = useState<boolean>(false)
+  const [activeWorkspace, setActiveWorkspace] = useState<StudentWorkspace>('none')
   const [selectedFiles, setSelectedFiles] = useState<string[]>([])
   const [compileResult, setCompileResult] = useState<CompileCppResult | null>(null)
   const [runResult, setRunResult] = useState<RunCppResult | null>(null)
@@ -46,11 +49,19 @@ export function StudentDashboard(): React.JSX.Element {
   const [selectedAssignmentId, setSelectedAssignmentId] = useState<string>('')
 
   function openCompileWorkspace(): void {
-    setShowCompileWorkspace(true)
+    setActiveWorkspace('compile')
   }
 
   function closeCompileWorkspace(): void {
-    setShowCompileWorkspace(false)
+    setActiveWorkspace('none')
+  }
+
+  function openAboutWorkspace(): void {
+    setActiveWorkspace('about')
+  }
+
+  function getWorkspaceButtonClass(workspace: Exclude<StudentWorkspace, 'none'>): string {
+    return `primary-button dashboard-tab-button${activeWorkspace === workspace ? ' active' : ''}`
   }
 
   function handleAssignmentChange(uuid: string): void {
@@ -76,64 +87,67 @@ export function StudentDashboard(): React.JSX.Element {
       </div>
 
       <div className="dashboard-container">
-        {showCompileWorkspace ? (
-          <>
-            <CppWorkflowPanel
-              title="Student Compilation Workspace"
-              description="Choose the files you want to submit, compile them, optionally run them with input, and review the output before submitting."
-              autoCompileOnSelection={true}
-              allowExecution={true}
-              onSelectionChange={setSelectedFiles}
-              onCompileResultChange={setCompileResult}
-              onRunResultChange={setRunResult}
-            />
-
-            <OutputDiffPanel
-              actualOutput={runResult?.stdout ?? null}
-              expectedOutput={expectedOutput}
-              assignments={assignments}
-              selectedAssignmentId={selectedAssignmentId}
-              onAssignmentChange={handleAssignmentChange}
-            />
-
-            <SubmitPanel
-              compileResult={compileResult}
-              selectedFiles={selectedFiles}
-              userId={user?.uuid}
-              selectedAssignmentId={selectedAssignmentId}
-              onAssignmentsLoaded={(loaded) => {
-                setAssignments(loaded)
-                if (loaded.length > 0 && !selectedAssignmentId) {
-                  setSelectedAssignmentId(loaded[0].uuid)
-                  setExpectedOutput(loaded[0].expectedOutputText ?? null)
-                }
-              }}
-              onExpectedOutputChange={setExpectedOutput}
-            />
-          </>
-        ) : (
-          <div className="dashboard-empty-state">
-            <h2>Get started</h2>
-            <p>
-              Select <strong>Compile</strong> to open the student workflow. You can compile,
-              execute, compare output against an assignment expectation, and submit in one panel.
-            </p>
-          </div>
-        )}
-
-        <div className="dashboard-toolbar">
-          {!showCompileWorkspace ? (
-            <button className="primary-button" onClick={openCompileWorkspace}>
+        <div key={activeWorkspace} className="dashboard-panel-transition">
+          <div className="dashboard-toolbar">
+            {activeWorkspace !== 'none' && (
+              <button className="secondary-button" onClick={closeCompileWorkspace}>
+                Close Workspace
+              </button>
+            )}
+            <button className={getWorkspaceButtonClass('compile')} onClick={openCompileWorkspace}>
               Compile
             </button>
-          ) : (
-            <button className="secondary-button" onClick={closeCompileWorkspace}>
-              Close Compile Workspace
+            <button className={getWorkspaceButtonClass('about')} onClick={openAboutWorkspace}>
+              About
             </button>
+          </div>
+
+          {activeWorkspace === 'compile' ? (
+            <>
+              <CppWorkflowPanel
+                title="Student Compilation Workspace"
+                description="Choose the files you want to submit, compile them, optionally run them with input, and review the output before submitting."
+                autoCompileOnSelection={true}
+                allowExecution={true}
+                onSelectionChange={setSelectedFiles}
+                onCompileResultChange={setCompileResult}
+                onRunResultChange={setRunResult}
+              />
+
+              <OutputDiffPanel
+                actualOutput={runResult?.stdout ?? null}
+                expectedOutput={expectedOutput}
+                assignments={assignments}
+                selectedAssignmentId={selectedAssignmentId}
+                onAssignmentChange={handleAssignmentChange}
+              />
+
+              <SubmitPanel
+                compileResult={compileResult}
+                selectedFiles={selectedFiles}
+                userId={user?.uuid}
+                selectedAssignmentId={selectedAssignmentId}
+                onAssignmentsLoaded={(loaded) => {
+                  setAssignments(loaded)
+                  if (loaded.length > 0 && !selectedAssignmentId) {
+                    setSelectedAssignmentId(loaded[0].uuid)
+                    setExpectedOutput(loaded[0].expectedOutputText ?? null)
+                  }
+                }}
+                onExpectedOutputChange={setExpectedOutput}
+              />
+            </>
+          ) : activeWorkspace === 'about' ? (
+            <AboutPanel />
+          ) : (
+            <div className="dashboard-empty-state">
+              <h2>Get started</h2>
+              <p>
+                Select <strong>Compile</strong> to open the student workflow. You can compile,
+                execute, compare output against an assignment expectation, and submit in one panel.
+              </p>
+            </div>
           )}
-          <button className="primary-button" onClick={() => navigate('/about')}>
-            About
-          </button>
         </div>
       </div>
 

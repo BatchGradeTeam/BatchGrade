@@ -213,20 +213,6 @@ footer {
   border-radius: 30px;
 }
 
-.menu-button {
-  background: none;
-  border: none;
-  font-size: 2rem;
-  cursor: pointer;
-  padding: 0.5rem 1rem 0.5rem 0;
-  color: var(--ev-c-gray-1);
-  transition: color 0.2s;
-}
-
-.menu-button:hover {
-  color: var(--ev-c-blue-1);
-}
-
 .primary-button {
   padding: 12px 30px;
   font-size: 16px;
@@ -340,11 +326,6 @@ footer {
   width: 100vw;
 }
 
-.navbar-menu {
-  display: flex;
-  flex-direction: column;
-}
-
 .navbar .primary-button {
   margin: 0;
 }
@@ -362,44 +343,6 @@ footer {
 .profile-image:hover {
   background-color: var(--ev-c-blue-1);
   border: 1px solid var(--ev-c-blue-1);
-}
-
-/* ==========================================================
-  Dropdown Menu Components
-========================================================== */
-
-.dropdown-menu {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  background-color: var(--ev-c-white);
-  border: 1px solid #ddd;
-  border-top: none;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-  z-index: 999;
-  display: flex;
-  flex-direction: column;
-  padding: 1rem 0;
-  margin-top: 5rem;
-}
-
-.dropdown-item {
-  background: none;
-  border: none;
-  padding: 0.75rem 1.5rem;
-  text-align: left;
-  cursor: pointer;
-  font-size: 1rem;
-  color: var(--ev-c-gray-1);
-  transition: background-color 0.2s;
-  border: none;
-  width: 100%;
-}
-
-.dropdown-item:hover {
-  background-color: var(--ev-c-gray-6);
-  color: var(--ev-c-blue-1);
 }
 
 /* ==========================================================

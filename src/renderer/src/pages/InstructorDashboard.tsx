@@ -20,11 +20,18 @@ import { useAuth } from '../components/AuthContext'
 import { NavBar } from '../components/Navbar'
 import { Footer } from '../components/Footer'
 import AssignmentConfigPanel from '../components/AssignmentConfigPanel'
+import { AboutPanel } from '../components/AboutPanel'
 import { GradebookPanel } from '../components/grading/GradebookPanel'
 import { GradingPanel } from '../components/grading/GradingPanel'
 import { GradingPlusPanel } from '../components/grading/GradingPlusPanel'
 
-type InstructorWorkspace = 'none' | 'assignment' | 'gradebook' | 'grading' | 'gradingPlus'
+type InstructorWorkspace =
+  | 'none'
+  | 'assignment'
+  | 'gradebook'
+  | 'grading'
+  | 'gradingPlus'
+  | 'about'
 
 /**
  * InstructorDashboard component
@@ -76,6 +83,10 @@ export function InstructorDashboard(): React.JSX.Element {
 
   function openGradingPlus(): void {
     setActiveWorkspace('gradingPlus')
+  }
+
+  function openAboutWorkspace(): void {
+    setActiveWorkspace('about')
   }
 
   function getWorkspaceButtonClass(workspace: Exclude<InstructorWorkspace, 'none'>): string {
@@ -130,7 +141,7 @@ export function InstructorDashboard(): React.JSX.Element {
           <button className={getWorkspaceButtonClass('gradingPlus')} onClick={openGradingPlus}>
             Grading+
           </button>
-          <button className="primary-button" onClick={() => navigate('/about')}>
+          <button className={getWorkspaceButtonClass('about')} onClick={openAboutWorkspace}>
             About
           </button>
         </div>
@@ -142,6 +153,8 @@ export function InstructorDashboard(): React.JSX.Element {
             <GradingPanel />
           ) : activeWorkspace === 'gradingPlus' ? (
             <GradingPlusPanel />
+          ) : activeWorkspace === 'about' ? (
+            <AboutPanel />
           ) : (
             <div className="dashboard-empty-state">
               <h2>Get started</h2>

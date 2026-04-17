@@ -12,7 +12,7 @@ export function GradingPanel({ showHomeButton = false, onGoHome }: GradingPanelP
   const [compileResult, setCompileResult] = useState<CompileCppResult | null>(null)
 
   return (
-    <>
+    <div className="panel-shell">
       <h1>Grading Page</h1>
       <p>
         Instructor workflow for compiling and running submissions. Execution remains a separate
@@ -45,6 +45,6 @@ export function GradingPanel({ showHomeButton = false, onGoHome }: GradingPanelP
           Go to home
         </button>
       )}
-    </>
+    </div>
   )
 }

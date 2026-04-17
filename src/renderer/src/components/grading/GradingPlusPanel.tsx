@@ -394,7 +394,7 @@ export function GradingPlusPanel({
   ).length
 
   return (
-    <>
+    <div className="panel-shell">
       <h1>Grading+ Page</h1>
       <p>Instructor batch grading workflow for compiling and judging multiple student submissions.</p>
 
@@ -635,6 +635,6 @@ export function GradingPlusPanel({
           Go to home
         </button>
       )}
-    </>
+    </div>
   )
 }
