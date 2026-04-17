@@ -1,8 +1,6 @@
-
 import { useNavigate } from 'react-router-dom'
 import { NavBar } from '../components/Navbar'
 import { Footer } from '../components/Footer'
-
 
 export function GuestDashboard(): React.JSX.Element {
   const navigate = useNavigate()
@@ -15,7 +13,8 @@ export function GuestDashboard(): React.JSX.Element {
         <div className="dashboard-header-container">
           <h1 className="title">Guest Portal</h1>
           <p>
-            Compile your C++ source files locally. Choose from either Single or Batch grade component.
+            Compile your C++ source files locally. Choose from either Single or Batch grade
+            component.
           </p>
         </div>
       </div>
@@ -27,9 +26,9 @@ export function GuestDashboard(): React.JSX.Element {
           </button>
         </div>
         <div className="student-dashboard-item">
-            <button className="primary-button" onClick={() => navigate('/guestBatchGradeInterface')}>
-                Multi-Assignment BatchGrade
-            </button>
+          <button className="primary-button" onClick={() => navigate('/guestBatchGradeInterface')}>
+            Multi-Assignment BatchGrade
+          </button>
         </div>
         <div className="student-dashboard-item">
           <button className="primary-button" onClick={() => navigate('/about')}>

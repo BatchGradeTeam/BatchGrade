@@ -35,7 +35,7 @@ export function GuestStudentInterface(): React.JSX.Element {
   // const [compileResult, setCompileResult] = useState<CompileCppResult | null>(null)
 
   // This is just an easy work around, so that way we dont trigger selectFiles, compileResult not used
-  console.log(selectedFiles);
+  console.log(selectedFiles)
   // console.log(compileResult)
 
   return (

@@ -59,10 +59,7 @@ export async function detectDockerInstallation(): Promise<DockerInstallationInfo
     platform = 'unknown'
   }
 
-  const [version, running] = await Promise.all([
-    checkDockerInstalled('docker'),
-    isDockerRunning()
-  ])
+  const [version, running] = await Promise.all([checkDockerInstalled('docker'), isDockerRunning()])
 
   // Docker not installed
   if (version === null) {

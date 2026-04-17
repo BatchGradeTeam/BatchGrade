@@ -31,7 +31,6 @@ async function getProfile(): Promise<Profile | null> {
     return null
   }
 
-
   // Query the "profiles" table using the user's ID
   const { data, error } = await supabase
     .from('profiles')
