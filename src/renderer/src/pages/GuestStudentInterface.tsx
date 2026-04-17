@@ -18,7 +18,8 @@ import { useNavigate } from 'react-router-dom'
 import { NavBar } from '../components/Navbar'
 import { Footer } from '../components/Footer'
 import { CppWorkflowPanel } from '../components/compiler/CppWorkflowPanel'
-import { CompileCppResult } from 'src/shared/compiler'
+import { DockerDetectionPanel } from '../components/DockerDetectionPanel'
+import { DockerCppGradePanel } from '../components/DockerCppGradePanel'
 
 /**
  * StudentUploadInterface Component
@@ -62,6 +63,9 @@ export function GuestStudentInterface(): React.JSX.Element {
           selectedFiles={selectedFiles}
           userId={user?.uuid}
         /> */}
+
+        <DockerDetectionPanel />
+        <DockerCppGradePanel sourceFiles={selectedFiles} />
       </div>
 
       <div className="button-container">

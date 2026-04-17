@@ -33,7 +33,7 @@ import { CppJudgePanel } from '../components/CppJudgePanel'
 export function Grading(): React.JSX.Element {
   const navigate = useNavigate()
   const [compileResult, setCompileResult] = useState<CompileCppResult | null>(null)
-  const [sourceFiles, setSourceFiles] = useState<string[]>([])
+  const [sourceFiles] = useState<string[]>([])
 
   return (
     <>
