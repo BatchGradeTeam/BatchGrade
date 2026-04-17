@@ -21,7 +21,7 @@ import { useState, useEffect } from 'react' // Import React hooks used for compo
 import { NavBar } from '../components/Navbar' // Import the navigation bar component
 import { Footer } from '../components/Footer' // Import the footer component
 import type { GradebookRecord } from '../../../shared/gradebookTypes'
-import { loadGradebookRecords } from '../lib/gradebookStorage'
+import { loadGradebookRecords, clearGradebookRecords } from '../lib/gradebookStorage'
 
 // =============================================================================
 // Helper Types
@@ -206,7 +206,7 @@ const buildStudentRecordsFromGradebook = (
 // =============================================================================
 export function Gradebook(): React.JSX.Element {
   // Stores the currently selected assignment id.
-  const [selectedAssignment, setSelectedAssignment] = useState('assignment-1')
+  const [selectedAssignment, setSelectedAssignment] = useState('')
 
   // Stores all saved Gradebook records loaded from localStorage.
   const [gradebookRecords, setGradebookRecords] = useState<GradebookRecord[]>([])
@@ -234,9 +234,12 @@ export function Gradebook(): React.JSX.Element {
     new Set(gradebookRecords.map((record) => record.assignmentId))
   )
 
+  // Check if there are any assignments available based on loaded records
+  const hasAssignments = assignmentOptions.length > 0
+
   const effectiveSelectedAssignment = assignmentOptions.includes(selectedAssignment)
     ? selectedAssignment
-    : (assignmentOptions[0] ?? 'assignment-1')
+    : (assignmentOptions[0] ?? '')
 
   // Build Gradebook student rows for the selected assignment.
   const students = buildStudentRecordsFromGradebook(gradebookRecords, effectiveSelectedAssignment)
@@ -249,6 +252,13 @@ export function Gradebook(): React.JSX.Element {
 
   // Calculate class statistics for the selected assignment
   const { averageScore, highestScore, lowestScore } = calculateStats(students)
+
+  // Clears all saved Gradebook records and resets the page state.
+  const handleClearRecentlyGraded = async (): Promise<void> => {
+    await clearGradebookRecords()
+    setGradebookRecords([])
+    setSelectedAssignment('')
+  }
 
   // ai-gen start (ChatGPT-5.3, 1)
   // Export currently displayed gradebook rows to a CSV file
@@ -293,17 +303,18 @@ export function Gradebook(): React.JSX.Element {
             {/* Dropdown that allows instructors to switch assignments (FR-8) */}
             <select
               id="assignment-select"
-              value={effectiveSelectedAssignment}
+              value={hasAssignments ? effectiveSelectedAssignment : ''}
               onChange={(e) => setSelectedAssignment(e.target.value)}
+              disabled={!hasAssignments}
             >
-              {assignmentOptions.length > 0 ? (
+              {hasAssignments ? (
                 assignmentOptions.map((assignmentId) => (
                   <option key={assignmentId} value={assignmentId}>
-                    {assignmentId}
+                    Recently Graded
                   </option>
                 ))
               ) : (
-                <option value="assignment-1">assignment-1</option>
+                <option value="">No assignments</option>
               )}
             </select>
           </div>
@@ -366,7 +377,19 @@ export function Gradebook(): React.JSX.Element {
 
               {/* Table body generated dynamically from student data */}
               <tbody>
-                {sortedStudents.length > 0 ? (
+                {!hasAssignments ? (
+                  <tr>
+                    <td style={cellStyle} colSpan={5}>
+                      No graded assignments available.
+                    </td>
+                  </tr>
+                ) : sortedStudents.length === 0 ? (
+                  <tr>
+                    <td style={cellStyle} colSpan={5}>
+                      No records for this assignment.
+                    </td>
+                  </tr>
+                ) : (
                   sortedStudents.map((student) => (
                     <tr key={student.id}>
                       <td style={cellStyle}>{student.id}</td>
@@ -376,27 +399,36 @@ export function Gradebook(): React.JSX.Element {
                       <td style={cellStyle}>{student.status}</td>
                     </tr>
                   ))
-                ) : (
-                  <tr>
-                    <td style={cellStyle} colSpan={5}>
-                      No Gradebook records found for this assignment.
-                    </td>
-                  </tr>
                 )}
               </tbody>
             </table>
           </div>
 
-          {/* Export CSV Button at the bottom-right corner of the table */}
-          <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '8px' }}>
+          {/* Clear Recently Graded and Export CSV Buttons */}
+          <div
+            style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '8px' }}
+          >
+            <button
+              onClick={() => void handleClearRecentlyGraded()}
+              disabled={!hasAssignments}
+              style={{
+                fontSize: '12px',
+                padding: '4px 8px',
+                opacity: hasAssignments ? 0.8 : 0.5,
+                cursor: hasAssignments ? 'pointer' : 'not-allowed'
+              }}
+            >
+              Clear Recently Graded
+            </button>
+
             <button
               onClick={handleExportCSV}
               disabled={sortedStudents.length === 0}
               style={{
-                fontSize: '12px', // smaller text
-                padding: '4px 8px', // smaller button
-                opacity: 0.8, // slightly subtle
-                cursor: 'pointer'
+                fontSize: '12px',
+                padding: '4px 8px',
+                opacity: sortedStudents.length === 0 ? 0.5 : 0.8,
+                cursor: sortedStudents.length === 0 ? 'not-allowed' : 'pointer'
               }}
             >
               Export CSV
