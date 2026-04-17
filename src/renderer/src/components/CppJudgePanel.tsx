@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState, useRef, useEffectEvent } from 'react'
 import type { CompileCppResult, JudgeCppResult } from '../../../shared/compiler'
 
 // Local type to display judge results
@@ -35,10 +35,16 @@ export function CppJudgePanel({ compileResult }: CppJudgePanelProps): React.JSX.
   const [judgeResults, setJudgeResults] = useState<JudgeCaseResult[]>([])
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [isJudging, setIsJudging] = useState(false)
+  const lastAutoJudgeRequestRef = useRef<string | null>(null)
+
+  const runAutomaticJudge = useEffectEvent(() => {
+    void handleRunJudge()
+  })
 
   useEffect(() => {
     setJudgeResults([])
     setErrorMessage(null)
+    lastAutoJudgeRequestRef.current = null
   }, [compileResult?.executablePath, compileResult?.compileSuccess])
 
   const summary = useMemo(() => {
@@ -53,6 +59,7 @@ export function CppJudgePanel({ compileResult }: CppJudgePanelProps): React.JSX.
     window.api.file
       .select()
       .then((file) => {
+        lastAutoJudgeRequestRef.current = null
         setSelectedOutputFiles((currentFiles) => appendUniqueFile(currentFiles, file))
         setJudgeResults([])
         setErrorMessage(null)
@@ -67,6 +74,7 @@ export function CppJudgePanel({ compileResult }: CppJudgePanelProps): React.JSX.
     window.api.file
       .select()
       .then((file) => {
+        lastAutoJudgeRequestRef.current = null
         setSelectedInputFiles((currentFiles) => appendUniqueFile(currentFiles, file))
         setJudgeResults([])
         setErrorMessage(null)
@@ -139,6 +147,44 @@ export function CppJudgePanel({ compileResult }: CppJudgePanelProps): React.JSX.
       setIsJudging(false)
     }
   }
+
+  // This automatically runs the judge when compilation is successful
+  // but only when there is a valid judge setup ready to go
+  useEffect(() => {
+    if (!compileResult?.compileSuccess || !compileResult.executablePath) {
+      return
+    }
+
+    if (selectedOutputFiles.length === 0) {
+      return
+    }
+
+    if (selectedInputFiles.length > 0 && selectedInputFiles.length !== selectedOutputFiles.length) {
+      return
+    }
+
+    // This lets us remember the current judge setup
+    // so we do not keep rerunning the exact same judge request.
+    const requestKey = [
+      compileResult.executablePath,
+      ...selectedOutputFiles,
+      'inputs',
+      ...selectedInputFiles
+    ].join('::')
+
+    if (isJudging || lastAutoJudgeRequestRef.current === requestKey) {
+      return
+    }
+
+    lastAutoJudgeRequestRef.current = requestKey
+    runAutomaticJudge()
+  }, [
+    compileResult?.compileSuccess,
+    compileResult?.executablePath,
+    isJudging,
+    selectedInputFiles,
+    selectedOutputFiles
+  ])
 
   return (
     <div className="mt-4 border border-gray-500 bg-[#2b2b2b] p-4">

@@ -22,18 +22,22 @@
  * pages within the application to access shared authentication
  * state (login status, user information, etc.)
  */
-import { HashRouter, Routes, Route } from 'react-router-dom'
+import { HashRouter, Route, Routes } from 'react-router-dom'
+import { INSTRUCTOR_ROLE, STUDENT_ROLE } from '../../main/database/schema'
 import { AuthProvider } from './components/AuthContext'
-import { SignUp } from './pages/SignUp'
-import { About } from './pages/About'
-import { Login } from './pages/Login'
-import { Grading } from './pages/Grading'
-import { Gradebook } from './pages/Gradebook'
-import { StudentDashboard } from './pages/StudentDashboard'
-import { InstructorDashboard } from './pages/InstructorDashboard'
 import { ProtectedRoute } from './components/ProtectedRoute'
-import { StudentUploadInterface } from './pages/studentUploadInterface'
-import { STUDENT_ROLE, INSTRUCTOR_ROLE } from '../../main/database/schema'
+import { About } from './pages/About'
+import { Gradebook } from './pages/Gradebook'
+import { Grading } from './pages/Grading'
+import { GradingPlus } from './pages/GradingPlus'
+import { GuestBatchGradeInterface } from './pages/GuestBatchGradeInterface'
+import { GuestDashboard } from './pages/GuestDashboard'
+import { GuestStudentInterface } from './pages/GuestStudentInterface'
+import { InstructorDashboard } from './pages/InstructorDashboard'
+import { Login } from './pages/Login'
+import { SignUp } from './pages/SignUp'
+import { StudentDashboard } from './pages/StudentDashboard'
+import { StudentUploadInterface } from './pages/StudentUploadInterface'
 
 /**
  * App Component
@@ -47,7 +51,7 @@ import { STUDENT_ROLE, INSTRUCTOR_ROLE } from '../../main/database/schema'
  * directory
  *
  * For example:
- *    '/'   -> Home page
+ *    '/'   -> Login page
  *    '/login'    -> Login page
  *    '/studentdashboard'   -> Student interface
  *    '/instructordashboard'    -> Instructor interface
@@ -60,7 +64,6 @@ import { STUDENT_ROLE, INSTRUCTOR_ROLE } from '../../main/database/schema'
  *
  * @returns App(): React.JSX.Element
  */
-
 export function App(): React.JSX.Element {
   return (
     /*-----------------------------------------------------------
@@ -88,6 +91,12 @@ export function App(): React.JSX.Element {
           <Route path="/login" element={<Login />} />
           {/* SignUp Page */}
           <Route path="/signup" element={<SignUp />} />
+          {/* Guest DashBoard */}
+          <Route path="/guestDashboard" element={<GuestDashboard />} />
+          {/* Guest Batch Interface */}
+          <Route path="/guestBatchGradeInterface" element={<GuestBatchGradeInterface />} />
+          {/* Guest Student Interface */}
+          <Route path="/guestStudentInterface" element={<GuestStudentInterface />} />
           {/* Student Interface */}
           <Route
             path="/studentdashboard"
@@ -130,6 +139,15 @@ export function App(): React.JSX.Element {
             element={
               <ProtectedRoute requiredRoles={[INSTRUCTOR_ROLE]}>
                 <Grading />
+              </ProtectedRoute>
+            }
+          />
+          {/* Grading+ (Batch Grading) Interface */}
+          <Route
+            path="/grading-plus"
+            element={
+              <ProtectedRoute requiredRoles={[INSTRUCTOR_ROLE]}>
+                <GradingPlus />
               </ProtectedRoute>
             }
           />

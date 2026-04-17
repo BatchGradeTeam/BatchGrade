@@ -61,10 +61,18 @@ export type AssignmentsAPI = {
   delete: (uuid: string) => Promise<Assignment>
 }
 
+export type SubmissionFolderGroup = {
+  folderName: string
+  folderPath: string
+  cppFiles: string[]
+}
+
 export type FileAPI = {
   select: () => Promise<string | undefined>
   selectCppFiles: () => Promise<string[]>
   stringify: (filePath: string) => Promise<string>
+  selectSubmissionFolder: () => Promise<SubmissionFolderGroup[]>
+  selectFilesFromFolder: () => Promise<string[]>
 }
 
 export type SubmissionsAPI = {

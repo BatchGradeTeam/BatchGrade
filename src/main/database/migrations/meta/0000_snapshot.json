@@ -1,11 +1,11 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "b06c0cb5-532b-43ae-ae01-7d84a15f9e8c",
+  "id": "5edac2f1-9dbc-4421-bb06-6277fe0fa1aa",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
-    "courses": {
-      "name": "courses",
+    "instructor_assignments": {
+      "name": "instructor_assignments",
       "columns": {
         "uuid": {
           "name": "uuid",
@@ -14,296 +14,8 @@
           "notNull": true,
           "autoincrement": false
         },
-        "course_code": {
-          "name": "course_code",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "title": {
-          "name": "title",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "description": {
-          "name": "description",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "credits": {
-          "name": "credits",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        }
-      },
-      "indexes": {
-        "courses_course_code_unique": {
-          "name": "courses_course_code_unique",
-          "columns": ["course_code"],
-          "isUnique": true
-        }
-      },
-      "foreignKeys": {},
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "checkConstraints": {}
-    },
-    "enrollments": {
-      "name": "enrollments",
-      "columns": {
-        "uuid": {
-          "name": "uuid",
-          "type": "text",
-          "primaryKey": true,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "student_id": {
-          "name": "student_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "section_id": {
-          "name": "section_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "enrollments_student_id_users_uuid_fk": {
-          "name": "enrollments_student_id_users_uuid_fk",
-          "tableFrom": "enrollments",
-          "tableTo": "users",
-          "columnsFrom": ["student_id"],
-          "columnsTo": ["uuid"],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        },
-        "enrollments_section_id_sections_uuid_fk": {
-          "name": "enrollments_section_id_sections_uuid_fk",
-          "tableFrom": "enrollments",
-          "tableTo": "sections",
-          "columnsFrom": ["section_id"],
-          "columnsTo": ["uuid"],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "checkConstraints": {}
-    },
-    "instructors": {
-      "name": "instructors",
-      "columns": {
-        "uuid": {
-          "name": "uuid",
-          "type": "text",
-          "primaryKey": true,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "first_name": {
-          "name": "first_name",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "last_name": {
-          "name": "last_name",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "instructors_uuid_users_uuid_fk": {
-          "name": "instructors_uuid_users_uuid_fk",
-          "tableFrom": "instructors",
-          "tableTo": "users",
-          "columnsFrom": ["uuid"],
-          "columnsTo": ["uuid"],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "checkConstraints": {}
-    },
-    "sections": {
-      "name": "sections",
-      "columns": {
-        "uuid": {
-          "name": "uuid",
-          "type": "text",
-          "primaryKey": true,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "course_id": {
-          "name": "course_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "instructor_id": {
-          "name": "instructor_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "semester": {
-          "name": "semester",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "sections_course_id_courses_uuid_fk": {
-          "name": "sections_course_id_courses_uuid_fk",
-          "tableFrom": "sections",
-          "tableTo": "courses",
-          "columnsFrom": ["course_id"],
-          "columnsTo": ["uuid"],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        },
-        "sections_instructor_id_users_uuid_fk": {
-          "name": "sections_instructor_id_users_uuid_fk",
-          "tableFrom": "sections",
-          "tableTo": "users",
-          "columnsFrom": ["instructor_id"],
-          "columnsTo": ["uuid"],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "checkConstraints": {}
-    },
-    "students": {
-      "name": "students",
-      "columns": {
-        "uuid": {
-          "name": "uuid",
-          "type": "text",
-          "primaryKey": true,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "first_name": {
-          "name": "first_name",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "last_name": {
-          "name": "last_name",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "students_uuid_users_uuid_fk": {
-          "name": "students_uuid_users_uuid_fk",
-          "tableFrom": "students",
-          "tableTo": "users",
-          "columnsFrom": ["uuid"],
-          "columnsTo": ["uuid"],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "checkConstraints": {}
-    },
-    "teaching_assistants": {
-      "name": "teaching_assistants",
-      "columns": {
-        "uuid": {
-          "name": "uuid",
-          "type": "text",
-          "primaryKey": true,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "first_name": {
-          "name": "first_name",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "last_name": {
-          "name": "last_name",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "teaching_assistants_uuid_users_uuid_fk": {
-          "name": "teaching_assistants_uuid_users_uuid_fk",
-          "tableFrom": "teaching_assistants",
-          "tableTo": "users",
-          "columnsFrom": ["uuid"],
-          "columnsTo": ["uuid"],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "checkConstraints": {}
-    },
-    "assignments": {
-      "name": "assignments",
-      "columns": {
-        "uuid": {
-          "name": "uuid",
-          "type": "text",
-          "primaryKey": true,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "section_id": {
-          "name": "section_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "title": {
-          "name": "title",
+        "name": {
+          "name": "name",
           "type": "text",
           "primaryKey": false,
           "notNull": true,
@@ -311,185 +23,64 @@
         },
         "due_date": {
           "name": "due_date",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "assignments_section_id_sections_uuid_fk": {
-          "name": "assignments_section_id_sections_uuid_fk",
-          "tableFrom": "assignments",
-          "tableTo": "sections",
-          "columnsFrom": ["section_id"],
-          "columnsTo": ["uuid"],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "checkConstraints": {}
-    },
-    "grades": {
-      "name": "grades",
-      "columns": {
-        "uuid": {
-          "name": "uuid",
-          "type": "text",
-          "primaryKey": true,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "submission_id": {
-          "name": "submission_id",
           "type": "text",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
         },
-        "instructor_id": {
-          "name": "instructor_id",
+        "grading_criteria": {
+          "name": "grading_criteria",
           "type": "text",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
         },
-        "score": {
-          "name": "score",
-          "type": "integer",
+        "solution_type": {
+          "name": "solution_type",
+          "type": "text",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
         },
-        "feedback": {
-          "name": "feedback",
+        "solution_file_name": {
+          "name": "solution_file_name",
           "type": "text",
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
         },
-        "graded_at": {
-          "name": "graded_at",
-          "type": "integer",
+        "solution_file_path": {
+          "name": "solution_file_path",
+          "type": "text",
           "primaryKey": false,
           "notNull": false,
+          "autoincrement": false
+        },
+        "expected_output_text": {
+          "name": "expected_output_text",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "created_by_user_uuid": {
+          "name": "created_by_user_uuid",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
           "autoincrement": false,
           "default": "(unixepoch())"
         }
       },
       "indexes": {},
-      "foreignKeys": {
-        "grades_submission_id_submissions_uuid_fk": {
-          "name": "grades_submission_id_submissions_uuid_fk",
-          "tableFrom": "grades",
-          "tableTo": "submissions",
-          "columnsFrom": ["submission_id"],
-          "columnsTo": ["uuid"],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        },
-        "grades_instructor_id_users_uuid_fk": {
-          "name": "grades_instructor_id_users_uuid_fk",
-          "tableFrom": "grades",
-          "tableTo": "users",
-          "columnsFrom": ["instructor_id"],
-          "columnsTo": ["uuid"],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "checkConstraints": {}
-    },
-    "submissions": {
-      "name": "submissions",
-      "columns": {
-        "uuid": {
-          "name": "uuid",
-          "type": "text",
-          "primaryKey": true,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "assignment_id": {
-          "name": "assignment_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "student_id": {
-          "name": "student_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "file_content": {
-          "name": "file_content",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "file_name": {
-          "name": "file_name",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": "'N/A'"
-        },
-        "file_size": {
-          "name": "file_size",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": 0
-        },
-        "status": {
-          "name": "status",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": "'not submitted'"
-        },
-        "submitted_at": {
-          "name": "submitted_at",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false,
-          "default": "(unixepoch())"
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "submissions_assignment_id_assignments_uuid_fk": {
-          "name": "submissions_assignment_id_assignments_uuid_fk",
-          "tableFrom": "submissions",
-          "tableTo": "assignments",
-          "columnsFrom": ["assignment_id"],
-          "columnsTo": ["uuid"],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        },
-        "submissions_student_id_users_uuid_fk": {
-          "name": "submissions_student_id_users_uuid_fk",
-          "tableFrom": "submissions",
-          "tableTo": "users",
-          "columnsFrom": ["student_id"],
-          "columnsTo": ["uuid"],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
+      "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
       "checkConstraints": {}
@@ -547,8 +138,8 @@
       "uniqueConstraints": {},
       "checkConstraints": {}
     },
-    "compile_logs": {
-      "name": "compile_logs",
+    "assignments": {
+      "name": "assignments",
       "columns": {
         "uuid": {
           "name": "uuid",
@@ -557,10 +148,42 @@
           "notNull": true,
           "autoincrement": false
         },
-        "student_id": {
-          "name": "student_id",
+        "title": {
+          "name": "title",
           "type": "text",
           "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "config": {
+          "name": "config",
+          "type": "blob",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(unixepoch())"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "compile_logs": {
+      "name": "compile_logs",
+      "columns": {
+        "uuid": {
+          "name": "uuid",
+          "type": "text",
+          "primaryKey": true,
           "notNull": true,
           "autoincrement": false
         },
@@ -605,27 +228,10 @@
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false,
-          "default": "(unixepoch())"
         }
       },
       "indexes": {},
       "foreignKeys": {
-        "compile_logs_student_id_users_uuid_fk": {
-          "name": "compile_logs_student_id_users_uuid_fk",
-          "tableFrom": "compile_logs",
-          "tableTo": "users",
-          "columnsFrom": ["student_id"],
-          "columnsTo": ["uuid"],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        },
         "compile_logs_submission_id_assignments_uuid_fk": {
           "name": "compile_logs_submission_id_assignments_uuid_fk",
           "tableFrom": "compile_logs",
@@ -640,8 +246,8 @@
       "uniqueConstraints": {},
       "checkConstraints": {}
     },
-    "action_logs": {
-      "name": "action_logs",
+    "grades": {
+      "name": "grades",
       "columns": {
         "uuid": {
           "name": "uuid",
@@ -650,36 +256,29 @@
           "notNull": true,
           "autoincrement": false
         },
-        "user_id": {
-          "name": "user_id",
+        "submission_id": {
+          "name": "submission_id",
           "type": "text",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
         },
-        "action": {
-          "name": "action",
-          "type": "text",
+        "score": {
+          "name": "score",
+          "type": "integer",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
         },
-        "entity_id": {
-          "name": "entity_id",
+        "feedback": {
+          "name": "feedback",
           "type": "text",
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
         },
-        "details": {
-          "name": "details",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "created_at": {
-          "name": "created_at",
+        "graded_at": {
+          "name": "graded_at",
           "type": "integer",
           "primaryKey": false,
           "notNull": false,
@@ -689,12 +288,84 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "action_logs_user_id_users_uuid_fk": {
-          "name": "action_logs_user_id_users_uuid_fk",
-          "tableFrom": "action_logs",
-          "tableTo": "users",
-          "columnsFrom": ["user_id"],
-          "columnsTo": ["uuid"],
+        "grades_submission_id_submissions_uuid_fk": {
+          "name": "grades_submission_id_submissions_uuid_fk",
+          "tableFrom": "grades",
+          "tableTo": "submissions",
+          "columnsFrom": [
+            "submission_id"
+          ],
+          "columnsTo": [
+            "uuid"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "submissions": {
+      "name": "submissions",
+      "columns": {
+        "uuid": {
+          "name": "uuid",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "assignment_id": {
+          "name": "assignment_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "file_name": {
+          "name": "file_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'N/A'"
+        },
+        "file_content": {
+          "name": "file_content",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "file_size": {
+          "name": "file_size",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "status": {
+          "name": "status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'not submitted'"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "submissions_assignment_id_assignments_uuid_fk": {
+          "name": "submissions_assignment_id_assignments_uuid_fk",
+          "tableFrom": "submissions",
+          "tableTo": "assignments",
+          "columnsFrom": [
+            "assignment_id"
+          ],
+          "columnsTo": [
+            "uuid"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         }

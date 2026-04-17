@@ -16,7 +16,7 @@ export default defineConfig({
       // returns exit code 0 even when test coverage fails
       thresholds: {
         perFile: true,
-        statements: 90,
+        statements: 90
       },
       exclude: [
         'src/main/database/schema/index.ts',

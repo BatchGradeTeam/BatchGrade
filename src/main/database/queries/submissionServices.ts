@@ -53,7 +53,6 @@ export function createSubmission(input: {
   db.insert(submissions)
     .values({
       uuid: submissionId,
-      studentId: input.studentId,
       assignmentId: input.assignmentId,
       fileName: input.fileName,
       fileContent: fileContent,

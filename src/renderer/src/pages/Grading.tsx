@@ -50,7 +50,7 @@ export function Grading(): React.JSX.Element {
           title="Instructor Compilation Workspace"
           description="Compile selected C++ files and optionally run the compiled program for grading checks."
           allowExecution={true}
-          onSelectionChange={setSourceFiles}
+          autoCompileOnSelection={true}
           onCompileResultChange={setCompileResult}
         />
 

@@ -1,0 +1,480 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="app.diagrams.net">
+  <diagram id="dCePBT6k12pDmA68uSpz" name="Page-1">
+    <mxGraphModel dx="4564" dy="2451" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="850" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="NgaQk7QGjLQI3tnoXoyk-79" parent="1" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;container=1;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0};size=65;fillColor=light-dark(#eeeeee,#1f2020);strokeColor=light-dark(#999999,#cccccc);fontColor=light-dark(#333333,#cccccc);" value="Student" vertex="1">
+          <mxGeometry height="3505" width="150" x="20" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="NgaQk7QGjLQI3tnoXoyk-80" parent="1" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;container=1;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0};size=65;fillColor=light-dark(#eeeeee,#1f2020);strokeColor=light-dark(#999999,#cccccc);fontColor=light-dark(#333333,#cccccc);" value="Student Submission Page" vertex="1">
+          <mxGeometry height="3505" width="198" x="220" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="NgaQk7QGjLQI3tnoXoyk-81" parent="1" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;container=1;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0};size=65;fillColor=light-dark(#eeeeee,#1f2020);strokeColor=light-dark(#999999,#cccccc);fontColor=light-dark(#333333,#cccccc);" value="Instructor" vertex="1">
+          <mxGeometry height="3505" width="150" x="468" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="NgaQk7QGjLQI3tnoXoyk-82" parent="1" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;container=1;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0};size=65;fillColor=light-dark(#eeeeee,#1f2020);strokeColor=light-dark(#999999,#cccccc);fontColor=light-dark(#333333,#cccccc);" value="Grading Page" vertex="1">
+          <mxGeometry height="3505" width="150" x="668" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="NgaQk7QGjLQI3tnoXoyk-83" parent="1" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;container=1;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0};size=65;fillColor=light-dark(#eeeeee,#1f2020);strokeColor=light-dark(#999999,#cccccc);fontColor=light-dark(#333333,#cccccc);" value="Preload" vertex="1">
+          <mxGeometry height="3505" width="150" x="1049" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="NgaQk7QGjLQI3tnoXoyk-84" parent="1" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;container=1;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0};size=65;fillColor=light-dark(#eeeeee,#1f2020);strokeColor=light-dark(#999999,#cccccc);fontColor=light-dark(#333333,#cccccc);" value="Main" vertex="1">
+          <mxGeometry height="3505" width="150" x="1337" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="NgaQk7QGjLQI3tnoXoyk-85" parent="1" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;container=1;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0};size=65;fillColor=light-dark(#eeeeee,#1f2020);strokeColor=light-dark(#999999,#cccccc);fontColor=light-dark(#333333,#cccccc);" value="GCC Detection Service" vertex="1">
+          <mxGeometry height="3505" width="177" x="1551" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="NgaQk7QGjLQI3tnoXoyk-86" parent="1" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;container=1;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0};size=65;fillColor=light-dark(#eeeeee,#1f2020);strokeColor=light-dark(#999999,#cccccc);fontColor=light-dark(#333333,#cccccc);" value="Compile Service" vertex="1">
+          <mxGeometry height="3505" width="150" x="1778" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="NgaQk7QGjLQI3tnoXoyk-87" parent="1" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;container=1;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0};size=65;fillColor=light-dark(#eeeeee,#1f2020);strokeColor=light-dark(#999999,#cccccc);fontColor=light-dark(#333333,#cccccc);" value="Execute Service" vertex="1">
+          <mxGeometry height="3505" width="150" x="1978" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="NgaQk7QGjLQI3tnoXoyk-88" parent="1" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;container=1;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0};size=65;fillColor=light-dark(#eeeeee,#1f2020);strokeColor=light-dark(#999999,#cccccc);fontColor=light-dark(#333333,#cccccc);" value="Submission Packaging" vertex="1">
+          <mxGeometry height="3505" width="177" x="2178" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="NgaQk7QGjLQI3tnoXoyk-89" parent="1" style="shape=umlFrame;dashed=1;pointerEvents=0;dropTarget=0;strokeColor=#B3B3B3;height=20;width=30;fillColor=light-dark(#eeeeee,#1f2020);fontColor=light-dark(#333333,#cccccc);" value="opt" vertex="1">
+          <mxGeometry height="306" width="1556" x="308" y="664" as="geometry" />
+        </mxCell>
+        <mxCell id="NgaQk7QGjLQI3tnoXoyk-90" parent="NgaQk7QGjLQI3tnoXoyk-89" style="text;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;" value="[[Auto compile on selection]]" vertex="1">
+          <mxGeometry height="20" width="1526" x="30" as="geometry" />
+        </mxCell>
+        <mxCell id="NgaQk7QGjLQI3tnoXoyk-91" parent="1" style="shape=umlFrame;dashed=1;pointerEvents=0;dropTarget=0;strokeColor=#B3B3B3;height=20;width=30;fillColor=light-dark(#eeeeee,#1f2020);fontColor=light-dark(#333333,#cccccc);" value="opt" vertex="1">
+          <mxGeometry height="358" width="1980" x="84" y="1292" as="geometry" />
+        </mxCell>
+        <mxCell id="NgaQk7QGjLQI3tnoXoyk-92" parent="NgaQk7QGjLQI3tnoXoyk-91" style="text;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;" value="[[Student runs program]]" vertex="1">
+          <mxGeometry height="20" width="1950" x="30" as="geometry" />
+        </mxCell>
+        <mxCell id="NgaQk7QGjLQI3tnoXoyk-93" parent="1" style="shape=umlFrame;dashed=1;pointerEvents=0;dropTarget=0;strokeColor=#B3B3B3;height=20;width=30;fillColor=light-dark(#eeeeee,#1f2020);fontColor=light-dark(#333333,#cccccc);" value="opt" vertex="1">
+          <mxGeometry height="358" width="2193" x="84" y="1660" as="geometry" />
+        </mxCell>
+        <mxCell id="NgaQk7QGjLQI3tnoXoyk-94" parent="NgaQk7QGjLQI3tnoXoyk-93" style="text;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;" value="[[Student submits code]]" vertex="1">
+          <mxGeometry height="20" width="2163" x="30" as="geometry" />
+        </mxCell>
+        <mxCell id="NgaQk7QGjLQI3tnoXoyk-95" parent="1" style="shape=umlFrame;dashed=1;pointerEvents=0;dropTarget=0;strokeColor=#B3B3B3;height=20;width=30;fillColor=light-dark(#eeeeee,#1f2020);fontColor=light-dark(#333333,#cccccc);" value="opt" vertex="1">
+          <mxGeometry height="306" width="1132" x="732" y="2444" as="geometry" />
+        </mxCell>
+        <mxCell id="NgaQk7QGjLQI3tnoXoyk-96" parent="NgaQk7QGjLQI3tnoXoyk-95" style="text;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;" value="[[Auto compile on selection]]" vertex="1">
+          <mxGeometry height="20" width="1102" x="30" as="geometry" />
+        </mxCell>
+        <mxCell id="NgaQk7QGjLQI3tnoXoyk-97" parent="1" style="shape=umlFrame;dashed=1;pointerEvents=0;dropTarget=0;strokeColor=#B3B3B3;height=20;width=30;fillColor=light-dark(#eeeeee,#1f2020);fontColor=light-dark(#333333,#cccccc);" value="opt" vertex="1">
+          <mxGeometry height="358" width="1532" x="532" y="3072" as="geometry" />
+        </mxCell>
+        <mxCell id="NgaQk7QGjLQI3tnoXoyk-98" parent="NgaQk7QGjLQI3tnoXoyk-97" style="text;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;" value="[[Instructor runs program]]" vertex="1">
+          <mxGeometry height="20" width="1502" x="30" as="geometry" />
+        </mxCell>
+        <mxCell id="NgaQk7QGjLQI3tnoXoyk-99" edge="1" parent="1" source="NgaQk7QGjLQI3tnoXoyk-84" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;endArrow=block;" target="NgaQk7QGjLQI3tnoXoyk-85" value="detectGccInstallation()">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1534" y="127" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="NgaQk7QGjLQI3tnoXoyk-100" edge="1" parent="1" source="NgaQk7QGjLQI3tnoXoyk-85" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;dashed=1;dashPattern=2 3;endArrow=block;" target="NgaQk7QGjLQI3tnoXoyk-84" value="GccInstallationInfo">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1537" y="179" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="NgaQk7QGjLQI3tnoXoyk-101" edge="1" parent="1" source="NgaQk7QGjLQI3tnoXoyk-79" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;endArrow=block;" target="NgaQk7QGjLQI3tnoXoyk-80" value="Open page">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="216" y="280" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="NgaQk7QGjLQI3tnoXoyk-102" edge="1" parent="1" source="NgaQk7QGjLQI3tnoXoyk-80" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;endArrow=block;" target="NgaQk7QGjLQI3tnoXoyk-83" value="getGccStatus()">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="730" y="332" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="NgaQk7QGjLQI3tnoXoyk-103" edge="1" parent="1" source="NgaQk7QGjLQI3tnoXoyk-83" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;endArrow=block;" target="NgaQk7QGjLQI3tnoXoyk-84" value="compiler:getGccStatus">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1277" y="384" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="NgaQk7QGjLQI3tnoXoyk-104" edge="1" parent="1" source="NgaQk7QGjLQI3tnoXoyk-84" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;dashed=1;dashPattern=2 3;endArrow=block;" target="NgaQk7QGjLQI3tnoXoyk-80" value="current compiler status">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="877" y="436" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="NgaQk7QGjLQI3tnoXoyk-105" edge="1" parent="1" source="NgaQk7QGjLQI3tnoXoyk-79" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;endArrow=block;" target="NgaQk7QGjLQI3tnoXoyk-80" value="Select C++ files">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="216" y="488" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="NgaQk7QGjLQI3tnoXoyk-106" edge="1" parent="1" source="NgaQk7QGjLQI3tnoXoyk-80" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;endArrow=block;" target="NgaQk7QGjLQI3tnoXoyk-83" value="selectCppFiles()">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="730" y="540" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="NgaQk7QGjLQI3tnoXoyk-107" edge="1" parent="1" source="NgaQk7QGjLQI3tnoXoyk-83" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;endArrow=block;" target="NgaQk7QGjLQI3tnoXoyk-84" value="file:selectCppFiles">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1277" y="592" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="NgaQk7QGjLQI3tnoXoyk-108" edge="1" parent="1" source="NgaQk7QGjLQI3tnoXoyk-84" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;dashed=1;dashPattern=2 3;endArrow=block;" target="NgaQk7QGjLQI3tnoXoyk-80" value="selected file paths">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="877" y="644" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="NgaQk7QGjLQI3tnoXoyk-109" edge="1" parent="1" source="NgaQk7QGjLQI3tnoXoyk-80" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;endArrow=block;" target="NgaQk7QGjLQI3tnoXoyk-83" value="compileCpp({ sourceFiles })">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="730" y="742" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="NgaQk7QGjLQI3tnoXoyk-110" edge="1" parent="1" source="NgaQk7QGjLQI3tnoXoyk-83" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;endArrow=block;" target="NgaQk7QGjLQI3tnoXoyk-84" value="compiler:compileCpp">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1277" y="794" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="NgaQk7QGjLQI3tnoXoyk-111" edge="1" parent="1" source="NgaQk7QGjLQI3tnoXoyk-84" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;endArrow=block;" target="NgaQk7QGjLQI3tnoXoyk-86" value="compileCppFiles(gccPath, request)">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1641" y="846" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="NgaQk7QGjLQI3tnoXoyk-112" edge="1" parent="1" source="NgaQk7QGjLQI3tnoXoyk-86" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;dashed=1;dashPattern=2 3;endArrow=block;" target="NgaQk7QGjLQI3tnoXoyk-84" value="CompileCppResult">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1644" y="898" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="NgaQk7QGjLQI3tnoXoyk-113" edge="1" parent="1" source="NgaQk7QGjLQI3tnoXoyk-84" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;dashed=1;dashPattern=2 3;endArrow=block;" target="NgaQk7QGjLQI3tnoXoyk-80" value="CompileCppResult">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="877" y="950" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="NgaQk7QGjLQI3tnoXoyk-114" edge="1" parent="1" source="NgaQk7QGjLQI3tnoXoyk-79" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;endArrow=block;" target="NgaQk7QGjLQI3tnoXoyk-80" value="Click Compile">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="216" y="1012" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="NgaQk7QGjLQI3tnoXoyk-115" edge="1" parent="1" source="NgaQk7QGjLQI3tnoXoyk-80" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;endArrow=block;" target="NgaQk7QGjLQI3tnoXoyk-83" value="compileCpp({ sourceFiles })">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="730" y="1064" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="NgaQk7QGjLQI3tnoXoyk-116" edge="1" parent="1" source="NgaQk7QGjLQI3tnoXoyk-83" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;endArrow=block;" target="NgaQk7QGjLQI3tnoXoyk-84" value="compiler:compileCpp">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1277" y="1116" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="NgaQk7QGjLQI3tnoXoyk-117" edge="1" parent="1" source="NgaQk7QGjLQI3tnoXoyk-84" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;endArrow=block;" target="NgaQk7QGjLQI3tnoXoyk-86" value="compileCppFiles(gccPath, request)">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1641" y="1168" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="NgaQk7QGjLQI3tnoXoyk-118" edge="1" parent="1" source="NgaQk7QGjLQI3tnoXoyk-86" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;dashed=1;dashPattern=2 3;endArrow=block;" target="NgaQk7QGjLQI3tnoXoyk-84" value="CompileCppResult">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1644" y="1220" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="NgaQk7QGjLQI3tnoXoyk-119" edge="1" parent="1" source="NgaQk7QGjLQI3tnoXoyk-84" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;dashed=1;dashPattern=2 3;endArrow=block;" target="NgaQk7QGjLQI3tnoXoyk-80" value="CompileCppResult">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="877" y="1272" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="NgaQk7QGjLQI3tnoXoyk-120" edge="1" parent="1" source="NgaQk7QGjLQI3tnoXoyk-79" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;endArrow=block;" target="NgaQk7QGjLQI3tnoXoyk-80" value="Click Run">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="216" y="1370" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="NgaQk7QGjLQI3tnoXoyk-121" edge="1" parent="1" source="NgaQk7QGjLQI3tnoXoyk-80" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;endArrow=block;" target="NgaQk7QGjLQI3tnoXoyk-83" value="runCompiledProgram(executablePath, stdin)">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="730" y="1422" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="NgaQk7QGjLQI3tnoXoyk-122" edge="1" parent="1" source="NgaQk7QGjLQI3tnoXoyk-83" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;endArrow=block;" target="NgaQk7QGjLQI3tnoXoyk-84" value="compiler:runCompiledProgram">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1277" y="1474" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="NgaQk7QGjLQI3tnoXoyk-123" edge="1" parent="1" source="NgaQk7QGjLQI3tnoXoyk-84" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;endArrow=block;" target="NgaQk7QGjLQI3tnoXoyk-87" value="executeCppFiles(request)">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1741" y="1526" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="NgaQk7QGjLQI3tnoXoyk-124" edge="1" parent="1" source="NgaQk7QGjLQI3tnoXoyk-87" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;dashed=1;dashPattern=2 3;endArrow=block;" target="NgaQk7QGjLQI3tnoXoyk-84" value="RunCppResult">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1744" y="1578" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="NgaQk7QGjLQI3tnoXoyk-125" edge="1" parent="1" source="NgaQk7QGjLQI3tnoXoyk-84" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;dashed=1;dashPattern=2 3;endArrow=block;" target="NgaQk7QGjLQI3tnoXoyk-80" value="RunCppResult">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="877" y="1630" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="NgaQk7QGjLQI3tnoXoyk-126" edge="1" parent="1" source="NgaQk7QGjLQI3tnoXoyk-79" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;endArrow=block;" target="NgaQk7QGjLQI3tnoXoyk-80" value="Click Submit Code">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="216" y="1738" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="NgaQk7QGjLQI3tnoXoyk-127" edge="1" parent="1" source="NgaQk7QGjLQI3tnoXoyk-80" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;endArrow=block;" target="NgaQk7QGjLQI3tnoXoyk-83" value="submitCpp(assignmentId, studentId, sourceFiles, compileSnapshot)">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="730" y="1790" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="NgaQk7QGjLQI3tnoXoyk-128" edge="1" parent="1" source="NgaQk7QGjLQI3tnoXoyk-83" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;endArrow=block;" target="NgaQk7QGjLQI3tnoXoyk-84" value="submissions:submitCpp">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1277" y="1842" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="NgaQk7QGjLQI3tnoXoyk-129" edge="1" parent="1" source="NgaQk7QGjLQI3tnoXoyk-84" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;endArrow=block;" target="NgaQk7QGjLQI3tnoXoyk-88" value="copy source files + write manifest">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1848" y="1894" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="NgaQk7QGjLQI3tnoXoyk-130" edge="1" parent="1" source="NgaQk7QGjLQI3tnoXoyk-88" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;dashed=1;dashPattern=2 3;endArrow=block;" target="NgaQk7QGjLQI3tnoXoyk-84" value="SubmitCppResult">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1851" y="1946" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="NgaQk7QGjLQI3tnoXoyk-131" edge="1" parent="1" source="NgaQk7QGjLQI3tnoXoyk-84" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;dashed=1;dashPattern=2 3;endArrow=block;" target="NgaQk7QGjLQI3tnoXoyk-80" value="SubmitCppResult">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="877" y="1998" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="NgaQk7QGjLQI3tnoXoyk-132" edge="1" parent="1" source="NgaQk7QGjLQI3tnoXoyk-81" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;endArrow=block;" target="NgaQk7QGjLQI3tnoXoyk-82" value="Open page">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="652" y="2060" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="NgaQk7QGjLQI3tnoXoyk-133" edge="1" parent="1" source="NgaQk7QGjLQI3tnoXoyk-82" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;endArrow=block;" target="NgaQk7QGjLQI3tnoXoyk-83" value="getGccStatus()">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="942" y="2112" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="NgaQk7QGjLQI3tnoXoyk-134" edge="1" parent="1" source="NgaQk7QGjLQI3tnoXoyk-83" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;endArrow=block;" target="NgaQk7QGjLQI3tnoXoyk-84" value="compiler:getGccStatus">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1277" y="2164" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="NgaQk7QGjLQI3tnoXoyk-135" edge="1" parent="1" source="NgaQk7QGjLQI3tnoXoyk-84" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;dashed=1;dashPattern=2 3;endArrow=block;" target="NgaQk7QGjLQI3tnoXoyk-82" value="current compiler status">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1089" y="2216" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="NgaQk7QGjLQI3tnoXoyk-136" edge="1" parent="1" source="NgaQk7QGjLQI3tnoXoyk-81" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;endArrow=block;" target="NgaQk7QGjLQI3tnoXoyk-82" value="Select C++ files">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="652" y="2268" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="NgaQk7QGjLQI3tnoXoyk-137" edge="1" parent="1" source="NgaQk7QGjLQI3tnoXoyk-82" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;endArrow=block;" target="NgaQk7QGjLQI3tnoXoyk-83" value="selectCppFiles()">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="942" y="2320" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="NgaQk7QGjLQI3tnoXoyk-138" edge="1" parent="1" source="NgaQk7QGjLQI3tnoXoyk-83" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;endArrow=block;" target="NgaQk7QGjLQI3tnoXoyk-84" value="file:selectCppFiles">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1277" y="2372" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="NgaQk7QGjLQI3tnoXoyk-139" edge="1" parent="1" source="NgaQk7QGjLQI3tnoXoyk-84" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;dashed=1;dashPattern=2 3;endArrow=block;" target="NgaQk7QGjLQI3tnoXoyk-82" value="selected file paths">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1089" y="2424" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="NgaQk7QGjLQI3tnoXoyk-140" edge="1" parent="1" source="NgaQk7QGjLQI3tnoXoyk-82" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;endArrow=block;" target="NgaQk7QGjLQI3tnoXoyk-83" value="compileCpp({ sourceFiles })">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="942" y="2522" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="NgaQk7QGjLQI3tnoXoyk-141" edge="1" parent="1" source="NgaQk7QGjLQI3tnoXoyk-83" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;endArrow=block;" target="NgaQk7QGjLQI3tnoXoyk-84" value="compiler:compileCpp">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1277" y="2574" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="NgaQk7QGjLQI3tnoXoyk-142" edge="1" parent="1" source="NgaQk7QGjLQI3tnoXoyk-84" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;endArrow=block;" target="NgaQk7QGjLQI3tnoXoyk-86" value="compileCppFiles(gccPath, request)">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1641" y="2626" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="NgaQk7QGjLQI3tnoXoyk-143" edge="1" parent="1" source="NgaQk7QGjLQI3tnoXoyk-86" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;dashed=1;dashPattern=2 3;endArrow=block;" target="NgaQk7QGjLQI3tnoXoyk-84" value="CompileCppResult">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1644" y="2678" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="NgaQk7QGjLQI3tnoXoyk-144" edge="1" parent="1" source="NgaQk7QGjLQI3tnoXoyk-84" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;dashed=1;dashPattern=2 3;endArrow=block;" target="NgaQk7QGjLQI3tnoXoyk-82" value="CompileCppResult">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1089" y="2730" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="NgaQk7QGjLQI3tnoXoyk-145" edge="1" parent="1" source="NgaQk7QGjLQI3tnoXoyk-81" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;endArrow=block;" target="NgaQk7QGjLQI3tnoXoyk-82" value="Click Compile">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="652" y="2792" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="NgaQk7QGjLQI3tnoXoyk-146" edge="1" parent="1" source="NgaQk7QGjLQI3tnoXoyk-82" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;endArrow=block;" target="NgaQk7QGjLQI3tnoXoyk-83" value="compileCpp({ sourceFiles })">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="942" y="2844" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="NgaQk7QGjLQI3tnoXoyk-147" edge="1" parent="1" source="NgaQk7QGjLQI3tnoXoyk-83" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;endArrow=block;" target="NgaQk7QGjLQI3tnoXoyk-84" value="compiler:compileCpp">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1277" y="2896" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="NgaQk7QGjLQI3tnoXoyk-148" edge="1" parent="1" source="NgaQk7QGjLQI3tnoXoyk-84" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;endArrow=block;" target="NgaQk7QGjLQI3tnoXoyk-86" value="compileCppFiles(gccPath, request)">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1641" y="2948" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="NgaQk7QGjLQI3tnoXoyk-149" edge="1" parent="1" source="NgaQk7QGjLQI3tnoXoyk-86" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;dashed=1;dashPattern=2 3;endArrow=block;" target="NgaQk7QGjLQI3tnoXoyk-84" value="CompileCppResult">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1644" y="3000" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="NgaQk7QGjLQI3tnoXoyk-150" edge="1" parent="1" source="NgaQk7QGjLQI3tnoXoyk-84" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;dashed=1;dashPattern=2 3;endArrow=block;" target="NgaQk7QGjLQI3tnoXoyk-82" value="CompileCppResult">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1089" y="3052" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="NgaQk7QGjLQI3tnoXoyk-151" edge="1" parent="1" source="NgaQk7QGjLQI3tnoXoyk-81" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;endArrow=block;" target="NgaQk7QGjLQI3tnoXoyk-82" value="Click Run">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="652" y="3150" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="NgaQk7QGjLQI3tnoXoyk-152" edge="1" parent="1" source="NgaQk7QGjLQI3tnoXoyk-82" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;endArrow=block;" target="NgaQk7QGjLQI3tnoXoyk-83" value="runCompiledProgram(executablePath, stdin)">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="942" y="3202" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="NgaQk7QGjLQI3tnoXoyk-153" edge="1" parent="1" source="NgaQk7QGjLQI3tnoXoyk-83" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;endArrow=block;" target="NgaQk7QGjLQI3tnoXoyk-84" value="compiler:runCompiledProgram">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1277" y="3254" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="NgaQk7QGjLQI3tnoXoyk-154" edge="1" parent="1" source="NgaQk7QGjLQI3tnoXoyk-84" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;endArrow=block;" target="NgaQk7QGjLQI3tnoXoyk-87" value="executeCppFiles(request)">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1741" y="3306" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="NgaQk7QGjLQI3tnoXoyk-155" edge="1" parent="1" source="NgaQk7QGjLQI3tnoXoyk-87" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;dashed=1;dashPattern=2 3;endArrow=block;" target="NgaQk7QGjLQI3tnoXoyk-84" value="RunCppResult">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1744" y="3358" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="NgaQk7QGjLQI3tnoXoyk-156" edge="1" parent="1" source="NgaQk7QGjLQI3tnoXoyk-84" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;dashed=1;dashPattern=2 3;endArrow=block;" target="NgaQk7QGjLQI3tnoXoyk-82" value="RunCppResult">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1089" y="3410" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="NgaQk7QGjLQI3tnoXoyk-157" parent="1" style="fillColor=#ffff88;strokeColor=#9E916F;fontColor=light-dark(#333333,#cccccc);" value="Cache compiler status at startup" vertex="1">
+          <mxGeometry height="49" width="247" x="1288.5" y="199" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
