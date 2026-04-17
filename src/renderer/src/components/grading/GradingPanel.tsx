@@ -8,15 +8,18 @@ interface GradingPanelProps {
   onGoHome?: () => void
 }
 
-export function GradingPanel({ showHomeButton = false, onGoHome }: GradingPanelProps): React.JSX.Element {
+export function GradingPanel({
+  showHomeButton = false,
+  onGoHome
+}: GradingPanelProps): React.JSX.Element {
   const [compileResult, setCompileResult] = useState<CompileCppResult | null>(null)
 
   return (
     <div className="panel-shell">
       <h1>Grading Page</h1>
       <p>
-        Instructor workflow for compiling and running submissions. Execution remains a separate
-        step so it can move behind a sandbox boundary later.
+        Instructor workflow for compiling and running submissions. Execution remains a separate step
+        so it can move behind a sandbox boundary later.
       </p>
 
       <CppWorkflowPanel

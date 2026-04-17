@@ -25,13 +25,7 @@ import { GradebookPanel } from '../components/grading/GradebookPanel'
 import { GradingPanel } from '../components/grading/GradingPanel'
 import { GradingPlusPanel } from '../components/grading/GradingPlusPanel'
 
-type InstructorWorkspace =
-  | 'none'
-  | 'assignment'
-  | 'gradebook'
-  | 'grading'
-  | 'gradingPlus'
-  | 'about'
+type InstructorWorkspace = 'none' | 'assignment' | 'gradebook' | 'grading' | 'gradingPlus' | 'about'
 
 /**
  * InstructorDashboard component
@@ -123,28 +117,31 @@ export function InstructorDashboard(): React.JSX.Element {
           {/*-----------------------------------------------------------
           Instructor Action Toolbar
         -----------------------------------------------------------*/}
-        <div className="dashboard-toolbar">
-          {activeWorkspace !== 'none' && (
-            <button className="secondary-button" onClick={closeAssignmentConfig}>
-              Close Workspace
+          <div className="dashboard-toolbar">
+            {activeWorkspace !== 'none' && (
+              <button className="secondary-button" onClick={closeAssignmentConfig}>
+                Close Workspace
+              </button>
+            )}
+            <button
+              className={getWorkspaceButtonClass('assignment')}
+              onClick={openAssignmentConfig}
+            >
+              Assignment Creation
             </button>
-          )}
-          <button className={getWorkspaceButtonClass('assignment')} onClick={openAssignmentConfig}>
-            Assignment Creation
-          </button>
-          <button className={getWorkspaceButtonClass('gradebook')} onClick={openGradebook}>
-            Gradebook
-          </button>
-          <button className={getWorkspaceButtonClass('grading')} onClick={openGrading}>
-            Grading
-          </button>
-          <button className={getWorkspaceButtonClass('gradingPlus')} onClick={openGradingPlus}>
-            Grading+
-          </button>
-          <button className={getWorkspaceButtonClass('about')} onClick={openAboutWorkspace}>
-            About
-          </button>
-        </div>
+            <button className={getWorkspaceButtonClass('gradebook')} onClick={openGradebook}>
+              Gradebook
+            </button>
+            <button className={getWorkspaceButtonClass('grading')} onClick={openGrading}>
+              Grading
+            </button>
+            <button className={getWorkspaceButtonClass('gradingPlus')} onClick={openGradingPlus}>
+              Grading+
+            </button>
+            <button className={getWorkspaceButtonClass('about')} onClick={openAboutWorkspace}>
+              About
+            </button>
+          </div>
           {activeWorkspace === 'assignment' ? (
             <AssignmentConfigPanel />
           ) : activeWorkspace === 'gradebook' ? (
