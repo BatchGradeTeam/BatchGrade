@@ -32,11 +32,11 @@ import { DockerCppGradePanel } from '../components/DockerCppGradePanel'
 export function GuestStudentInterface(): React.JSX.Element {
   const navigate = useNavigate()
   const [selectedFiles, setSelectedFiles] = useState<string[]>([])
-  const [compileResult, setCompileResult] = useState<CompileCppResult | null>(null)
+  // const [compileResult, setCompileResult] = useState<CompileCppResult | null>(null)
 
   // This is just an easy work around, so that way we dont trigger selectFiles, compileResult not used
   console.log(selectedFiles);
-  console.log(compileResult)
+  // console.log(compileResult)
 
   return (
     <>
@@ -55,7 +55,7 @@ export function GuestStudentInterface(): React.JSX.Element {
           autoCompileOnSelection={true}
           allowExecution={true}
           onSelectionChange={setSelectedFiles}
-          onCompileResultChange={setCompileResult}
+          // onCompileResultChange={setCompileResult}
         />
 
         {/* <SubmitPanel
