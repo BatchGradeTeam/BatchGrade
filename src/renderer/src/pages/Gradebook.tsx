@@ -1,6 +1,6 @@
 import { Footer } from '../components/Footer'
 import { NavBar } from '../components/Navbar'
-import { GradebookPanel } from '../components/instructor/GradebookPanel'
+import { GradebookPanel } from '../components/grading/GradebookPanel'
 
 export function Gradebook(): React.JSX.Element {
   return (

@@ -15,7 +15,7 @@
 import { useNavigate } from 'react-router-dom'
 import { Footer } from '../components/Footer'
 import { NavBar } from '../components/Navbar'
-import { GradingPanel } from '../components/instructor/GradingPanel'
+import { GradingPanel } from '../components/grading/GradingPanel'
 
 /**
  * Grading Component

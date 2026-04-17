@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom'
 import { Footer } from '../components/Footer'
 import { NavBar } from '../components/Navbar'
-import { GradingPlusPanel } from '../components/instructor/GradingPlusPanel'
+import { GradingPlusPanel } from '../components/grading/GradingPlusPanel'
 
 export function GradingPlus(): React.JSX.Element {
   const navigate = useNavigate()

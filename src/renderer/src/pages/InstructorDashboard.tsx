@@ -20,9 +20,9 @@ import { useAuth } from '../components/AuthContext'
 import { NavBar } from '../components/Navbar'
 import { Footer } from '../components/Footer'
 import AssignmentConfigPanel from '../components/AssignmentConfigPanel'
-import { GradebookPanel } from '../components/instructor/GradebookPanel'
-import { GradingPanel } from '../components/instructor/GradingPanel'
-import { GradingPlusPanel } from '../components/instructor/GradingPlusPanel'
+import { GradebookPanel } from '../components/grading/GradebookPanel'
+import { GradingPanel } from '../components/grading/GradingPanel'
+import { GradingPlusPanel } from '../components/grading/GradingPlusPanel'
 
 type InstructorWorkspace = 'none' | 'assignment' | 'gradebook' | 'grading' | 'gradingPlus'
 
@@ -106,29 +106,10 @@ export function InstructorDashboard(): React.JSX.Element {
       </div>
       <div className="dashboard-container">
         {/*-----------------------------------------------------------
-          Assignment Configuration Workspace
+          Instructor Dashboard Workspaces
         -----------------------------------------------------------*/}
         <div key={activeWorkspace} className="dashboard-panel-transition">
-          {activeWorkspace === 'assignment' ? (
-            <AssignmentConfigPanel />
-          ) : activeWorkspace === 'gradebook' ? (
-            <GradebookPanel />
-          ) : activeWorkspace === 'grading' ? (
-            <GradingPanel />
-          ) : activeWorkspace === 'gradingPlus' ? (
-            <GradingPlusPanel />
-          ) : (
-            <div className="dashboard-empty-state">
-              <h2>Get started</h2>
-              <p>
-                Select an instructor tool below to open it inside this dashboard workspace. You can
-                switch between assignment creation, gradebook, single grading, and batch grading
-                without leaving this page.
-              </p>
-            </div>
-          )}
-        </div>
-        {/*-----------------------------------------------------------
+          {/*-----------------------------------------------------------
           Instructor Action Toolbar
         -----------------------------------------------------------*/}
         <div className="dashboard-toolbar">
@@ -152,6 +133,25 @@ export function InstructorDashboard(): React.JSX.Element {
           <button className="primary-button" onClick={() => navigate('/about')}>
             About
           </button>
+        </div>
+          {activeWorkspace === 'assignment' ? (
+            <AssignmentConfigPanel />
+          ) : activeWorkspace === 'gradebook' ? (
+            <GradebookPanel />
+          ) : activeWorkspace === 'grading' ? (
+            <GradingPanel />
+          ) : activeWorkspace === 'gradingPlus' ? (
+            <GradingPlusPanel />
+          ) : (
+            <div className="dashboard-empty-state">
+              <h2>Get started</h2>
+              <p>
+                Select an instructor tool above to open it inside this dashboard workspace. You can
+                switch between assignment creation, gradebook, single grading, and batch grading
+                without leaving this page.
+              </p>
+            </div>
+          )}
         </div>
       </div>
 

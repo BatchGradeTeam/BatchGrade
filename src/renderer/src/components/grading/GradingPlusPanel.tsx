@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { compileCppFiles } from '../compiler/cppWorkflowApi'
 import type { BatchJudgeCaseResult, BatchStudentSubmission } from '../../../../shared/batchGrading'
-import { StudentGradingCard } from '../grading/StudentGradingCard'
+import { StudentGradingCard } from './StudentGradingCard'
 
 interface GradingPlusPanelProps {
   showHomeButton?: boolean
