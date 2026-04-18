@@ -4,27 +4,23 @@ export default defineConfig({
   test: {
     environment: 'node',
     globals: true,
-    globalSetup: ['./tests/globalSetup.ts'], // TODO: comment out process.exit(0)
-    setupFiles: ['./tests/setup.ts'], // TODO: update for all src files
-    include: ['tests/**/*.test.ts'],
+    globalSetup: ['./tests/globalSetup.ts'], // Runs once before & after all tests
+    setupFiles: ['./tests/setup.ts'], // Runs before each test file
 
     coverage: {
       provider: 'v8',
       reporter: ['text', 'html', 'json-summary'],
-      // Although the threshold creates errors for inadequate
-      // coverage, globalSetup.ts makes it so that npm run test
-      // returns exit code 0 even when test coverage fails
-      thresholds: {
-        perFile: true,
-        statements: 90
+      enabled: true,
+      // Enforce 79% statement coverage (for now)
+      thresholds: { 
+        perFile: false, // Will likely hinder development too much if true
+        statements: 79,
       },
-      exclude: [
-        'src/main/database/schema/index.ts',
-        '**/node_modules/**',
-        '**/dist/**',
-        '**/out/**',
-        '**/coverage/**'
-      ]
+      // for all source files
+      // Note: .sql files are excluded from the coverage report
+      // even when explicitly added to the include
+      include: [ './src/main/**/*.ts', './src/main/**/**/*.ts'],
+      exclude: [ '**index.ts'],
     },
 
     pool: 'forks',
