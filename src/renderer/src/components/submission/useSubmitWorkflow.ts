@@ -64,7 +64,7 @@ export function useSubmitWorkflow({
         console.error('Error loading assignments:', error)
         setErrorMessage('Could not load assignments.')
       })
-  }, [])
+  })
 
   // Reset submit result whenever the relevant inputs change
   useEffect(() => {
