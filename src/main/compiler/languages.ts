@@ -61,3 +61,54 @@ export function getLanguage(id: Language): LanguageConfig {
   }
   return configs[id]
 }
+
+function getFilename(path: string): string {
+  const normalizedPath = path.replaceAll('\\', '/')
+  const segments = normalizedPath.split('/')
+  return segments[segments.length - 1] ?? path
+}
+
+export function detectPythonMainFile(files: string[]): string | null {
+  if (files.length === 0) {
+    return null
+  }
+
+  const pythonFiles = files.filter((file) => file.endsWith('.py'))
+  if (pythonFiles.length === 0) {
+    return null
+  }
+
+  const mainFile = pythonFiles.find((file) => getFilename(file) === 'main.py')
+  return mainFile ?? pythonFiles[0]
+}
+
+export async function detectJavaMainClass(files: string[]): Promise<string | null> {
+  if (files.length === 0) {
+    return null
+  }
+
+  const javaFiles = files.filter((file) => file.endsWith('.java'))
+  if (javaFiles.length === 0) {
+    return null
+  }
+
+  const { readFile } = await import('fs/promises')
+
+  for (const file of javaFiles) {
+    try {
+      const source = await readFile(file, 'utf8')
+      const classMatch = source.match(/\bclass\s+([A-Za-z_][A-Za-z0-9_]*)\b/)
+      const hasMainMethod = /\bpublic\s+static\s+void\s+main\s*\(\s*String\s*\[\s*\]\s+\w+\s*\)/.test(
+        source
+      )
+
+      if (classMatch && hasMainMethod) {
+        return classMatch[1]
+      }
+    } catch {
+      // Ignore unreadable files and continue scanning the rest.
+    }
+  }
+
+  return null
+}
