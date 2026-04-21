@@ -13,11 +13,13 @@ import { getCommonWorkingDirectory } from '../utils/sourceFiles'
 import { getLanguage } from './languages'
 import type { Language } from './languages'
 
+// This is used when requesting a file to be compiled.
 interface DockerCompileRequest {
   sourceFiles: string[]
   language: Language
 }
 
+// This is the result of a compilation request.
 interface DockerCompileResult {
   success: boolean
   executablePath: string | null
@@ -26,6 +28,11 @@ interface DockerCompileResult {
   message: string
 }
 
+/**
+ * Compiles source files using Docker.
+ * @param request - The compilation request containing source files and language.
+ * @returns A promise that resolves to the compilation result.
+ */
 async function dockerCompile(request: DockerCompileRequest): Promise<DockerCompileResult> {
   const { sourceFiles, language } = request
   const config = getLanguage(language)
@@ -47,6 +54,7 @@ async function dockerCompile(request: DockerCompileRequest): Promise<DockerCompi
     }
   }
 
+  // No need to store it long term so use a temp directory
   const tempDirectory = await mkdtemp(join(tmpdir(), 'batchgrade-docker-'))
   let executableName = 'batchgrade-program'
   if (config.exeExtension) {
@@ -84,25 +92,29 @@ async function dockerCompile(request: DockerCompileRequest): Promise<DockerCompi
       `/out/${executableName}`
     ]
 
+    // Spawn the Docker process
     const child = spawn('docker', dockerArgs, { windowsHide: true })
 
+    // Program timeout
     let timedOut = false
     const timeout = setTimeout(() => {
       timedOut = true
       child.kill()
     }, 60000)
 
+    // Store the output from stdout
     child.stdout?.on('data', (chunk) => {
       stdout += chunk.toString()
     })
 
+    // Store the output from stderr
     child.stderr?.on('data', (chunk) => {
       stderr += chunk.toString()
     })
 
     child.on('close', (code) => {
       clearTimeout(timeout)
-
+      // Determine compilation result timed out, success, or failed
       if (timedOut) {
         resolve({
           success: false,

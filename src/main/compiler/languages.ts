@@ -6,6 +6,7 @@
 
 export type Language = 'cpp' | 'python' | 'java'
 
+// Language config info needed for compilation and execution
 export interface LanguageConfig {
   id: Language
   name: string
@@ -51,6 +52,7 @@ export const javaConfig: LanguageConfig = {
   needsCompilation: true
 }
 
+// Helper function to ensure that we support only real language configs
 export function getLanguage(id: Language): LanguageConfig {
   const configs: Record<Language, LanguageConfig> = {
     cpp: cppConfig,

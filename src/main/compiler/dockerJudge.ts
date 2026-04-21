@@ -8,6 +8,7 @@
 import type { Language } from './languages'
 import { dockerExecute } from './dockerExecute'
 
+// This is used when requesting a program to be judged.
 interface DockerJudgeRequest {
   executablePath: string
   stdin: string
@@ -16,6 +17,7 @@ interface DockerJudgeRequest {
   language: Language
 }
 
+// This is the result of a program judging request.
 interface DockerJudgeResult {
   passed: boolean
   timedOut: boolean
@@ -28,6 +30,11 @@ async function cleanOutput(output: string): Promise<string> {
   return output.trim().replace(/\r\n/g, '\n').replace(/\r/g, '\n').replace(/\n+$/, '')
 }
 
+/**
+ * Judges a compiled program by executing it in Docker and comparing its output to the expected output.
+ * @param request - The judging request containing the executable path, stdin, expected output, timeout, and language.
+ * @returns A promise that resolves to the judging result.
+ */
 async function dockerJudge(request: DockerJudgeRequest): Promise<DockerJudgeResult> {
   const { executablePath, stdin, expectedOutput, timeoutMs, language } = request
 

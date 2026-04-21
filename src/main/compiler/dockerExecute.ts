@@ -11,6 +11,7 @@ import { dirname, basename } from 'path'
 import type { Language } from './languages'
 import { getLanguage } from './languages'
 
+// This is used when requesting a compiled program to be executed.
 interface DockerExecuteRequest {
   executablePath: string
   stdin: string
@@ -18,6 +19,7 @@ interface DockerExecuteRequest {
   language: Language
 }
 
+// This is the result of a program execution request.
 interface DockerExecuteResult {
   success: boolean
   timedOut: boolean
@@ -26,10 +28,18 @@ interface DockerExecuteResult {
   message: string
 }
 
+/**
+ * Executes a compiled program using Docker.
+ * @param request - The execution request containing the executable path, stdin, timeout, and language.
+ * @returns A promise that resolves to the execution result.
+ */
 async function dockerExecute(request: DockerExecuteRequest): Promise<DockerExecuteResult> {
+  // Retrieve needed info from the request and language config
   const { executablePath, stdin, timeoutMs, language } = request
+  // Get the needed config for the chosen language cpp, java, python, etc.
   const config = getLanguage(language)
 
+  // Set up Docker command arguments
   const execDir = dirname(executablePath)
   const execName = basename(executablePath)
 
@@ -46,9 +56,10 @@ async function dockerExecute(request: DockerExecuteRequest): Promise<DockerExecu
       config.dockerImage,
       `/app/${execName}`
     ]
-
+    // Spawn the Docker process with the specified command and arguments
     const child = spawn('docker', dockerArgs, { windowsHide: true })
 
+    // Timeout handling
     let programTimedOut = false
     const timeout = setTimeout(() => {
       programTimedOut = true
