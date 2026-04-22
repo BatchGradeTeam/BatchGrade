@@ -13,18 +13,19 @@
  *  - Viewing automated grading feedback
  *  - Accessing submission history
  */
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { NavBar } from '../components/Navbar'
 import { Footer } from '../components/Footer'
 import { useAuth } from '../components/AuthContext'
 import { CppWorkflowPanel } from '../components/compiler/CppWorkflowPanel'
-import { OutputDiffPanel } from '../components/OutputDiffPanel'
+import { OutputDiffPanel, type OutputComparisonCase } from '../components/OutputDiffPanel'
 import { SubmitPanel } from '../components/submission/SubmitPanel'
 import { AboutPanel } from '../components/AboutPanel'
 import { StudentScoresPanel } from '../components/grading/StudentScoresPanel'
 import type { CompileCppResult, RunCppResult } from 'src/shared/compiler'
-import type { Assignment } from '../../../shared/types'
+import type { Assignment, AssignmentTestCase } from '../../../shared/types'
+import { loadAssignmentTestCases } from '../lib/serverData'
 
 type StudentWorkspace = 'none' | 'compile' | 'scores' | 'about'
 
@@ -48,6 +49,10 @@ export function StudentDashboard(): React.JSX.Element {
   const [expectedOutput, setExpectedOutput] = useState<string | null>(null)
   const [assignments, setAssignments] = useState<Assignment[]>([])
   const [selectedAssignmentId, setSelectedAssignmentId] = useState<string>('')
+  const [assignmentTestCases, setAssignmentTestCases] = useState<AssignmentTestCase[]>([])
+  const [comparisonCases, setComparisonCases] = useState<OutputComparisonCase[]>([])
+  const [isRunningTestCases, setIsRunningTestCases] = useState(false)
+  const [testCaseError, setTestCaseError] = useState<string | null>(null)
 
   function openCompileWorkspace(): void {
     setActiveWorkspace('compile')
@@ -73,6 +78,8 @@ export function StudentDashboard(): React.JSX.Element {
     setSelectedAssignmentId(uuid)
     const assignment = assignments.find((a) => a.uuid === uuid)
     setExpectedOutput(assignment?.expectedOutputText ?? null)
+    setComparisonCases([])
+    setTestCaseError(null)
   }
 
   const handleAssignmentsLoaded = useCallback(
@@ -85,6 +92,127 @@ export function StudentDashboard(): React.JSX.Element {
     },
     [selectedAssignmentId]
   )
+
+  useEffect(() => {
+    let isMounted = true
+
+    async function loadTestCases(): Promise<void> {
+      if (!selectedAssignmentId) {
+        setAssignmentTestCases([])
+        setComparisonCases([])
+        return
+      }
+
+      try {
+        const serverTestCases = await loadAssignmentTestCases(selectedAssignmentId)
+        const testCases =
+          serverTestCases.length > 0
+            ? serverTestCases
+            : await window.api.assignments.getTestCases(selectedAssignmentId)
+
+        if (isMounted) {
+          setAssignmentTestCases(testCases)
+          setComparisonCases([])
+          setTestCaseError(null)
+        }
+      } catch (error) {
+        console.error('Could not load assignment test cases:', error)
+
+        try {
+          const localTestCases = await window.api.assignments.getTestCases(selectedAssignmentId)
+
+          if (isMounted) {
+            setAssignmentTestCases(localTestCases)
+            setComparisonCases([])
+            setTestCaseError(null)
+          }
+        } catch (fallbackError) {
+          console.error('Could not load local assignment test cases:', fallbackError)
+
+          if (isMounted) {
+            setAssignmentTestCases([])
+            setComparisonCases([])
+            setTestCaseError('Could not load assignment test cases.')
+          }
+        }
+      }
+    }
+
+    void loadTestCases()
+
+    return () => {
+      isMounted = false
+    }
+  }, [selectedAssignmentId])
+
+  useEffect(() => {
+    let isMounted = true
+
+    async function runAssignmentTestCases(): Promise<void> {
+      if (
+        !compileResult?.compileSuccess ||
+        !compileResult.executablePath ||
+        assignmentTestCases.length === 0
+      ) {
+        return
+      }
+
+      setIsRunningTestCases(true)
+      setTestCaseError(null)
+      setComparisonCases(
+        assignmentTestCases.map((testCase) => ({
+          id: testCase.uuid,
+          label: `Test ${testCase.caseOrder}`,
+          inputLabel: testCase.inputFileName ?? (testCase.inputText ? 'Text input' : null),
+          actualOutput: null,
+          expectedOutput: testCase.expectedOutputText
+        }))
+      )
+
+      try {
+        const results = await Promise.all(
+          assignmentTestCases.map(async (testCase) => {
+            const run = await window.api.compiler.runCompiledProgram({
+              executablePath: compileResult.executablePath as string,
+              stdin: testCase.inputText ?? '',
+              timeoutMs: 5000
+            })
+
+            return {
+              id: testCase.uuid,
+              label: `Test ${testCase.caseOrder}`,
+              inputLabel: testCase.inputFileName ?? (testCase.inputText ? 'Text input' : null),
+              actualOutput: run.stdout,
+              expectedOutput: testCase.expectedOutputText,
+              executionMessage: run.message,
+              executionSuccess: run.executionSuccess,
+              timedOut: run.timedOut
+            } satisfies OutputComparisonCase
+          })
+        )
+
+        if (isMounted) {
+          setComparisonCases(results)
+        }
+      } catch (error) {
+        console.error('Could not run assignment test cases:', error)
+
+        if (isMounted) {
+          setTestCaseError('Could not run assignment test cases.')
+        }
+      } finally {
+        if (isMounted) {
+          setIsRunningTestCases(false)
+        }
+      }
+    }
+
+    void runAssignmentTestCases()
+
+    return () => {
+      isMounted = false
+    }
+  }, [assignmentTestCases, compileResult])
 
   return (
     <>
@@ -139,6 +267,9 @@ export function StudentDashboard(): React.JSX.Element {
                 assignments={assignments}
                 selectedAssignmentId={selectedAssignmentId}
                 onAssignmentChange={handleAssignmentChange}
+                comparisonCases={comparisonCases}
+                isRunningTestCases={isRunningTestCases}
+                testCaseError={testCaseError}
               />
 
               <SubmitPanel

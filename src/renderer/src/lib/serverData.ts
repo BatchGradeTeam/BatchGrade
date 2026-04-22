@@ -545,7 +545,7 @@ export async function publishAssignmentTestCases(
 }
 
 export async function loadAssignmentTestCases(assignmentId: string): Promise<AssignmentTestCase[]> {
-  await requireCurrentProfile('instructor')
+  await requireCurrentProfile()
 
   const { data, error } = await supabase
     .from(ASSIGNMENT_TEST_CASES_TABLE)

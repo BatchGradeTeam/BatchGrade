@@ -1069,6 +1069,32 @@ footer {
   white-space: nowrap;
 }
 
+.output-case-tab {
+  cursor: pointer;
+  transform: translateY(0);
+  transition:
+    background-color 180ms ease,
+    border-color 180ms ease,
+    box-shadow 180ms ease,
+    color 180ms ease,
+    opacity 180ms ease,
+    transform 180ms ease;
+}
+
+.output-case-tab:hover {
+  opacity: 1 !important;
+  transform: translateY(-1px);
+}
+
+.output-case-tab:active {
+  transform: translateY(0);
+}
+
+.output-case-tab:focus-visible {
+  outline: 2px solid #81c3d7;
+  outline-offset: 2px;
+}
+
 .file-control-row {
   display: flex;
   align-items: center;
