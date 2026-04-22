@@ -158,13 +158,19 @@ export function GradebookPanel(): React.JSX.Element {
   }, [])
 
   const assignmentOptions = Array.from(
-    new Set(gradebookRecords.map((record) => record.assignmentId))
+    new Map(
+      gradebookRecords.map((record) => [
+        record.assignmentId,
+        record.assignmentName ?? record.assignmentId
+      ])
+    ).entries()
   )
   const hasAssignments = assignmentOptions.length > 0
 
-  const effectiveSelectedAssignment = assignmentOptions.includes(selectedAssignment)
+  const assignmentIds = assignmentOptions.map(([assignmentId]) => assignmentId)
+  const effectiveSelectedAssignment = assignmentIds.includes(selectedAssignment)
     ? selectedAssignment
-    : (assignmentOptions[0] ?? '')
+    : (assignmentOptions[0]?.[0] ?? '')
 
   const students = buildStudentRecordsFromGradebook(gradebookRecords, effectiveSelectedAssignment)
   const filteredStudents = filterStudents(students, searchTerm)
@@ -208,9 +214,9 @@ export function GradebookPanel(): React.JSX.Element {
               disabled={!hasAssignments}
             >
               {hasAssignments ? (
-                assignmentOptions.map((assignmentId) => (
+                assignmentOptions.map(([assignmentId, assignmentName]) => (
                   <option key={assignmentId} value={assignmentId}>
-                    Recently Graded
+                    {assignmentName}
                   </option>
                 ))
               ) : (

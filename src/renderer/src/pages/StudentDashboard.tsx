@@ -22,10 +22,11 @@ import { CppWorkflowPanel } from '../components/compiler/CppWorkflowPanel'
 import { OutputDiffPanel } from '../components/OutputDiffPanel'
 import { SubmitPanel } from '../components/submission/SubmitPanel'
 import { AboutPanel } from '../components/AboutPanel'
+import { StudentScoresPanel } from '../components/grading/StudentScoresPanel'
 import type { CompileCppResult, RunCppResult } from 'src/shared/compiler'
 import type { Assignment } from '../../../shared/types'
 
-type StudentWorkspace = 'none' | 'compile' | 'about'
+type StudentWorkspace = 'none' | 'compile' | 'scores' | 'about'
 
 /**
  * StudentDashboard Component
@@ -50,6 +51,10 @@ export function StudentDashboard(): React.JSX.Element {
 
   function openCompileWorkspace(): void {
     setActiveWorkspace('compile')
+  }
+
+  function openScoresWorkspace(): void {
+    setActiveWorkspace('scores')
   }
 
   function closeCompileWorkspace(): void {
@@ -108,6 +113,9 @@ export function StudentDashboard(): React.JSX.Element {
             <button className={getWorkspaceButtonClass('compile')} onClick={openCompileWorkspace}>
               Compile
             </button>
+            <button className={getWorkspaceButtonClass('scores')} onClick={openScoresWorkspace}>
+              Scores
+            </button>
             <button className={getWorkspaceButtonClass('about')} onClick={openAboutWorkspace}>
               About
             </button>
@@ -142,6 +150,8 @@ export function StudentDashboard(): React.JSX.Element {
                 onExpectedOutputChange={setExpectedOutput}
               />
             </>
+          ) : activeWorkspace === 'scores' ? (
+            <StudentScoresPanel />
           ) : activeWorkspace === 'about' ? (
             <AboutPanel />
           ) : (
