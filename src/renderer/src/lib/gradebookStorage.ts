@@ -5,15 +5,11 @@
  */
 
 import type { GradebookRecord } from '../../../shared/gradebookTypes'
+import { loadServerGradebookRecords, saveServerGradebookRecord } from './serverData'
 
 const GRADEBOOK_STORAGE_KEY = 'gradebookRecords'
 
-/**
- * Loads all saved Gradebook records from localStorage.
- *
- * @returns Promise resolving to all saved Gradebook records
- */
-export async function loadGradebookRecords(): Promise<GradebookRecord[]> {
+async function loadLocalGradebookRecords(): Promise<GradebookRecord[]> {
   try {
     const rawData = localStorage.getItem(GRADEBOOK_STORAGE_KEY)
 
@@ -23,9 +19,25 @@ export async function loadGradebookRecords(): Promise<GradebookRecord[]> {
 
     return JSON.parse(rawData) as GradebookRecord[]
   } catch (error) {
-    console.error('Failed to load Gradebook records:', error)
+    console.error('Failed to load local Gradebook records:', error)
     return []
   }
+}
+
+/**
+ * Loads all saved Gradebook records from localStorage.
+ *
+ * @returns Promise resolving to all saved Gradebook records
+ */
+export async function loadGradebookRecords(): Promise<GradebookRecord[]> {
+  try {
+    const serverRecords = await loadServerGradebookRecords()
+    return serverRecords
+  } catch (error) {
+    console.error('Failed to load server Gradebook records, using local cache:', error)
+  }
+
+  return loadLocalGradebookRecords()
 }
 
 /**
@@ -36,7 +48,13 @@ export async function loadGradebookRecords(): Promise<GradebookRecord[]> {
  */
 export async function saveGradebookRecord(record: GradebookRecord): Promise<void> {
   try {
-    const existingRecords = await loadGradebookRecords()
+    await saveServerGradebookRecord(record)
+  } catch (error) {
+    console.error('Failed to save server Gradebook record, using local cache:', error)
+  }
+
+  try {
+    const existingRecords = await loadLocalGradebookRecords()
     const updatedRecords = [...existingRecords, record]
 
     localStorage.setItem(GRADEBOOK_STORAGE_KEY, JSON.stringify(updatedRecords))

@@ -13,7 +13,7 @@ import { getAllAssignments, createAssignment, updateAssignment } from './databas
 import { deleteAssignment } from './database/queries'
 
 /* TEST ONLY DELETE WHEN DONE */
-import { selectFile, stringifyFile, selectCppFiles, selectSubmissionFolder, selectFilesFromFolder} from './utils/file'
+import { selectFile, stringifyFile, selectCppFiles, selectSubmissionFolder, selectFilesFromFolder, materializeServerSubmissions} from './utils/file'
 /* TEST ONLY DELETE WHEN DONE */
 
 // @ Issue 9: Implement Automated Build & Compilation
@@ -220,6 +220,9 @@ app.whenReady().then(() => {
     ipcMain.handle('file:stringify', (_e, filePath: string) => stringifyFile(filePath))
     ipcMain.handle('file:selectSubmissionFolder', () => selectSubmissionFolder())
     ipcMain.handle('file:selectFilesFromFolder', () => selectFilesFromFolder())
+    ipcMain.handle('file:materializeServerSubmissions', (_e, bundles) =>
+      materializeServerSubmissions(bundles)
+    )
     /* TEST ONLY DELETE WHEN DONE */
 
     // Compilation

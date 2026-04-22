@@ -36,6 +36,10 @@ type SubmissionRow = {
   submitted_at: string | null
 }
 
+type UploadedSubmissionRow = SubmissionRow & {
+  storage_path: string
+}
+
 type ServerSubmissionBundle = {
   submissionId: string
   studentId: string
@@ -75,6 +79,8 @@ const ASSIGNMENT_COLUMNS =
   'assignments_id, section_id, assignment_name, due_date, grading_criteria, solution_type, solution_file_name, solution_file_path, expected_output, created_by, created_at'
 const ASSIGNMENTS_TABLE = 'instructors_assignments'
 const SUBMISSIONS_BUCKET = 'Submissions'
+const LOCAL_BATCH_STORAGE_PREFIX = 'batch://'
+const SUBMISSION_MANIFEST_FILE = 'submission-manifest.json'
 
 function getErrorMessage(error: unknown): string {
   if (error instanceof Error) {
@@ -373,6 +379,32 @@ async function downloadTextFromSubmissionBucket(path: string): Promise<string> {
   return data.text()
 }
 
+async function downloadSubmissionText(path: string, label: string): Promise<string> {
+  try {
+    return await downloadTextFromSubmissionBucket(path)
+  } catch (error) {
+    throw new Error(
+      `Could not download ${label} from Supabase Storage path "${path}": ${getErrorMessage(error)}`
+    )
+  }
+}
+
+function isUploadedSubmissionManifestPath(path: string | null): path is string {
+  if (!path) {
+    return false
+  }
+
+  return (
+    !path.startsWith(LOCAL_BATCH_STORAGE_PREFIX) && path.endsWith(`/${SUBMISSION_MANIFEST_FILE}`)
+  )
+}
+
+function hasUploadedSubmissionManifest(
+  submission: SubmissionRow
+): submission is UploadedSubmissionRow {
+  return isUploadedSubmissionManifestPath(submission.storage_path)
+}
+
 async function uploadSubmissionBundle(
   result: SubmitCppResult,
   compileSnapshot: SubmissionCompileSnapshot | null,
@@ -572,7 +604,9 @@ export async function loadServerSubmissionsForGrading(
 
   const { data: submissionsData, error: submissionsError } = await supabase
     .from('submissions')
-    .select('submission_id, assignment_id, student_id, file_name, storage_path, status, submitted_at')
+    .select(
+      'submission_id, assignment_id, student_id, file_name, storage_path, status, submitted_at'
+    )
     .eq('assignment_id', assignmentId)
     .not('storage_path', 'is', null)
 
@@ -580,44 +614,73 @@ export async function loadServerSubmissionsForGrading(
     throw new Error(`Could not load Supabase submissions: ${submissionsError.message}`)
   }
 
-  const submissions = (submissionsData ?? []) as SubmissionRow[]
+  const submissions = ((submissionsData ?? []) as SubmissionRow[]).filter(
+    hasUploadedSubmissionManifest
+  )
   const studentNames = await loadStudentNames([
     ...new Set(submissions.map((submission) => submission.student_id))
   ])
+  const bundles: ServerSubmissionBundle[] = []
+  const skippedSubmissionIds: string[] = []
 
-  return Promise.all(
-    submissions.map(async (submission) => {
-      if (!submission.storage_path) {
-        throw new Error(`Submission ${submission.submission_id} does not have uploaded files.`)
-      }
-
-      const manifestText = await downloadTextFromSubmissionBucket(submission.storage_path)
+  for (const submission of submissions) {
+    try {
+      const manifestText = await downloadSubmissionText(
+        submission.storage_path,
+        `manifest for submission ${submission.submission_id}`
+      )
       const manifest = JSON.parse(manifestText) as UploadedSubmissionManifest
       const submittedFiles = manifest.submittedFiles ?? []
 
       const files = await Promise.all(
         submittedFiles.map(async (file) => {
           if (!file.storagePath) {
-            throw new Error(`Submission ${submission.submission_id} has a file without storagePath.`)
+            throw new Error(
+              `Submission ${submission.submission_id} has a file without storagePath.`
+            )
           }
 
           return {
             relativePath: file.relativePath ?? file.fileName ?? file.storagePath,
             fileName: file.fileName ?? file.storagePath.split('/').pop() ?? 'submission.cpp',
-            content: await downloadTextFromSubmissionBucket(file.storagePath)
+            content: await downloadSubmissionText(
+              file.storagePath,
+              `source file for submission ${submission.submission_id}`
+            )
           }
         })
       )
 
-      return {
+      bundles.push({
         submissionId: submission.submission_id,
         studentId: submission.student_id,
         studentName:
           studentNames.get(submission.student_id) ?? submission.file_name ?? submission.student_id,
         files
-      }
-    })
-  )
+      })
+    } catch (error) {
+      console.warn(`Skipping server submission ${submission.submission_id}:`, error)
+      skippedSubmissionIds.push(submission.submission_id)
+    }
+  }
+
+  if (bundles.length === 0 && skippedSubmissionIds.length > 0) {
+    throw new Error(
+      `Found ${skippedSubmissionIds.length} server submission row${
+        skippedSubmissionIds.length === 1 ? '' : 's'
+      }, but the uploaded files are missing from Supabase Storage. Ask the student to submit again, or delete the stale row from the submissions table. First stale submission: ${skippedSubmissionIds[0]}.`
+    )
+  }
+
+  if (skippedSubmissionIds.length > 0) {
+    console.warn(
+      `Skipped ${skippedSubmissionIds.length} server submission${
+        skippedSubmissionIds.length === 1 ? '' : 's'
+      } with missing Supabase Storage files: ${skippedSubmissionIds.join(', ')}`
+    )
+  }
+
+  return bundles
 }
 
 function buildBatchFeedback(record: GradebookRecord): string {

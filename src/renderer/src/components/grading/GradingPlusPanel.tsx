@@ -2,7 +2,9 @@ import { useEffect, useRef, useState } from 'react'
 import { compileCppFiles } from '../compiler/cppWorkflowApi'
 import type { BatchJudgeCaseResult, BatchStudentSubmission } from '../../../../shared/batchGrading'
 import type { GradebookRecord } from '../../../../shared/gradebookTypes'
+import type { Assignment } from '../../../../shared/types'
 import { saveGradebookRecord } from '../../lib/gradebookStorage'
+import { loadServerAssignments, loadServerSubmissionsForGrading } from '../../lib/serverData'
 import { StudentGradingCard } from './StudentGradingCard'
 
 interface GradingPlusPanelProps {
@@ -16,6 +18,10 @@ interface GradingPlusPanelProps {
 function getFileName(filePath: string): string {
   const parts = filePath.split(/[/\\]/)
   return parts[parts.length - 1] || filePath
+}
+
+function getFileStem(filePath: string): string {
+  return getFileName(filePath).replace(/\.[^.]+$/, '')
 }
 
 type JudgeFilePairPreview = {
@@ -41,6 +47,7 @@ function sortFilesAlphabetically(files: string[]): string[] {
 
 function buildGradebookRecord(
   student: BatchStudentSubmission,
+  assignmentId: string,
   passedCount: number,
   totalCount: number,
   status: 'done' | 'failed'
@@ -50,7 +57,8 @@ function buildGradebookRecord(
   return {
     studentId: student.studentId,
     studentName: student.studentName,
-    assignmentId: 'assignment-1',
+    assignmentId,
+    submissionId: student.serverSubmissionId,
     score,
     passedCount,
     totalCount,
@@ -73,6 +81,9 @@ export function GradingPlusPanel({
   const [expandedStudentIndex, setExpandedStudentIndex] = useState<number | null>(null)
   const [showInputMenu, setShowInputMenu] = useState(false)
   const [showOutputMenu, setShowOutputMenu] = useState(false)
+  const [assignments, setAssignments] = useState<Assignment[]>([])
+  const [selectedAssignmentId, setSelectedAssignmentId] = useState('')
+  const [isLoadingServerSubmissions, setIsLoadingServerSubmissions] = useState(false)
 
   const judgeFilePairPreview = buildJudgeFilePairPreview(selectedInputFiles, selectedOutputFiles)
   const studentCardRefs = useRef<(HTMLDivElement | null)[]>([])
@@ -87,6 +98,31 @@ export function GradingPlusPanel({
 
     return () => {
       window.removeEventListener('click', handleClickOutside)
+    }
+  }, [])
+
+  useEffect(() => {
+    let isMounted = true
+
+    loadServerAssignments()
+      .then(async (result) => (result.length > 0 ? result : window.api.assignments.getAll()))
+      .then((result) => {
+        if (!isMounted) {
+          return
+        }
+
+        setAssignments(result)
+        setSelectedAssignmentId((current) => current || result[0]?.uuid || '')
+      })
+      .catch((error) => {
+        console.error('Error loading assignments for batch grading:', error)
+        if (isMounted) {
+          setBatchError('Could not load assignments for grading.')
+        }
+      })
+
+    return () => {
+      isMounted = false
     }
   }, [])
 
@@ -134,8 +170,8 @@ export function GradingPlusPanel({
         const startIndex = currentStudents.length
 
         const newStudents = newFiles.map((filePath, index) => ({
-          studentId: `student-${startIndex + index + 1}`,
-          studentName: `Student ${startIndex + index + 1}`,
+          studentId: getFileStem(filePath) || `student-${startIndex + index + 1}`,
+          studentName: getFileStem(filePath) || `Student ${startIndex + index + 1}`,
           folderName: `Manual Upload ${startIndex + index + 1}`,
           filePaths: [filePath],
           fileNames: [getFileName(filePath)],
@@ -171,10 +207,8 @@ export function GradingPlusPanel({
           return currentStudents
         }
 
-        const startIndex = currentStudents.length
-
-        const newStudents = newGroups.map((group, index) => ({
-          studentId: `student-${startIndex + index + 1}`,
+        const newStudents = newGroups.map((group) => ({
+          studentId: group.folderName,
           studentName: group.folderName,
           folderName: group.folderName,
           filePaths: group.cppFiles,
@@ -196,6 +230,61 @@ export function GradingPlusPanel({
     } catch (error) {
       console.error('Error importing submission folder:', error)
       setBatchError('Could not import submission folder.')
+    }
+  }
+
+  async function handleLoadServerSubmissions(): Promise<void> {
+    if (!selectedAssignmentId) {
+      setBatchError('Select an assignment before loading server submissions.')
+      return
+    }
+
+    setIsLoadingServerSubmissions(true)
+    setBatchError(null)
+    setBatchMessage(null)
+
+    try {
+      const bundles = await loadServerSubmissionsForGrading(selectedAssignmentId)
+
+      if (bundles.length === 0) {
+        setBatchMessage('No server submissions found for this assignment.')
+        return
+      }
+
+      const groups = await window.api.file.materializeServerSubmissions(bundles)
+
+      setStudents((currentStudents) => {
+        const existingServerIds = new Set(
+          currentStudents.map((student) => student.serverSubmissionId).filter(Boolean)
+        )
+
+        const newStudents = groups
+          .filter((group) => !existingServerIds.has(group.serverSubmissionId))
+          .map((group) => ({
+            studentId: group.studentId ?? group.folderName,
+            studentName: group.studentName ?? group.folderName,
+            folderName: group.folderName,
+            serverSubmissionId: group.serverSubmissionId,
+            filePaths: group.cppFiles,
+            fileNames: group.cppFiles.map((filePath) => getFileName(filePath)),
+            status: 'pending' as const,
+            compileResult: null,
+            judgeResults: [],
+            passedCount: 0,
+            totalCount: 0,
+            savedToGradebook: false,
+            errorMessage: null
+          }))
+
+        return [...currentStudents, ...newStudents]
+      })
+
+      setBatchMessage(`Loaded ${bundles.length} server submission${bundles.length === 1 ? '' : 's'}.`)
+    } catch (error) {
+      console.error('Error loading server submissions:', error)
+      setBatchError(error instanceof Error ? error.message : 'Could not load server submissions.')
+    } finally {
+      setIsLoadingServerSubmissions(false)
     }
   }
 
@@ -273,7 +362,7 @@ export function GradingPlusPanel({
       })
 
       if (!compileResult.compileSuccess || !compileResult.executablePath) {
-        const failedRecord = buildGradebookRecord(student, 0, 0, 'failed')
+        const failedRecord = buildGradebookRecord(student, selectedAssignmentId, 0, 0, 'failed')
         await saveGradebookRecord(failedRecord)
 
         updateStudent(index, {
@@ -318,7 +407,13 @@ export function GradingPlusPanel({
 
       const passedCount = judgeResults.filter((test) => test.result.passed).length
       const totalCount = judgeResults.length
-      const savedRecord = buildGradebookRecord(student, passedCount, totalCount, 'done')
+      const savedRecord = buildGradebookRecord(
+        student,
+        selectedAssignmentId,
+        passedCount,
+        totalCount,
+        'done'
+      )
       await saveGradebookRecord(savedRecord)
 
       updateStudent(index, {
@@ -331,7 +426,7 @@ export function GradingPlusPanel({
     } catch (error) {
       console.error('Error grading student:', error)
 
-      const failedRecord = buildGradebookRecord(student, 0, 0, 'failed')
+      const failedRecord = buildGradebookRecord(student, selectedAssignmentId, 0, 0, 'failed')
       await saveGradebookRecord(failedRecord)
 
       updateStudent(index, {
@@ -345,6 +440,11 @@ export function GradingPlusPanel({
   async function handleGradeStudent(index: number): Promise<void> {
     if (selectedInputFiles.length === 0) {
       setBatchError('Select at least one input file before grading.')
+      return
+    }
+
+    if (!selectedAssignmentId) {
+      setBatchError('Select an assignment before grading.')
       return
     }
 
@@ -376,6 +476,11 @@ export function GradingPlusPanel({
   async function handleGradeAllStudents(): Promise<void> {
     if (students.length === 0) {
       setBatchError('No students available to grade.')
+      return
+    }
+
+    if (!selectedAssignmentId) {
+      setBatchError('Select an assignment before grading.')
       return
     }
 
@@ -468,9 +573,40 @@ export function GradingPlusPanel({
       >
         <h2 style={{ marginBottom: '10px' }}>Batch Setup</h2>
 
+        <div style={{ marginBottom: '10px' }}>
+          <label htmlFor="batch-assignment-select" style={{ marginRight: '8px' }}>
+            Assignment:
+          </label>
+          <select
+            id="batch-assignment-select"
+            value={selectedAssignmentId}
+            onChange={(e) => setSelectedAssignmentId(e.target.value)}
+            disabled={assignments.length === 0 || isBatchGrading}
+            style={{ padding: '6px', minWidth: '220px' }}
+          >
+            {assignments.length === 0 ? (
+              <option value="">No assignments available</option>
+            ) : (
+              assignments.map((assignment) => (
+                <option key={assignment.uuid} value={assignment.uuid}>
+                  {assignment.name}
+                </option>
+              ))
+            )}
+          </select>
+        </div>
+
         <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
           <button onClick={() => void handleImportSubmissionFolder()} className="primary-button">
             Import Submission Folder
+          </button>
+
+          <button
+            onClick={() => void handleLoadServerSubmissions()}
+            className="primary-button"
+            disabled={isLoadingServerSubmissions || !selectedAssignmentId}
+          >
+            {isLoadingServerSubmissions ? 'Loading Server Submissions...' : 'Load Server Submissions'}
           </button>
 
           <button onClick={() => void handleSelectStudentFiles()} className="primary-button">
