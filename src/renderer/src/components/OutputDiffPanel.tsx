@@ -19,7 +19,7 @@
  * Students cannot supply their own expected output only instructors define it
  * via FR-9/FR-11.
  */
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import type { Assignment } from '../../../shared/types'
 
 type DiffLineType = 'match' | 'missing' | 'extra'
@@ -234,14 +234,14 @@ export function OutputDiffPanel({
   isRunningTestCases = false,
   testCaseError = null
 }: OutputDiffPanelProps): React.JSX.Element {
-  const [activeCaseIndex, setActiveCaseIndex] = useState(0)
+  const [activeCaseId, setActiveCaseId] = useState<string | null>(null)
+  const activeCaseIndex = Math.max(
+    0,
+    comparisonCases.findIndex((testCase) => testCase.id === activeCaseId)
+  )
   const activeCase = comparisonCases[activeCaseIndex] ?? null
   const displayedActualOutput = activeCase ? activeCase.actualOutput : actualOutput
   const displayedExpectedOutput = activeCase ? activeCase.expectedOutput : expectedOutput
-
-  useEffect(() => {
-    setActiveCaseIndex(0)
-  }, [selectedAssignmentId, comparisonCases.length])
 
   /**
    * @brief Memoized diff, recomputed only when inputs change.
@@ -304,7 +304,7 @@ export function OutputDiffPanel({
               <button
                 key={testCase.id}
                 type="button"
-                onClick={() => setActiveCaseIndex(index)}
+                onClick={() => setActiveCaseId(testCase.id)}
                 className="compact-button output-case-tab"
                 style={testCaseTabStyle(status, isActive)}
                 title={`${testCase.label}: ${status}`}
