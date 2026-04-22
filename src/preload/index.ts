@@ -46,7 +46,10 @@ const assignmentsApi: AssignmentsAPI = {
   getAll: () => ipcRenderer.invoke('assignments:getAll'),
   create: (data) => ipcRenderer.invoke('assignments:create', data),
   update: (data) => ipcRenderer.invoke('assignments:update', data),
-  delete: (uuid) => ipcRenderer.invoke('assignments:delete', uuid)
+  delete: (uuid) => ipcRenderer.invoke('assignments:delete', uuid),
+  getTestCases: (assignmentUuid) => ipcRenderer.invoke('assignments:getTestCases', assignmentUuid),
+  replaceTestCases: (assignmentUuid, testCases) =>
+    ipcRenderer.invoke('assignments:replaceTestCases', assignmentUuid, testCases)
 }
 
 // Custom APIs for renderer

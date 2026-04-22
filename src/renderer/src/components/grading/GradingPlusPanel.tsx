@@ -40,6 +40,8 @@ type JudgeCaseData = {
   expectedOutput: string
 }
 
+type TestCaseMode = 'saved' | 'manual'
+
 function buildJudgeFilePairPreview(
   inputFiles: string[],
   outputFiles: string[]
@@ -97,17 +99,17 @@ export function GradingPlusPanel({
   const [isLoadingServerSubmissions, setIsLoadingServerSubmissions] = useState(false)
   const [assignmentTestCases, setAssignmentTestCases] = useState<AssignmentTestCase[]>([])
   const [isLoadingAssignmentTestCases, setIsLoadingAssignmentTestCases] = useState(false)
+  const [testCaseMode, setTestCaseMode] = useState<TestCaseMode>('saved')
 
-  const judgeFilePairPreview =
-    assignmentTestCases.length > 0
-      ? assignmentTestCases.map((testCase) => ({
-          inputFile:
-            testCase.inputFileName ??
-            (testCase.inputText ? `Test ${testCase.caseOrder} input` : null),
-          outputFile:
-            testCase.expectedOutputFileName ?? `Test ${testCase.caseOrder} expected output`
-        }))
-      : buildJudgeFilePairPreview(selectedInputFiles, selectedOutputFiles)
+  const useSavedTestCases = testCaseMode === 'saved' && assignmentTestCases.length > 0
+  const judgeFilePairPreview = useSavedTestCases
+    ? assignmentTestCases.map((testCase) => ({
+        inputFile:
+          testCase.inputFileName ??
+          (testCase.inputText ? `Test ${testCase.caseOrder} input` : null),
+        outputFile: testCase.expectedOutputFileName ?? `Test ${testCase.caseOrder} expected output`
+      }))
+    : buildJudgeFilePairPreview(selectedInputFiles, selectedOutputFiles)
   const studentCardRefs = useRef<(HTMLDivElement | null)[]>([])
 
   useEffect(() => {
@@ -183,6 +185,7 @@ export function GradingPlusPanel({
 
         if (isMounted) {
           setAssignmentTestCases(testCases)
+          setTestCaseMode(testCases.length > 0 ? 'saved' : 'manual')
         }
       } catch (error) {
         console.error('Error loading assignment test cases:', error)
@@ -192,12 +195,14 @@ export function GradingPlusPanel({
 
           if (isMounted) {
             setAssignmentTestCases(localTestCases)
+            setTestCaseMode(localTestCases.length > 0 ? 'saved' : 'manual')
           }
         } catch (fallbackError) {
           console.error('Error loading local assignment test cases:', fallbackError)
 
           if (isMounted) {
             setAssignmentTestCases([])
+            setTestCaseMode('manual')
           }
         }
       } finally {
@@ -416,7 +421,7 @@ export function GradingPlusPanel({
   }
 
   async function buildJudgeCases(): Promise<JudgeCaseData[]> {
-    if (assignmentTestCases.length > 0) {
+    if (useSavedTestCases) {
       return assignmentTestCases.map((testCase) => ({
         testNumber: testCase.caseOrder,
         inputLabel:
@@ -553,13 +558,13 @@ export function GradingPlusPanel({
       return
     }
 
-    if (assignmentTestCases.length === 0 && selectedOutputFiles.length === 0) {
+    if (!useSavedTestCases && selectedOutputFiles.length === 0) {
       setBatchError('Select at least one expected output file before grading.')
       return
     }
 
     if (
-      assignmentTestCases.length === 0 &&
+      !useSavedTestCases &&
       selectedInputFiles.length > 0 &&
       selectedInputFiles.length !== selectedOutputFiles.length
     ) {
@@ -593,13 +598,13 @@ export function GradingPlusPanel({
       return
     }
 
-    if (assignmentTestCases.length === 0 && selectedOutputFiles.length === 0) {
+    if (!useSavedTestCases && selectedOutputFiles.length === 0) {
       setBatchError('Select at least one expected output file before grading.')
       return
     }
 
     if (
-      assignmentTestCases.length === 0 &&
+      !useSavedTestCases &&
       selectedInputFiles.length > 0 &&
       selectedInputFiles.length !== selectedOutputFiles.length
     ) {
@@ -713,7 +718,7 @@ export function GradingPlusPanel({
             </span>
           ) : assignmentTestCases.length > 0 ? (
             <span style={{ marginLeft: '8px', fontSize: '13px', color: '#22c55e' }}>
-              Using {assignmentTestCases.length} saved test case
+              Loaded {assignmentTestCases.length} saved test case
               {assignmentTestCases.length === 1 ? '' : 's'}
             </span>
           ) : (
@@ -721,6 +726,32 @@ export function GradingPlusPanel({
               No saved test cases. Manual files will be used.
             </span>
           )}
+        </div>
+
+        <div style={{ marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '14px' }}>
+          <span style={{ fontSize: '14px' }}>Test cases:</span>
+
+          <label style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+            <input
+              type="radio"
+              name="grading-test-case-mode"
+              checked={testCaseMode === 'saved'}
+              disabled={assignmentTestCases.length === 0 || isBatchGrading}
+              onChange={() => setTestCaseMode('saved')}
+            />
+            Saved assignment cases
+          </label>
+
+          <label style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+            <input
+              type="radio"
+              name="grading-test-case-mode"
+              checked={testCaseMode === 'manual'}
+              disabled={isBatchGrading}
+              onChange={() => setTestCaseMode('manual')}
+            />
+            Manual files for this run
+          </label>
         </div>
 
         <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
@@ -863,6 +894,9 @@ export function GradingPlusPanel({
 
         <div style={{ marginTop: '12px', fontSize: '14px', lineHeight: '1.6' }}>
           <p>Total Students: {students.length}</p>
+          <p>
+            Active Test Case Mode: {useSavedTestCases ? 'Saved assignment cases' : 'Manual files'}
+          </p>
           <p>Saved Test Cases: {assignmentTestCases.length}</p>
           <p>Manual Input Files: {selectedInputFiles.length}</p>
           <p>Manual Output Files: {selectedOutputFiles.length}</p>
@@ -883,7 +917,7 @@ export function GradingPlusPanel({
                 ))}
               </ul>
 
-              {assignmentTestCases.length === 0 &&
+              {!useSavedTestCases &&
                 selectedInputFiles.length > 0 &&
                 selectedInputFiles.length !== selectedOutputFiles.length && (
                   <p style={{ fontSize: '13px', color: '#f87171', marginTop: '8px' }}>

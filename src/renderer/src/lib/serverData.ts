@@ -1,4 +1,4 @@
-import type { Assignment } from '../../../shared/types'
+import type { Assignment, AssignmentTestCase } from '../../../shared/types'
 import type { GradebookRecord } from '../../../shared/gradebookTypes'
 import type { SubmissionCompileSnapshot, SubmitCppResult } from '../../../shared/submission'
 import { supabase } from './supabase'
@@ -15,6 +15,29 @@ type InstructorAssignmentRow = {
   solution_file_path: string | null
   expected_output: string | null
   created_by: string | null
+  created_at: string | number | null
+}
+
+type AssignmentTestCaseInput = {
+  caseOrder: number
+  inputFileName?: string | null
+  inputFilePath?: string | null
+  inputText?: string | null
+  expectedOutputFileName?: string | null
+  expectedOutputFilePath?: string | null
+  expectedOutputText: string
+}
+
+type AssignmentTestCaseRow = {
+  test_case_id: string
+  assignment_id: string
+  case_order: number
+  input_file_name: string | null
+  input_storage_path: string | null
+  input_text: string | null
+  expected_output_file_name: string | null
+  expected_output_storage_path: string | null
+  expected_output_text: string | null
   created_at: string | number | null
 }
 
@@ -77,8 +100,12 @@ type StudentRow = {
 
 const ASSIGNMENT_COLUMNS =
   'assignments_id, section_id, assignment_name, due_date, grading_criteria, solution_type, solution_file_name, solution_file_path, expected_output, created_by, created_at'
+const ASSIGNMENT_TEST_CASE_COLUMNS =
+  'test_case_id, assignment_id, case_order, input_file_name, input_storage_path, input_text, expected_output_file_name, expected_output_storage_path, expected_output_text, created_at'
 const ASSIGNMENTS_TABLE = 'instructors_assignments'
+const ASSIGNMENT_TEST_CASES_TABLE = 'assignment_test_cases'
 const SUBMISSIONS_BUCKET = 'Submissions'
+const ASSIGNMENT_TESTS_BUCKET = 'AssignmentTests'
 const LOCAL_BATCH_STORAGE_PREFIX = 'batch://'
 const SUBMISSION_MANIFEST_FILE = 'submission-manifest.json'
 
@@ -243,6 +270,63 @@ function assignmentPayload(
   }
 }
 
+function toAssignmentTestCase(row: AssignmentTestCaseRow): AssignmentTestCase {
+  return {
+    uuid: row.test_case_id,
+    assignmentUuid: row.assignment_id,
+    caseOrder: row.case_order,
+    inputFileName: row.input_file_name,
+    inputFilePath: row.input_storage_path,
+    inputText: row.input_text,
+    expectedOutputFileName: row.expected_output_file_name,
+    expectedOutputFilePath: row.expected_output_storage_path,
+    expectedOutputText: row.expected_output_text ?? '',
+    createdAt: toUnixSeconds(row.created_at)
+  }
+}
+
+function buildAssignmentTestPath(
+  instructorId: string,
+  assignmentId: string,
+  caseOrder: number,
+  kind: 'input' | 'expected',
+  fileName: string
+): string {
+  return [
+    sanitizeStorageSegment(instructorId),
+    sanitizeStorageSegment(assignmentId),
+    String(caseOrder),
+    `${kind}-${sanitizeStorageSegment(fileName)}`
+  ].join('/')
+}
+
+async function uploadTextToAssignmentTestsBucket(
+  path: string,
+  content: string,
+  contentType: string
+): Promise<void> {
+  const { error } = await supabase.storage
+    .from(ASSIGNMENT_TESTS_BUCKET)
+    .upload(path, new Blob([content], { type: contentType }), {
+      contentType,
+      upsert: true
+    })
+
+  if (error) {
+    throw error
+  }
+}
+
+async function downloadTextFromAssignmentTestsBucket(path: string): Promise<string> {
+  const { data, error } = await supabase.storage.from(ASSIGNMENT_TESTS_BUCKET).download(path)
+
+  if (error) {
+    throw error
+  }
+
+  return data.text()
+}
+
 export async function loadServerAssignments(): Promise<Assignment[]> {
   const profile = await requireCurrentProfile()
 
@@ -342,6 +426,156 @@ export async function deleteServerAssignment(assignmentId: string): Promise<void
   }
 }
 
+async function resolveLocalTestCaseText(
+  text: string | null | undefined,
+  filePath: string | null | undefined
+): Promise<string | null> {
+  if (text !== undefined && text !== null) {
+    return text
+  }
+
+  if (!filePath) {
+    return null
+  }
+
+  return window.api.file.stringify(filePath)
+}
+
+export async function publishAssignmentTestCases(
+  assignmentId: string,
+  testCases: AssignmentTestCaseInput[]
+): Promise<AssignmentTestCase[]> {
+  const authUser = await getAuthenticatedUser()
+  await ensureServerProfile(authUser.id, authUser.email, 'instructor')
+
+  const { error: deleteError } = await supabase
+    .from(ASSIGNMENT_TEST_CASES_TABLE)
+    .delete()
+    .eq('assignment_id', assignmentId)
+
+  if (deleteError) {
+    throw new Error(`Could not replace assignment test cases: ${getErrorMessage(deleteError)}`)
+  }
+
+  if (testCases.length === 0) {
+    return []
+  }
+
+  const rows = await Promise.all(
+    testCases.map(async (testCase, index) => {
+      const caseOrder = testCase.caseOrder || index + 1
+      const inputText = await resolveLocalTestCaseText(testCase.inputText, testCase.inputFilePath)
+      const expectedOutputText = await resolveLocalTestCaseText(
+        testCase.expectedOutputText,
+        testCase.expectedOutputFilePath
+      )
+
+      if (expectedOutputText === null) {
+        throw new Error(`Test case ${caseOrder} is missing expected output.`)
+      }
+
+      const inputStoragePath =
+        inputText !== null
+          ? buildAssignmentTestPath(
+              authUser.id,
+              assignmentId,
+              caseOrder,
+              'input',
+              testCase.inputFileName ?? `input-${caseOrder}.txt`
+            )
+          : null
+      const expectedOutputStoragePath = buildAssignmentTestPath(
+        authUser.id,
+        assignmentId,
+        caseOrder,
+        'expected',
+        testCase.expectedOutputFileName ?? `expected-${caseOrder}.txt`
+      )
+
+      if (inputStoragePath) {
+        await uploadTextToAssignmentTestsBucket(
+          inputStoragePath,
+          inputText ?? '',
+          'text/plain;charset=utf-8'
+        )
+      }
+
+      await uploadTextToAssignmentTestsBucket(
+        expectedOutputStoragePath,
+        expectedOutputText,
+        'text/plain;charset=utf-8'
+      )
+
+      return {
+        assignment_id: assignmentId,
+        case_order: caseOrder,
+        input_file_name: testCase.inputFileName ?? null,
+        input_storage_path: inputStoragePath,
+        input_text: null,
+        expected_output_file_name: testCase.expectedOutputFileName ?? null,
+        expected_output_storage_path: expectedOutputStoragePath,
+        expected_output_text: null
+      }
+    })
+  )
+
+  const { data, error } = await supabase
+    .from(ASSIGNMENT_TEST_CASES_TABLE)
+    .insert(rows)
+    .select(ASSIGNMENT_TEST_CASE_COLUMNS)
+
+  if (error) {
+    throw new Error(`Could not save assignment test cases: ${getErrorMessage(error)}`)
+  }
+
+  return Promise.all(
+    ((data ?? []) as AssignmentTestCaseRow[]).map(async (row) => {
+      const testCase = toAssignmentTestCase(row)
+      return {
+        ...testCase,
+        inputText: row.input_storage_path
+          ? await downloadTextFromAssignmentTestsBucket(row.input_storage_path)
+          : row.input_text,
+        expectedOutputText: row.expected_output_storage_path
+          ? await downloadTextFromAssignmentTestsBucket(row.expected_output_storage_path)
+          : (row.expected_output_text ?? '')
+      }
+    })
+  )
+}
+
+export async function loadAssignmentTestCases(assignmentId: string): Promise<AssignmentTestCase[]> {
+  await requireCurrentProfile('instructor')
+
+  const { data, error } = await supabase
+    .from(ASSIGNMENT_TEST_CASES_TABLE)
+    .select(ASSIGNMENT_TEST_CASE_COLUMNS)
+    .eq('assignment_id', assignmentId)
+    .order('case_order', { ascending: true })
+
+  if (error) {
+    throw new Error(`Could not load assignment test cases: ${getErrorMessage(error)}`)
+  }
+
+  return Promise.all(
+    ((data ?? []) as AssignmentTestCaseRow[]).map(async (row) => {
+      const testCase = toAssignmentTestCase(row)
+      const inputText = row.input_storage_path
+        ? await downloadTextFromAssignmentTestsBucket(row.input_storage_path)
+        : row.input_text
+      const expectedOutputText = row.expected_output_storage_path
+        ? await downloadTextFromAssignmentTestsBucket(row.expected_output_storage_path)
+        : (row.expected_output_text ?? '')
+
+      return {
+        ...testCase,
+        inputText,
+        expectedOutputText
+      }
+    })
+  )
+}
+
 function sanitizeStorageSegment(segment: string): string {
   return segment.replace(/[^a-zA-Z0-9._-]/g, '_')
 }
@@ -356,7 +590,11 @@ function toStorageRelativePath(relativePath: string, fallbackFileName: string): 
   return parts.length > 0 ? parts.join('/') : sanitizeStorageSegment(fallbackFileName)
 }
 
-async function uploadTextToSubmissionBucket(path: string, content: string, contentType: string): Promise<void> {
+async function uploadTextToSubmissionBucket(
+  path: string,
+  content: string,
+  contentType: string
+): Promise<void> {
   const { error } = await supabase.storage
     .from(SUBMISSIONS_BUCKET)
     .upload(path, new Blob([content], { type: contentType }), {
@@ -484,7 +722,7 @@ async function createServerStudentId(authUserId: string, email: string | null): 
     .from('students')
     .insert({
       ...studentRecord,
-      id: authUserId,
+      id: authUserId
     })
     .select('id')
     .single()
@@ -831,7 +1069,9 @@ export async function loadServerGradebookRecords(): Promise<GradebookRecord[]> {
 
   const { data: submissionsData, error: submissionsError } = await supabase
     .from('submissions')
-    .select('submission_id, assignment_id, student_id, file_name, storage_path, status, submitted_at')
+    .select(
+      'submission_id, assignment_id, student_id, file_name, storage_path, status, submitted_at'
+    )
     .in('assignment_id', assignmentIds)
 
   if (submissionsError) {
@@ -855,9 +1095,16 @@ export async function loadServerGradebookRecords(): Promise<GradebookRecord[]> {
     throw gradesError
   }
 
-  const studentNames = await loadStudentNames([...new Set(submissions.map((submission) => submission.student_id))])
+  const studentNames = await loadStudentNames([
+    ...new Set(submissions.map((submission) => submission.student_id))
+  ])
 
-  return mapGradebookRecords(submissions, (gradesData ?? []) as GradeRow[], assignments, studentNames)
+  return mapGradebookRecords(
+    submissions,
+    (gradesData ?? []) as GradeRow[],
+    assignments,
+    studentNames
+  )
 }
 
 export async function loadServerStudentGradebookRecords(): Promise<GradebookRecord[]> {
@@ -867,7 +1114,9 @@ export async function loadServerStudentGradebookRecords(): Promise<GradebookReco
 
   const { data: submissionsData, error: submissionsError } = await supabase
     .from('submissions')
-    .select('submission_id, assignment_id, student_id, file_name, storage_path, status, submitted_at')
+    .select(
+      'submission_id, assignment_id, student_id, file_name, storage_path, status, submitted_at'
+    )
     .eq('student_id', serverStudentId)
 
   if (submissionsError) {

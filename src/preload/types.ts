@@ -13,7 +13,18 @@ import type {
   DockerJudgeResult
 } from '../shared/compiler'
 import type { SubmitCppRequest, SubmitCppResult } from '../shared/submission'
-import type { Assignment, NewAssignment, UpdateAssignment } from '../shared/types'
+import type {
+  Assignment,
+  AssignmentTestCase,
+  NewAssignment,
+  NewAssignmentTestCase,
+  UpdateAssignment
+} from '../shared/types'
+
+export type AssignmentTestCaseInput = Omit<
+  NewAssignmentTestCase,
+  'uuid' | 'assignmentUuid' | 'createdAt'
+>
 
 export type UsersAPI = {
   getAll: () => Promise<User[]>
@@ -59,6 +70,11 @@ export type AssignmentsAPI = {
    * @return Promise resolving to the deleted assignment.
    */
   delete: (uuid: string) => Promise<Assignment>
+  getTestCases: (assignmentUuid: string) => Promise<AssignmentTestCase[]>
+  replaceTestCases: (
+    assignmentUuid: string,
+    testCases: AssignmentTestCaseInput[]
+  ) => Promise<AssignmentTestCase[]>
 }
 
 export type SubmissionFolderGroup = {

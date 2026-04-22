@@ -1,9 +1,11 @@
 import { useCallback, useEffect, useState } from 'react'
-import type { Assignment } from '../../../shared/types'
+import type { Assignment, AssignmentTestCase } from '../../../shared/types'
 import { useAuth } from './AuthContext'
 import {
   deleteServerAssignment,
+  loadAssignmentTestCases,
   loadServerAssignments,
+  publishAssignmentTestCases,
   publishServerAssignment,
   updateServerAssignment
 } from '../lib/serverData'
@@ -28,6 +30,25 @@ type FormState = {
   expectedOutputText: string
 }
 
+type TestCaseFormState = {
+  inputFileName: string | null
+  inputFilePath: string | null
+  inputText: string
+  expectedOutputFileName: string | null
+  expectedOutputFilePath: string | null
+  expectedOutputText: string
+}
+
+type TestCaseSaveInput = {
+  caseOrder: number
+  inputFileName: string | null
+  inputFilePath: string | null
+  inputText: string | null
+  expectedOutputFileName: string | null
+  expectedOutputFilePath: string | null
+  expectedOutputText: string
+}
+
 /**
  * @brief Empty/default form values for a new assignment.
  *
@@ -39,6 +60,32 @@ const emptyForm: FormState = {
   gradingCriteria: '',
   solutionType: 'text',
   expectedOutputText: ''
+}
+
+function createEmptyTestCase(): TestCaseFormState {
+  return {
+    inputFileName: null,
+    inputFilePath: null,
+    inputText: '',
+    expectedOutputFileName: null,
+    expectedOutputFilePath: null,
+    expectedOutputText: ''
+  }
+}
+
+function getFileName(filePath: string): string {
+  return filePath.split(/[\\/]/).pop() ?? filePath
+}
+
+function toTestCaseForm(testCase: AssignmentTestCase): TestCaseFormState {
+  return {
+    inputFileName: testCase.inputFileName,
+    inputFilePath: testCase.inputFilePath,
+    inputText: testCase.inputText ?? '',
+    expectedOutputFileName: testCase.expectedOutputFileName,
+    expectedOutputFilePath: testCase.expectedOutputFilePath,
+    expectedOutputText: testCase.expectedOutputText
+  }
 }
 
 /**
@@ -64,6 +111,7 @@ export function AssignmentConfigPanel(): React.JSX.Element {
   const { user } = useAuth()
   const [assignments, setAssignments] = useState<Assignment[]>([])
   const [form, setForm] = useState<FormState>(emptyForm)
+  const [testCases, setTestCases] = useState<TestCaseFormState[]>([])
   const [editingUuid, setEditingUuid] = useState<string | null>(null)
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -135,7 +183,8 @@ export function AssignmentConfigPanel(): React.JSX.Element {
 
   async function publishAssignmentAfterLocalSave(
     action: 'created' | 'updated',
-    assignment: Assignment
+    assignment: Assignment,
+    testCaseInputs: TestCaseSaveInput[]
   ): Promise<void> {
     if (!user) {
       setStatusMessage(`Assignment ${action} locally.`)
@@ -148,6 +197,7 @@ export function AssignmentConfigPanel(): React.JSX.Element {
       } else {
         await updateServerAssignment(assignment)
       }
+      await publishAssignmentTestCases(assignment.uuid, testCaseInputs)
 
       setStatusMessage(`Assignment ${action} and published successfully.`)
     } catch (publishError) {
@@ -192,7 +242,7 @@ export function AssignmentConfigPanel(): React.JSX.Element {
    * @param assignment The assignment selected for editing.
    * @return Nothing.
    */
-  function startEdit(assignment: Assignment): void {
+  async function startEdit(assignment: Assignment): Promise<void> {
     setEditingUuid(assignment.uuid)
     setForm({
       name: assignment.name ?? '',
@@ -207,6 +257,21 @@ export function AssignmentConfigPanel(): React.JSX.Element {
     setDeleteConfirm(null)
     setStatusMessage(null)
     setError(null)
+
+    try {
+      const savedTestCases = user
+        ? await loadAssignmentTestCases(assignment.uuid)
+        : await window.api.assignments.getTestCases(assignment.uuid)
+      setTestCases(savedTestCases.map(toTestCaseForm))
+    } catch (loadError) {
+      console.error('Could not load assignment test cases:', loadError)
+      setTestCases([])
+      setError(
+        loadError instanceof Error
+          ? `Could not load test cases: ${loadError.message}`
+          : 'Could not load test cases.'
+      )
+    }
   }
 
   /**
@@ -220,9 +285,64 @@ export function AssignmentConfigPanel(): React.JSX.Element {
     setSelectedFilePath(null)
     setSelectedFileName(null)
     setCompiledOutput(null)
+    setTestCases([])
     setDeleteConfirm(null)
     setStatusMessage(null)
     setError(null)
+  }
+
+  async function handleSelectTestCaseFile(
+    index: number,
+    kind: 'input' | 'expectedOutput'
+  ): Promise<void> {
+    try {
+      const filePath = await window.api.file.select()
+
+      if (!filePath) {
+        return
+      }
+
+      const fileName = getFileName(filePath)
+      const content = await window.api.file.stringify(filePath)
+
+      setTestCases((currentTestCases) =>
+        currentTestCases.map((testCase, testCaseIndex) => {
+          if (testCaseIndex !== index) {
+            return testCase
+          }
+
+          return kind === 'input'
+            ? {
+                ...testCase,
+                inputFileName: fileName,
+                inputFilePath: filePath,
+                inputText: content
+              }
+            : {
+                ...testCase,
+                expectedOutputFileName: fileName,
+                expectedOutputFilePath: filePath,
+                expectedOutputText: content
+              }
+        })
+      )
+      setError(null)
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : 'Could not load test case file.')
+    }
+  }
+
+  function buildTestCaseInputs(): TestCaseSaveInput[] {
+    return testCases.map((testCase, index) => ({
+      caseOrder: index + 1,
+      inputFileName: testCase.inputFileName,
+      inputFilePath: testCase.inputFilePath,
+      inputText:
+        testCase.inputText.length > 0 || testCase.inputFilePath ? testCase.inputText : null,
+      expectedOutputFileName: testCase.expectedOutputFileName,
+      expectedOutputFilePath: testCase.expectedOutputFilePath,
+      expectedOutputText: testCase.expectedOutputText
+    }))
   }
 
   /**
@@ -321,13 +441,23 @@ export function AssignmentConfigPanel(): React.JSX.Element {
       return false
     }
 
-    if (form.solutionType === 'text' && !trimmedExpectedOutput) {
-      setError('Expected output text is required for text solution mode.')
+    if (form.solutionType === 'text' && !trimmedExpectedOutput && testCases.length === 0) {
+      setError('Expected output text is required unless automated test cases are provided.')
       return false
     }
 
     if (form.solutionType === 'file' && !selectedFilePath && !editingUuid) {
       setError('Please select a solution file before submission.')
+      return false
+    }
+
+    const invalidTestCaseIndex = testCases.findIndex(
+      (testCase) =>
+        testCase.expectedOutputText.trim().length === 0 && !testCase.expectedOutputFilePath
+    )
+
+    if (invalidTestCaseIndex !== -1) {
+      setError(`Expected output is required for test case ${invalidTestCaseIndex + 1}.`)
       return false
     }
 
@@ -359,6 +489,8 @@ export function AssignmentConfigPanel(): React.JSX.Element {
     setStatusMessage(null)
 
     try {
+      const testCaseInputs = buildTestCaseInputs()
+
       if (editingUuid) {
         const updatedAssignment = await window.api.assignments.update({
           uuid: editingUuid,
@@ -371,9 +503,12 @@ export function AssignmentConfigPanel(): React.JSX.Element {
           solutionFilePath:
             form.solutionType === 'file' ? (selectedFilePath ?? undefined) : undefined,
           expectedOutputText:
-            form.solutionType === 'text' ? trimmedExpectedOutput : (compiledOutput ?? undefined)
+            form.solutionType === 'text'
+              ? trimmedExpectedOutput || null
+              : (compiledOutput ?? undefined)
         })
-        await publishAssignmentAfterLocalSave('updated', updatedAssignment)
+        await window.api.assignments.replaceTestCases(updatedAssignment.uuid, testCaseInputs)
+        await publishAssignmentAfterLocalSave('updated', updatedAssignment, testCaseInputs)
       } else {
         const createdAssignment = await window.api.assignments.create({
           name: trimmedName,
@@ -382,16 +517,19 @@ export function AssignmentConfigPanel(): React.JSX.Element {
           solutionType: form.solutionType,
           solutionFileName: form.solutionType === 'file' ? (selectedFileName ?? null) : null,
           solutionFilePath: form.solutionType === 'file' ? (selectedFilePath ?? null) : null,
-          expectedOutputText: form.solutionType === 'text' ? trimmedExpectedOutput : compiledOutput,
+          expectedOutputText:
+            form.solutionType === 'text' ? trimmedExpectedOutput || null : compiledOutput,
           createdByUserUuid: user?.uuid ?? null
         })
-        await publishAssignmentAfterLocalSave('created', createdAssignment)
+        await window.api.assignments.replaceTestCases(createdAssignment.uuid, testCaseInputs)
+        await publishAssignmentAfterLocalSave('created', createdAssignment, testCaseInputs)
       }
 
       setForm(emptyForm)
       setSelectedFilePath(null)
       setSelectedFileName(null)
       setCompiledOutput(null)
+      setTestCases([])
       setEditingUuid(null)
       setDeleteConfirm(null)
       await loadAssignments()
@@ -497,9 +635,11 @@ export function AssignmentConfigPanel(): React.JSX.Element {
           />
         </div>
 
-        <div className="panel-subheader">
-          <h3>Solution Upload</h3>
-          <p>Choose whether the instructor solution will be provided as text or as a file.</p>
+        <div className="assignment-section-header">
+          <div>
+            <h3>Reference Solution</h3>
+            <p>Instructor answer source or fallback expected output.</p>
+          </div>
         </div>
 
         <div className="panel-section">
@@ -515,7 +655,7 @@ export function AssignmentConfigPanel(): React.JSX.Element {
                 }))
               }
             />
-            text solution
+            Text output
           </label>
 
           <label style={{ marginLeft: '1rem' }}>
@@ -531,35 +671,39 @@ export function AssignmentConfigPanel(): React.JSX.Element {
                 }))
               }
             />
-            file solution
+            C++ file
           </label>
         </div>
 
         {form.solutionType === 'text' ? (
-          <div className="solution-box">
-            <label className="field-label">Expected output text</label>
+          <div className="solution-box reference-solution-box">
+            <label className="field-label">Fallback expected output</label>
             <textarea
-              placeholder="Enter the expected solution output"
+              placeholder="Used when no grading test cases are added"
               value={form.expectedOutputText}
               onChange={(e) => setForm((f) => ({ ...f, expectedOutputText: e.target.value }))}
-              className="panel-input"
+              className="panel-input panel-textarea"
               rows={5}
             />
           </div>
         ) : (
-          <div className="solution-box">
-            <label className="field-label">Upload solution file (.cpp)</label>
+          <div className="solution-box reference-solution-box">
+            <label className="field-label">Reference C++ file</label>
 
             <button
               type="button"
               onClick={() => void handleSelectFile()}
-              className="primary-button"
+              className="secondary-button compact-button"
               disabled={isSubmitting}
             >
-              {isSubmitting ? 'Compiling solution…' : 'Select .cpp File'}
+              {isSubmitting ? 'Compiling...' : 'Select .cpp File'}
             </button>
 
-            {selectedFileName && <p className="helper-text">Selected file: {selectedFileName}</p>}
+            {selectedFileName ? (
+              <p className="helper-text">Selected: {selectedFileName}</p>
+            ) : (
+              <p className="helper-text">No reference file selected.</p>
+            )}
 
             {/* FR11: Preview compiled output once the pipeline has run */}
             {compiledOutput !== null && (
@@ -571,9 +715,126 @@ export function AssignmentConfigPanel(): React.JSX.Element {
           </div>
         )}
 
+        <div className="assignment-section-header assignment-section-header--tests">
+          <div>
+            <h3>Grading Test Cases</h3>
+            <p>Input and expected-output pairs used by Grading+.</p>
+          </div>
+
+          <button
+            type="button"
+            className="primary-button compact-button"
+            onClick={() =>
+              setTestCases((currentTestCases) => [...currentTestCases, createEmptyTestCase()])
+            }
+          >
+            + Add Test Case
+          </button>
+        </div>
+
+        <div className="test-case-list">
+          {testCases.length === 0 ? (
+            <div className="panel-empty">No grading test cases added.</div>
+          ) : (
+            testCases.map((testCase, index) => (
+              <div key={index} className="test-case-card">
+                <div className="test-case-card-header">
+                  <div>
+                    <h4>Test case {index + 1}</h4>
+                    <p>{testCase.expectedOutputFileName ?? 'Expected output required'}</p>
+                  </div>
+                  <button
+                    type="button"
+                    className="btn-ghost text-xs"
+                    onClick={() =>
+                      setTestCases((currentTestCases) =>
+                        currentTestCases.filter((_, testCaseIndex) => testCaseIndex !== index)
+                      )
+                    }
+                  >
+                    Remove
+                  </button>
+                </div>
+
+                <div className="test-case-grid">
+                  <div className="test-case-field">
+                    <label className="field-label">Input</label>
+                    <textarea
+                      placeholder="Optional stdin"
+                      value={testCase.inputText}
+                      onChange={(e) =>
+                        setTestCases((currentTestCases) =>
+                          currentTestCases.map((currentTestCase, testCaseIndex) =>
+                            testCaseIndex === index
+                              ? {
+                                  ...currentTestCase,
+                                  inputText: e.target.value,
+                                  inputFileName: null,
+                                  inputFilePath: null
+                                }
+                              : currentTestCase
+                          )
+                        )
+                      }
+                      className="panel-input panel-textarea"
+                      rows={5}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => void handleSelectTestCaseFile(index, 'input')}
+                      className="secondary-button compact-button"
+                    >
+                      Select Input
+                    </button>
+                    {testCase.inputFileName && (
+                      <p className="helper-text">Input file: {testCase.inputFileName}</p>
+                    )}
+                  </div>
+
+                  <div className="test-case-field test-case-field--required">
+                    <label className="field-label">Expected Output</label>
+                    <textarea
+                      placeholder="Required expected stdout"
+                      value={testCase.expectedOutputText}
+                      onChange={(e) =>
+                        setTestCases((currentTestCases) =>
+                          currentTestCases.map((currentTestCase, testCaseIndex) =>
+                            testCaseIndex === index
+                              ? {
+                                  ...currentTestCase,
+                                  expectedOutputText: e.target.value,
+                                  expectedOutputFileName: null,
+                                  expectedOutputFilePath: null
+                                }
+                              : currentTestCase
+                          )
+                        )
+                      }
+                      className="panel-input panel-textarea"
+                      rows={5}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => void handleSelectTestCaseFile(index, 'expectedOutput')}
+                      className="secondary-button compact-button"
+                    >
+                      Select Output
+                    </button>
+                    {testCase.expectedOutputFileName && (
+                      <p className="helper-text">
+                        Expected output file: {testCase.expectedOutputFileName}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+
         <div className="panel-subheader">
-          <h3>Solution Submission</h3>
-          <p>Submit the assignment only after the solution input has been provided.</p>
+          <h3>Save Assignment</h3>
+          <p>Create or update the assignment configuration.</p>
         </div>
 
         <button
@@ -615,7 +876,7 @@ export function AssignmentConfigPanel(): React.JSX.Element {
                 </div>
 
                 <div className="panel-actions">
-                  <button onClick={() => startEdit(assignment)} className="btn-ghost text-xs">
+                  <button onClick={() => void startEdit(assignment)} className="btn-ghost text-xs">
                     Edit
                   </button>
 
