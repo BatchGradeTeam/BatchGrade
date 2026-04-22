@@ -36,11 +36,12 @@ interface DockerCompileResult {
 async function dockerCompile(request: DockerCompileRequest): Promise<DockerCompileResult> {
   const { sourceFiles, language } = request
   const config = getLanguage(language)
+  const compileExtensions = language === 'cpp' ? ['.cpp', '.cc', '.cxx', '.cp'] : config.extensions
 
   // Filter files by language extensions
   const sourceFilesForLang = sourceFiles.filter((file) => {
     const ext = file.substring(file.lastIndexOf('.'))
-    return config.extensions.includes(ext.toLowerCase())
+    return compileExtensions.includes(ext.toLowerCase())
   })
 
   // If there are no source files error

@@ -229,7 +229,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       isMounted = false
       subscription.unsubscribe()
     }
-  })
+  }, [])
 
   // Handles user login with Supabase then refreshes the user's profile to update authentication state and user information
   const login = async (email: string, password: string): Promise<AuthUser> => {
