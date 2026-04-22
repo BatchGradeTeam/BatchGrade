@@ -1,9 +1,13 @@
 import { useEffect, useRef, useState } from 'react'
 import type { BatchJudgeCaseResult, BatchStudentSubmission } from '../../../../shared/batchGrading'
 import type { GradebookRecord } from '../../../../shared/gradebookTypes'
-import type { Assignment } from '../../../../shared/types'
+import type { Assignment, AssignmentTestCase } from '../../../../shared/types'
 import { saveGradebookRecord } from '../../lib/gradebookStorage'
-import { loadServerAssignments, loadServerSubmissionsForGrading } from '../../lib/serverData'
+import {
+  loadAssignmentTestCases,
+  loadServerAssignments,
+  loadServerSubmissionsForGrading
+} from '../../lib/serverData'
 import { StudentGradingCard } from './StudentGradingCard'
 
 interface GradingPlusPanelProps {
@@ -24,8 +28,16 @@ function getFileStem(filePath: string): string {
 }
 
 type JudgeFilePairPreview = {
-  inputFile: string
+  inputFile: string | null
   outputFile: string
+}
+
+type JudgeCaseData = {
+  testNumber: number
+  inputLabel: string | null
+  outputLabel: string
+  stdin: string
+  expectedOutput: string
 }
 
 function buildJudgeFilePairPreview(
@@ -83,8 +95,19 @@ export function GradingPlusPanel({
   const [assignments, setAssignments] = useState<Assignment[]>([])
   const [selectedAssignmentId, setSelectedAssignmentId] = useState('')
   const [isLoadingServerSubmissions, setIsLoadingServerSubmissions] = useState(false)
+  const [assignmentTestCases, setAssignmentTestCases] = useState<AssignmentTestCase[]>([])
+  const [isLoadingAssignmentTestCases, setIsLoadingAssignmentTestCases] = useState(false)
 
-  const judgeFilePairPreview = buildJudgeFilePairPreview(selectedInputFiles, selectedOutputFiles)
+  const judgeFilePairPreview =
+    assignmentTestCases.length > 0
+      ? assignmentTestCases.map((testCase) => ({
+          inputFile:
+            testCase.inputFileName ??
+            (testCase.inputText ? `Test ${testCase.caseOrder} input` : null),
+          outputFile:
+            testCase.expectedOutputFileName ?? `Test ${testCase.caseOrder} expected output`
+        }))
+      : buildJudgeFilePairPreview(selectedInputFiles, selectedOutputFiles)
   const studentCardRefs = useRef<(HTMLDivElement | null)[]>([])
 
   useEffect(() => {
@@ -139,6 +162,57 @@ export function GradingPlusPanel({
       })
     }
   }, [currentStudentIndex])
+
+  useEffect(() => {
+    let isMounted = true
+
+    async function loadSelectedAssignmentTestCases(): Promise<void> {
+      if (!selectedAssignmentId) {
+        setAssignmentTestCases([])
+        return
+      }
+
+      setIsLoadingAssignmentTestCases(true)
+
+      try {
+        const serverTestCases = await loadAssignmentTestCases(selectedAssignmentId)
+        const testCases =
+          serverTestCases.length > 0
+            ? serverTestCases
+            : await window.api.assignments.getTestCases(selectedAssignmentId)
+
+        if (isMounted) {
+          setAssignmentTestCases(testCases)
+        }
+      } catch (error) {
+        console.error('Error loading assignment test cases:', error)
+
+        try {
+          const localTestCases = await window.api.assignments.getTestCases(selectedAssignmentId)
+
+          if (isMounted) {
+            setAssignmentTestCases(localTestCases)
+          }
+        } catch (fallbackError) {
+          console.error('Error loading local assignment test cases:', fallbackError)
+
+          if (isMounted) {
+            setAssignmentTestCases([])
+          }
+        }
+      } finally {
+        if (isMounted) {
+          setIsLoadingAssignmentTestCases(false)
+        }
+      }
+    }
+
+    void loadSelectedAssignmentTestCases()
+
+    return () => {
+      isMounted = false
+    }
+  }, [selectedAssignmentId])
 
   function updateStudent(index: number, updates: Partial<BatchStudentSubmission>): void {
     setStudents((currentStudents) =>
@@ -278,7 +352,9 @@ export function GradingPlusPanel({
         return [...currentStudents, ...newStudents]
       })
 
-      setBatchMessage(`Loaded ${bundles.length} server submission${bundles.length === 1 ? '' : 's'}.`)
+      setBatchMessage(
+        `Loaded ${bundles.length} server submission${bundles.length === 1 ? '' : 's'}.`
+      )
     } catch (error) {
       console.error('Error loading server submissions:', error)
       setBatchError(error instanceof Error ? error.message : 'Could not load server submissions.')
@@ -339,6 +415,40 @@ export function GradingPlusPanel({
     }
   }
 
+  async function buildJudgeCases(): Promise<JudgeCaseData[]> {
+    if (assignmentTestCases.length > 0) {
+      return assignmentTestCases.map((testCase) => ({
+        testNumber: testCase.caseOrder,
+        inputLabel:
+          testCase.inputFileName ??
+          (testCase.inputText ? `Test ${testCase.caseOrder} input` : null),
+        outputLabel:
+          testCase.expectedOutputFileName ?? `Test ${testCase.caseOrder} expected output`,
+        stdin: testCase.inputText ?? '',
+        expectedOutput: testCase.expectedOutputText
+      }))
+    }
+
+    const expectedOutputs = await Promise.all(
+      selectedOutputFiles.map((filePath) => window.api.file.stringify(filePath))
+    )
+
+    const stdinValues =
+      selectedInputFiles.length === 0
+        ? selectedOutputFiles.map(() => '')
+        : await Promise.all(
+            selectedInputFiles.map((filePath) => window.api.file.stringify(filePath))
+          )
+
+    return selectedOutputFiles.map((outputFile, index) => ({
+      testNumber: index + 1,
+      inputLabel: selectedInputFiles[index] ?? null,
+      outputLabel: outputFile,
+      stdin: stdinValues[index] ?? '',
+      expectedOutput: expectedOutputs[index] ?? ''
+    }))
+  }
+
   async function gradeSingleStudent(index: number): Promise<void> {
     setCurrentStudentIndex(index)
     setExpandedStudentIndex(index)
@@ -386,30 +496,21 @@ export function GradingPlusPanel({
         status: 'judging'
       })
 
-      const expectedOutputs = await Promise.all(
-        selectedOutputFiles.map((filePath) => window.api.file.stringify(filePath))
-      )
-
-      const stdinValues = await Promise.all(
-        selectedInputFiles.map((filePath) => window.api.file.stringify(filePath))
-      )
-
+      const judgeCases = await buildJudgeCases()
       const judgeResults: BatchJudgeCaseResult[] = []
 
-      for (const [i, outputFile] of selectedOutputFiles.entries()) {
-        const inputFile = selectedInputFiles[i] ?? null
-
-        const result = await window.api.compiler.judgeCpp({
+      for (const judgeCase of judgeCases) {
+        const result = await window.api.compiler.dockerJudgeCpp({
           executablePath: compileResult.executablePath,
-          stdin: stdinValues[i] ?? '',
-          expectedOutput: expectedOutputs[i] ?? '',
+          stdin: judgeCase.stdin,
+          expectedOutput: judgeCase.expectedOutput,
           timeoutMs: 5000
         })
 
         judgeResults.push({
-          testNumber: i + 1,
-          inputFile,
-          outputFile,
+          testNumber: judgeCase.testNumber,
+          inputFile: judgeCase.inputLabel,
+          outputFile: judgeCase.outputLabel,
           result
         })
       }
@@ -447,22 +548,21 @@ export function GradingPlusPanel({
   }
 
   async function handleGradeStudent(index: number): Promise<void> {
-    if (selectedInputFiles.length === 0) {
-      setBatchError('Select at least one input file before grading.')
-      return
-    }
-
     if (!selectedAssignmentId) {
       setBatchError('Select an assignment before grading.')
       return
     }
 
-    if (selectedOutputFiles.length === 0) {
+    if (assignmentTestCases.length === 0 && selectedOutputFiles.length === 0) {
       setBatchError('Select at least one expected output file before grading.')
       return
     }
 
-    if (selectedInputFiles.length !== selectedOutputFiles.length) {
+    if (
+      assignmentTestCases.length === 0 &&
+      selectedInputFiles.length > 0 &&
+      selectedInputFiles.length !== selectedOutputFiles.length
+    ) {
       setBatchError('Input files must match the number of output files.')
       return
     }
@@ -493,12 +593,16 @@ export function GradingPlusPanel({
       return
     }
 
-    if (selectedOutputFiles.length === 0) {
+    if (assignmentTestCases.length === 0 && selectedOutputFiles.length === 0) {
       setBatchError('Select at least one expected output file before grading.')
       return
     }
 
-    if (selectedInputFiles.length !== selectedOutputFiles.length) {
+    if (
+      assignmentTestCases.length === 0 &&
+      selectedInputFiles.length > 0 &&
+      selectedInputFiles.length !== selectedOutputFiles.length
+    ) {
       setBatchError('Input files must match the number of output files.')
       return
     }
@@ -603,6 +707,20 @@ export function GradingPlusPanel({
               ))
             )}
           </select>
+          {isLoadingAssignmentTestCases ? (
+            <span style={{ marginLeft: '8px', fontSize: '13px', color: '#facc15' }}>
+              Loading test cases...
+            </span>
+          ) : assignmentTestCases.length > 0 ? (
+            <span style={{ marginLeft: '8px', fontSize: '13px', color: '#22c55e' }}>
+              Using {assignmentTestCases.length} saved test case
+              {assignmentTestCases.length === 1 ? '' : 's'}
+            </span>
+          ) : (
+            <span style={{ marginLeft: '8px', fontSize: '13px', color: '#facc15' }}>
+              No saved test cases. Manual files will be used.
+            </span>
+          )}
         </div>
 
         <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
@@ -615,7 +733,9 @@ export function GradingPlusPanel({
             className="primary-button"
             disabled={isLoadingServerSubmissions || !selectedAssignmentId}
           >
-            {isLoadingServerSubmissions ? 'Loading Server Submissions...' : 'Load Server Submissions'}
+            {isLoadingServerSubmissions
+              ? 'Loading Server Submissions...'
+              : 'Load Server Submissions'}
           </button>
 
           <button onClick={() => void handleSelectStudentFiles()} className="primary-button">
@@ -743,8 +863,9 @@ export function GradingPlusPanel({
 
         <div style={{ marginTop: '12px', fontSize: '14px', lineHeight: '1.6' }}>
           <p>Total Students: {students.length}</p>
-          <p>Input Files: {selectedInputFiles.length}</p>
-          <p>Output Files: {selectedOutputFiles.length}</p>
+          <p>Saved Test Cases: {assignmentTestCases.length}</p>
+          <p>Manual Input Files: {selectedInputFiles.length}</p>
+          <p>Manual Output Files: {selectedOutputFiles.length}</p>
 
           {judgeFilePairPreview.length > 0 && (
             <div style={{ marginTop: '8px' }}>
@@ -756,16 +877,19 @@ export function GradingPlusPanel({
                     key={`${pair.inputFile}-${pair.outputFile}`}
                     style={{ fontSize: '14px', marginBottom: '4px', overflowWrap: 'anywhere' }}
                   >
-                    Test {index + 1}: {getFileName(pair.inputFile)} → {getFileName(pair.outputFile)}
+                    Test {index + 1}: {pair.inputFile ? getFileName(pair.inputFile) : 'No input'} →{' '}
+                    {getFileName(pair.outputFile)}
                   </li>
                 ))}
               </ul>
 
-              {selectedInputFiles.length !== selectedOutputFiles.length && (
-                <p style={{ fontSize: '13px', color: '#f87171', marginTop: '8px' }}>
-                  Warning: Input and output file counts do not match yet.
-                </p>
-              )}
+              {assignmentTestCases.length === 0 &&
+                selectedInputFiles.length > 0 &&
+                selectedInputFiles.length !== selectedOutputFiles.length && (
+                  <p style={{ fontSize: '13px', color: '#f87171', marginTop: '8px' }}>
+                    Warning: Input and output file counts do not match yet.
+                  </p>
+                )}
             </div>
           )}
           <p>Completed: {completedCount}</p>
