@@ -12,9 +12,13 @@ export type GradebookRecord = {
   studentId: string
   studentName: string
   assignmentId: string
+  assignmentName?: string
   score: number
   passedCount: number
   totalCount: number
   status: 'done' | 'failed'
   submittedAt: number
+  feedback?: string
+  gradedAt?: string
+  submissionId?: string
 }
