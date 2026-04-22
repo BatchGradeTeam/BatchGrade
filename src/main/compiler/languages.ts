@@ -98,9 +98,8 @@ export async function detectJavaMainClass(files: string[]): Promise<string | nul
     try {
       const source = await readFile(file, 'utf8')
       const classMatch = source.match(/\bclass\s+([A-Za-z_][A-Za-z0-9_]*)\b/)
-      const hasMainMethod = /\bpublic\s+static\s+void\s+main\s*\(\s*String\s*\[\s*\]\s+\w+\s*\)/.test(
-        source
-      )
+      const hasMainMethod =
+        /\bpublic\s+static\s+void\s+main\s*\(\s*String\s*\[\s*\]\s+\w+\s*\)/.test(source)
 
       if (classMatch && hasMainMethod) {
         return classMatch[1]
