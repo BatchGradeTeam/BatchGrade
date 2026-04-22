@@ -4,12 +4,6 @@ import type { SubmissionCompileSnapshot, SubmitCppResult } from '../../../shared
 import { supabase } from './supabase'
 import { getProfile, type Profile } from './profiles'
 
-/**
- * Supabase-backed data helpers used by the renderer.
- *
- * This file keeps shared assignment, submission, and gradebook reads/writes in
- * one place so UI components do not need to know the database table shapes.
- */
 type InstructorAssignmentRow = {
   assignments_id: string
   section_id: string | null
@@ -42,14 +36,27 @@ type SubmissionRow = {
   submitted_at: string | null
 }
 
-type UploadedSubmissionFile = {
-  relativePath?: string
-  fileName?: string
-  storagePath?: string
+type ServerSubmissionBundle = {
+  submissionId: string
+  studentId: string
+  studentName: string
+  files: {
+    relativePath: string
+    fileName: string
+    content: string
+  }[]
+}
+
+type UploadedSubmissionManifest = {
+  submittedFiles?: {
+    relativePath?: string
+    fileName?: string
+    storagePath?: string
+  }[]
 }
 
 type GradeRow = {
-  id: string
+  grade_id: string
   submission_id: string
   score: number
   feedback: string | null
@@ -69,7 +76,6 @@ const ASSIGNMENT_COLUMNS =
 const ASSIGNMENTS_TABLE = 'instructors_assignments'
 const SUBMISSIONS_BUCKET = 'Submissions'
 
-// Supabase errors are plain objects, so normalize the useful fields for UI messages.
 function getErrorMessage(error: unknown): string {
   if (error instanceof Error) {
     return error.message
@@ -84,25 +90,14 @@ function getErrorMessage(error: unknown): string {
       error_description?: unknown
     }
 
-    const message = [
-      maybeError.message,
-      maybeError.details,
-      maybeError.hint,
-      maybeError.code,
-      maybeError.error_description
-    ]
+    return [maybeError.message, maybeError.details, maybeError.hint, maybeError.code]
       .filter((part): part is string => typeof part === 'string' && part.length > 0)
       .join(' ')
-
-    if (message) {
-      return message
-    }
   }
 
   return String(error)
 }
 
-// Server timestamps can arrive as ISO strings, seconds, or milliseconds.
 function toUnixSeconds(value: string | number | null): number {
   if (typeof value === 'number') {
     return value > 9999999999 ? Math.floor(value / 1000) : value
@@ -116,7 +111,6 @@ function toUnixSeconds(value: string | number | null): number {
   return Number.isNaN(timestamp) ? Math.floor(Date.now() / 1000) : Math.floor(timestamp / 1000)
 }
 
-// Convert the Supabase assignment row into the shared app Assignment shape.
 function toAssignment(row: InstructorAssignmentRow): Assignment {
   return {
     uuid: row.assignments_id,
@@ -132,7 +126,6 @@ function toAssignment(row: InstructorAssignmentRow): Assignment {
   }
 }
 
-// Profile reads can fail while auth still succeeds, so callers can decide fallback behavior.
 async function getCurrentProfile(): Promise<Profile | null> {
   try {
     return await getProfile()
@@ -142,7 +135,6 @@ async function getCurrentProfile(): Promise<Profile | null> {
   }
 }
 
-// Require an app profile and optionally enforce the role needed by the current operation.
 async function requireCurrentProfile(role?: Profile['role']): Promise<Profile> {
   const profile = await getCurrentProfile()
 
@@ -157,7 +149,6 @@ async function requireCurrentProfile(role?: Profile['role']): Promise<Profile> {
   return profile
 }
 
-// Use Supabase auth directly for writes so publishing can work even before profile state refreshes.
 async function getAuthenticatedUser(): Promise<{ id: string; email: string | null }> {
   const {
     data: { user },
@@ -169,7 +160,7 @@ async function getAuthenticatedUser(): Promise<{ id: string; email: string | nul
   }
 
   if (!user) {
-    throw new Error('Log in before publishing shared assignment data.')
+    throw new Error('Log in before publishing shared submission data.')
   }
 
   return {
@@ -178,7 +169,6 @@ async function getAuthenticatedUser(): Promise<{ id: string; email: string | nul
   }
 }
 
-// Make sure a matching profiles row exists for RLS policies and role-based queries.
 async function ensureServerProfile(
   authUserId: string,
   email: string | null,
@@ -198,7 +188,6 @@ async function ensureServerProfile(
   }
 }
 
-// Assignments can be published before course sections are configured.
 async function getInstructorSectionId(instructorId: string): Promise<string | null> {
   const { data, error } = await supabase
     .from('sections')
@@ -215,7 +204,6 @@ async function getInstructorSectionId(instructorId: string): Promise<string | nu
   return (data as SectionRow | null)?.section_id ?? null
 }
 
-// Student assignment visibility is based on the sections they are enrolled in.
 async function getStudentSectionIds(studentId: string): Promise<string[]> {
   const { data, error } = await supabase
     .from('enrollments')
@@ -230,7 +218,6 @@ async function getStudentSectionIds(studentId: string): Promise<string[]> {
   return ((data ?? []) as EnrollmentRow[]).map((row) => row.section_id).filter(Boolean)
 }
 
-// Map the local assignment model into the Supabase instructor assignment row shape.
 function assignmentPayload(
   assignment: Assignment,
   instructorId: string,
@@ -250,7 +237,6 @@ function assignmentPayload(
   }
 }
 
-// Load instructor-owned assignments or student-visible assignments from Supabase.
 export async function loadServerAssignments(): Promise<Assignment[]> {
   const profile = await requireCurrentProfile()
 
@@ -296,7 +282,6 @@ export async function loadServerAssignments(): Promise<Assignment[]> {
   return ((data ?? []) as InstructorAssignmentRow[]).map(toAssignment)
 }
 
-// Create or replace the shared Supabase copy of a locally created assignment.
 export async function publishServerAssignment(assignment: Assignment): Promise<Assignment> {
   const authUser = await getAuthenticatedUser()
   await ensureServerProfile(authUser.id, authUser.email, 'instructor')
@@ -317,7 +302,6 @@ export async function publishServerAssignment(assignment: Assignment): Promise<A
   return toAssignment(data as InstructorAssignmentRow)
 }
 
-// Keep the shared assignment row in sync after edits in the instructor config panel.
 export async function updateServerAssignment(assignment: Assignment): Promise<Assignment> {
   const authUser = await getAuthenticatedUser()
   await ensureServerProfile(authUser.id, authUser.email, 'instructor')
@@ -338,7 +322,6 @@ export async function updateServerAssignment(assignment: Assignment): Promise<As
   return toAssignment(data as InstructorAssignmentRow)
 }
 
-// Delete only assignments owned by the currently authenticated instructor.
 export async function deleteServerAssignment(assignmentId: string): Promise<void> {
   const authUser = await getAuthenticatedUser()
 
@@ -353,12 +336,10 @@ export async function deleteServerAssignment(assignmentId: string): Promise<void
   }
 }
 
-// Keep storage paths compatible with Supabase RLS folder checks.
 function sanitizeStorageSegment(segment: string): string {
   return segment.replace(/[^a-zA-Z0-9._-]/g, '_')
 }
 
-// Preserve nested source paths while preventing traversal and invalid storage names.
 function toStorageRelativePath(relativePath: string, fallbackFileName: string): string {
   const parts = relativePath
     .replace(/\\/g, '/')
@@ -369,12 +350,7 @@ function toStorageRelativePath(relativePath: string, fallbackFileName: string): 
   return parts.length > 0 ? parts.join('/') : sanitizeStorageSegment(fallbackFileName)
 }
 
-// Upload text content to the shared Submissions bucket.
-async function uploadTextToSubmissionBucket(
-  path: string,
-  content: string,
-  contentType: string
-): Promise<void> {
+async function uploadTextToSubmissionBucket(path: string, content: string, contentType: string): Promise<void> {
   const { error } = await supabase.storage
     .from(SUBMISSIONS_BUCKET)
     .upload(path, new Blob([content], { type: contentType }), {
@@ -387,7 +363,16 @@ async function uploadTextToSubmissionBucket(
   }
 }
 
-// Store submitted source files plus a manifest so instructors can retrieve the full bundle later.
+async function downloadTextFromSubmissionBucket(path: string): Promise<string> {
+  const { data, error } = await supabase.storage.from(SUBMISSIONS_BUCKET).download(path)
+
+  if (error) {
+    throw error
+  }
+
+  return data.text()
+}
+
 async function uploadSubmissionBundle(
   result: SubmitCppResult,
   compileSnapshot: SubmissionCompileSnapshot | null,
@@ -404,7 +389,7 @@ async function uploadSubmissionBundle(
     sanitizeStorageSegment(result.submissionId)
   ].join('/')
 
-  const uploadedFiles: UploadedSubmissionFile[] = await Promise.all(
+  const uploadedFiles = await Promise.all(
     result.submittedFiles.map(async (file) => {
       const relativePath = toStorageRelativePath(file.relativePath, file.fileName)
       const storagePath = `${rootPath}/source/${relativePath}`
@@ -413,8 +398,7 @@ async function uploadSubmissionBundle(
       await uploadTextToSubmissionBucket(storagePath, fileContent, 'text/plain;charset=utf-8')
 
       return {
-        relativePath: file.relativePath,
-        fileName: file.fileName,
+        ...file,
         storagePath
       }
     })
@@ -441,7 +425,6 @@ async function uploadSubmissionBundle(
   return manifestPath
 }
 
-// Find an existing students row tied to the authenticated Supabase user.
 async function findServerStudentId(authUserId: string): Promise<string | null> {
   const { data, error } = await supabase
     .from('students')
@@ -457,7 +440,6 @@ async function findServerStudentId(authUserId: string): Promise<string | null> {
   return (data as StudentRow | null)?.id ?? null
 }
 
-// Create the student row required by submission RLS policies.
 async function createServerStudentId(authUserId: string, email: string | null): Promise<string> {
   const emailName = email?.split('@')[0] || 'Student'
   const studentRecord = {
@@ -470,7 +452,7 @@ async function createServerStudentId(authUserId: string, email: string | null): 
     .from('students')
     .insert({
       ...studentRecord,
-      id: authUserId
+      id: authUserId,
     })
     .select('id')
     .single()
@@ -504,7 +486,6 @@ async function createServerStudentId(authUserId: string, email: string | null): 
   return String(fallbackStudentId)
 }
 
-// Ensure the app has the server-side student id used by submissions.student_id.
 async function resolveServerStudentId(authUserId: string, email: string | null): Promise<string> {
   await ensureServerProfile(authUserId, email, 'student')
 
@@ -517,7 +498,6 @@ async function resolveServerStudentId(authUserId: string, email: string | null):
   return createServerStudentId(authUserId, email)
 }
 
-// Fail fast when a student tries to submit against an assignment that is still local-only.
 async function requireServerAssignment(assignmentId: string): Promise<void> {
   const { data, error } = await supabase
     .from(ASSIGNMENTS_TABLE)
@@ -536,7 +516,6 @@ async function requireServerAssignment(assignmentId: string): Promise<void> {
   }
 }
 
-// Upload source files to storage and record a successful student submission in the database.
 export async function publishServerSubmission(
   result: SubmitCppResult,
   compileSnapshot: SubmissionCompileSnapshot | null
@@ -581,11 +560,66 @@ export async function publishServerSubmission(
   )
 
   if (error) {
-    throw new Error(`Could not create Supabase submission row: ${getErrorMessage(error)}`)
+    throw new Error(`Could not create Supabase submission row: ${error.message}`)
   }
 }
 
-// Reuse detailed feedback when present, otherwise summarize the batch grading result.
+export async function loadServerSubmissionsForGrading(
+  assignmentId: string
+): Promise<ServerSubmissionBundle[]> {
+  const authUser = await getAuthenticatedUser()
+  await ensureServerProfile(authUser.id, authUser.email, 'instructor')
+
+  const { data: submissionsData, error: submissionsError } = await supabase
+    .from('submissions')
+    .select('submission_id, assignment_id, student_id, file_name, storage_path, status, submitted_at')
+    .eq('assignment_id', assignmentId)
+    .not('storage_path', 'is', null)
+
+  if (submissionsError) {
+    throw new Error(`Could not load Supabase submissions: ${submissionsError.message}`)
+  }
+
+  const submissions = (submissionsData ?? []) as SubmissionRow[]
+  const studentNames = await loadStudentNames([
+    ...new Set(submissions.map((submission) => submission.student_id))
+  ])
+
+  return Promise.all(
+    submissions.map(async (submission) => {
+      if (!submission.storage_path) {
+        throw new Error(`Submission ${submission.submission_id} does not have uploaded files.`)
+      }
+
+      const manifestText = await downloadTextFromSubmissionBucket(submission.storage_path)
+      const manifest = JSON.parse(manifestText) as UploadedSubmissionManifest
+      const submittedFiles = manifest.submittedFiles ?? []
+
+      const files = await Promise.all(
+        submittedFiles.map(async (file) => {
+          if (!file.storagePath) {
+            throw new Error(`Submission ${submission.submission_id} has a file without storagePath.`)
+          }
+
+          return {
+            relativePath: file.relativePath ?? file.fileName ?? file.storagePath,
+            fileName: file.fileName ?? file.storagePath.split('/').pop() ?? 'submission.cpp',
+            content: await downloadTextFromSubmissionBucket(file.storagePath)
+          }
+        })
+      )
+
+      return {
+        submissionId: submission.submission_id,
+        studentId: submission.student_id,
+        studentName:
+          studentNames.get(submission.student_id) ?? submission.file_name ?? submission.student_id,
+        files
+      }
+    })
+  )
+}
+
 function buildBatchFeedback(record: GradebookRecord): string {
   if (record.feedback) {
     return record.feedback
@@ -596,32 +630,60 @@ function buildBatchFeedback(record: GradebookRecord): string {
     : `${record.passedCount} / ${record.totalCount} test cases passed.`
 }
 
-// Persist a batch grading result as a server submission plus grade row.
+async function findServerStudentIdByIdentifier(identifier: string): Promise<string | null> {
+  const { data, error } = await supabase
+    .from('students')
+    .select('id, student_id, first_name, last_name')
+    .or(`id.eq.${identifier},student_id.eq.${identifier}`)
+    .limit(1)
+    .maybeSingle()
+
+  if (error) {
+    throw error
+  }
+
+  return (data as StudentRow | null)?.id ?? null
+}
+
 export async function saveServerGradebookRecord(record: GradebookRecord): Promise<void> {
-  const profile = await requireCurrentProfile('instructor')
-  const submissionId = crypto.randomUUID()
-  const submittedAt = new Date(record.submittedAt).toISOString()
+  const authUser = await getAuthenticatedUser()
+  await ensureServerProfile(authUser.id, authUser.email, 'instructor')
 
-  const { error: submissionError } = await supabase.from('submissions').insert({
-    submission_id: submissionId,
-    assignment_id: record.assignmentId,
-    student_id: record.studentId,
-    file_name: record.studentName,
-    storage_path: `batch://${record.assignmentId}/${record.studentId}/${record.submittedAt}`,
-    status: record.status === 'failed' ? 'failed' : 'graded',
-    submitted_at: submittedAt
-  })
+  let submissionId = record.submissionId ?? null
 
-  if (submissionError) {
-    throw submissionError
+  if (!submissionId) {
+    const serverStudentId = await findServerStudentIdByIdentifier(record.studentId)
+
+    if (!serverStudentId) {
+      throw new Error(
+        `Could not find a Supabase student row matching "${record.studentId}". Use a student folder/file name that matches students.id or students.student_id.`
+      )
+    }
+
+    submissionId = crypto.randomUUID()
+    const submittedAt = new Date(record.submittedAt).toISOString()
+
+    const { error: submissionError } = await supabase.from('submissions').insert({
+      submission_id: submissionId,
+      assignment_id: record.assignmentId,
+      student_id: serverStudentId,
+      file_name: record.studentName,
+      storage_path: `batch://${record.assignmentId}/${record.studentId}/${record.submittedAt}`,
+      status: record.status === 'failed' ? 'failed' : 'graded',
+      submitted_at: submittedAt
+    })
+
+    if (submissionError) {
+      throw submissionError
+    }
   }
 
   const { error: gradeError } = await supabase.from('grades').insert({
-    id: crypto.randomUUID(),
+    grade_id: crypto.randomUUID(),
     submission_id: submissionId,
     score: record.score,
     feedback: buildBatchFeedback(record),
-    graded_by: profile.id,
+    graded_by: authUser.id,
     graded_at: new Date().toISOString()
   })
 
@@ -630,7 +692,6 @@ export async function saveServerGradebookRecord(record: GradebookRecord): Promis
   }
 }
 
-// Resolve display names for gradebook rows without failing the whole gradebook load.
 async function loadStudentNames(studentIds: string[]): Promise<Map<string, string>> {
   if (studentIds.length === 0) {
     return new Map()
@@ -654,7 +715,6 @@ async function loadStudentNames(studentIds: string[]): Promise<Map<string, strin
   )
 }
 
-// Join submissions, grades, assignments, and student names into renderer-friendly records.
 function mapGradebookRecords(
   submissions: SubmissionRow[],
   grades: GradeRow[],
@@ -697,7 +757,6 @@ function mapGradebookRecords(
   return records
 }
 
-// Load grades for assignments owned by the current instructor.
 export async function loadServerGradebookRecords(): Promise<GradebookRecord[]> {
   const profile = await requireCurrentProfile('instructor')
   const assignments = await loadServerAssignments()
@@ -725,7 +784,7 @@ export async function loadServerGradebookRecords(): Promise<GradebookRecord[]> {
 
   const { data: gradesData, error: gradesError } = await supabase
     .from('grades')
-    .select('id, submission_id, score, feedback, graded_by, graded_at')
+    .select('grade_id, submission_id, score, feedback, graded_by, graded_at')
     .in('submission_id', submissionIds)
     .eq('graded_by', profile.id)
 
@@ -738,15 +797,15 @@ export async function loadServerGradebookRecords(): Promise<GradebookRecord[]> {
   return mapGradebookRecords(submissions, (gradesData ?? []) as GradeRow[], assignments, studentNames)
 }
 
-// Load the current student's own submitted and graded work.
 export async function loadServerStudentGradebookRecords(): Promise<GradebookRecord[]> {
-  const profile = await requireCurrentProfile('student')
+  const authUser = await getAuthenticatedUser()
+  const serverStudentId = await resolveServerStudentId(authUser.id, authUser.email)
   const assignments = await loadServerAssignments()
 
   const { data: submissionsData, error: submissionsError } = await supabase
     .from('submissions')
     .select('submission_id, assignment_id, student_id, file_name, storage_path, status, submitted_at')
-    .eq('student_id', profile.id)
+    .eq('student_id', serverStudentId)
 
   if (submissionsError) {
     throw submissionsError
@@ -761,7 +820,7 @@ export async function loadServerStudentGradebookRecords(): Promise<GradebookReco
 
   const { data: gradesData, error: gradesError } = await supabase
     .from('grades')
-    .select('id, submission_id, score, feedback, graded_by, graded_at')
+    .select('grade_id, submission_id, score, feedback, graded_by, graded_at')
     .in('submission_id', submissionIds)
 
   if (gradesError) {
@@ -772,6 +831,6 @@ export async function loadServerStudentGradebookRecords(): Promise<GradebookReco
     submissions,
     (gradesData ?? []) as GradeRow[],
     assignments,
-    new Map([[profile.id, profile.email]])
+    new Map([[serverStudentId, authUser.email ?? serverStudentId]])
   )
 }

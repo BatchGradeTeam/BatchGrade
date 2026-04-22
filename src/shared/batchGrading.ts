@@ -44,6 +44,7 @@ export type BatchStudentSubmission = {
   studentId: string
   studentName: string
   folderName: string
+  serverSubmissionId?: string
 
   // File info
   filePaths: string[]

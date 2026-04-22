@@ -58,6 +58,22 @@ export type SubmissionFolderGroup = {
   folderName: string
   folderPath: string
   cppFiles: string[]
+  studentId?: string
+  studentName?: string
+  serverSubmissionId?: string
+}
+
+export type ServerSubmissionFile = {
+  relativePath: string
+  fileName: string
+  content: string
+}
+
+export type ServerSubmissionBundle = {
+  submissionId: string
+  studentId: string
+  studentName: string
+  files: ServerSubmissionFile[]
 }
 
 export type FileAPI = {
@@ -66,6 +82,9 @@ export type FileAPI = {
   stringify: (filePath: string) => Promise<string>
   selectSubmissionFolder: () => Promise<SubmissionFolderGroup[]>
   selectFilesFromFolder: () => Promise<string[]>
+  materializeServerSubmissions: (
+    bundles: ServerSubmissionBundle[]
+  ) => Promise<SubmissionFolderGroup[]>
 }
 
 export type SubmissionsAPI = {
