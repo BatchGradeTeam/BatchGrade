@@ -129,9 +129,7 @@
       "indexes": {
         "users_email_unique": {
           "name": "users_email_unique",
-          "columns": [
-            "email"
-          ],
+          "columns": ["email"],
           "isUnique": true
         }
       },
@@ -238,12 +236,8 @@
           "name": "compile_logs_submission_id_assignments_uuid_fk",
           "tableFrom": "compile_logs",
           "tableTo": "assignments",
-          "columnsFrom": [
-            "submission_id"
-          ],
-          "columnsTo": [
-            "uuid"
-          ],
+          "columnsFrom": ["submission_id"],
+          "columnsTo": ["uuid"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }

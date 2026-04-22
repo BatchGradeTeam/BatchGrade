@@ -1,0 +1,305 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36">
+  <diagram name="Page-1" id="mvp3-cls-v02-docker">
+    <mxGraphModel dx="1956" dy="1050" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1900" pageHeight="2400" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- User -->
+        <mxCell id="user" parent="1" style="swimlane;fontStyle=1;align=center;startSize=30;" value="User" vertex="1">
+          <mxGeometry height="170" width="180" x="810" y="30" as="geometry" />
+        </mxCell>
+        <mxCell id="user_m" parent="user" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;" value="+openGradingPage()&#xa;+selectCppFiles()&#xa;+clickCompile()&#xa;+selectExpectedOutput()&#xa;+clickRunJudge()&#xa;+viewJudgeResults()" vertex="1">
+          <mxGeometry height="140" width="180" y="30" as="geometry" />
+        </mxCell>
+
+        <!-- GradingPage -->
+        <mxCell id="grading" parent="1" style="swimlane;fontStyle=1;align=center;startSize=30;" value="GradingPage" vertex="1">
+          <mxGeometry height="94" width="340" x="740" y="280" as="geometry" />
+        </mxCell>
+        <mxCell id="grading_f" parent="grading" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;" value="-compileResult: DockerCompileResult | null" vertex="1">
+          <mxGeometry height="28" width="340" y="30" as="geometry" />
+        </mxCell>
+        <mxCell id="grading_div" parent="grading" style="line;strokeColor=default;fillColor=none;" value="" vertex="1">
+          <mxGeometry height="8" width="340" y="58" as="geometry" />
+        </mxCell>
+        <mxCell id="grading_m" parent="grading" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;" value="+render()" vertex="1">
+          <mxGeometry height="28" width="340" y="66" as="geometry" />
+        </mxCell>
+
+        <!-- DockerCppGradePanel -->
+        <mxCell id="workflow" parent="1" style="swimlane;fontStyle=1;align=center;startSize=30;" value="DockerCppGradePanel" vertex="1">
+          <mxGeometry height="290" width="230" x="80" y="520" as="geometry" />
+        </mxCell>
+        <mxCell id="workflow_f" parent="workflow" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;" value="-dockerStatus: DockerInstallationInfo&#xa;-compileResult: DockerCompileResult&#xa;-selectedFiles: string[]&#xa;-stdinText: string&#xa;-isCompiling: boolean&#xa;-autoCompileOnSelection: boolean&#xa;-lastAutoCompileRef" vertex="1">
+          <mxGeometry height="168" width="230" y="30" as="geometry" />
+        </mxCell>
+        <mxCell id="workflow_div" parent="workflow" style="line;strokeColor=default;fillColor=none;" value="" vertex="1">
+          <mxGeometry height="8" width="230" y="198" as="geometry" />
+        </mxCell>
+        <mxCell id="workflow_m" parent="workflow" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;" value="+handleSelectCppFiles()&#xa;+handleCompileCpp()&#xa;+handleRefreshDockerStatus()" vertex="1">
+          <mxGeometry height="84" width="230" y="206" as="geometry" />
+        </mxCell>
+
+        <!-- PreloadAPI -->
+        <mxCell id="preload" parent="1" style="swimlane;fontStyle=1;align=center;startSize=30;" value="PreloadAPI" vertex="1">
+          <mxGeometry height="226" width="260" x="740" y="520" as="geometry" />
+        </mxCell>
+        <mxCell id="preload_m" parent="preload" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;" value="+getDockerStatus()&#xa;+dockerCompileCpp(sourceFiles)&#xa;+dockerJudgeCpp(request)&#xa;+selectCppFiles()&#xa;+select()&#xa;+stringify(filePath)" vertex="1">
+          <mxGeometry height="196" width="260" y="30" as="geometry" />
+        </mxCell>
+
+        <!-- CppJudgePanel -->
+        <mxCell id="judgepanel" parent="1" style="swimlane;fontStyle=1;align=center;startSize=30;" value="CppJudgePanel" vertex="1">
+          <mxGeometry height="262" width="230" x="1360" y="520" as="geometry" />
+        </mxCell>
+        <mxCell id="judgepanel_f" parent="judgepanel" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;" value="-selectedOutputFiles&#xa;-selectedInputFiles&#xa;-judgeResults&#xa;-errorMessage&#xa;-isJudging" vertex="1">
+          <mxGeometry height="140" width="230" y="30" as="geometry" />
+        </mxCell>
+        <mxCell id="judgepanel_div" parent="judgepanel" style="line;strokeColor=default;fillColor=none;" value="" vertex="1">
+          <mxGeometry height="8" width="230" y="170" as="geometry" />
+        </mxCell>
+        <mxCell id="judgepanel_m" parent="judgepanel" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;" value="+handleSelectOutputFiles()&#xa;+handleSelectInputFiles()&#xa;+handleRunJudge()" vertex="1">
+          <mxGeometry height="84" width="230" y="178" as="geometry" />
+        </mxCell>
+
+        <!-- MainProcess -->
+        <mxCell id="main" parent="1" style="swimlane;fontStyle=1;align=center;startSize=30;" value="MainProcess" vertex="1">
+          <mxGeometry height="234" width="300" x="720" y="880" as="geometry" />
+        </mxCell>
+        <mxCell id="main_f" parent="main" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;" value="-dockerStatusCache: DockerInstallationInfo" vertex="1">
+          <mxGeometry height="28" width="300" y="30" as="geometry" />
+        </mxCell>
+        <mxCell id="main_div" parent="main" style="line;strokeColor=default;fillColor=none;" value="" vertex="1">
+          <mxGeometry height="8" width="300" y="58" as="geometry" />
+        </mxCell>
+        <mxCell id="main_m" parent="main" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;" value="+handleGetDockerStatus()&#xa;+handleDockerCompileCpp(sourceFiles)&#xa;+handleDockerJudgeCpp(request)&#xa;+handleSelectCppFiles()&#xa;+handleSelectFile()" vertex="1">
+          <mxGeometry height="168" width="300" y="66" as="geometry" />
+        </mxCell>
+
+        <!-- dockerDetection -->
+        <mxCell id="gcc" parent="1" style="swimlane;fontStyle=1;align=center;startSize=30;" value="dockerDetection" vertex="1">
+          <mxGeometry height="100" width="240" x="60" y="1200" as="geometry" />
+        </mxCell>
+        <mxCell id="gcc_m" parent="gcc" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;" value="+detectDockerInstallation()&#xa;-checkDockerInstalled(cmd)&#xa;-isDockerRunning()" vertex="1">
+          <mxGeometry height="70" width="240" y="30" as="geometry" />
+        </mxCell>
+
+        <!-- FileSelectionService -->
+        <mxCell id="filesel" parent="1" style="swimlane;fontStyle=1;align=center;startSize=30;" value="FileSelectionService" vertex="1">
+          <mxGeometry height="114" width="210" x="230" y="1380" as="geometry" />
+        </mxCell>
+        <mxCell id="filesel_m" parent="filesel" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;" value="+selectCppFiles()&#xa;+select()&#xa;+stringifyFile(filePath)" vertex="1">
+          <mxGeometry height="84" width="210" y="30" as="geometry" />
+        </mxCell>
+
+        <!-- dockerCompile -->
+        <mxCell id="compile" parent="1" style="swimlane;fontStyle=1;align=center;startSize=30;" value="dockerCompile" vertex="1">
+          <mxGeometry height="72" width="310" x="650" y="1200" as="geometry" />
+        </mxCell>
+        <mxCell id="compile_m" parent="compile" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;" value="+dockerCompile(request: DockerCompileRequest)" vertex="1">
+          <mxGeometry height="42" width="310" y="30" as="geometry" />
+        </mxCell>
+
+        <!-- dockerJudge -->
+        <mxCell id="judge" parent="1" style="swimlane;fontStyle=1;align=center;startSize=30;" value="dockerJudge" vertex="1">
+          <mxGeometry height="86" width="220" x="1060" y="1200" as="geometry" />
+        </mxCell>
+        <mxCell id="judge_m" parent="judge" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;" value="+dockerJudge(request: DockerJudgeRequest)&#xa;-cleanOutput(output): string" vertex="1">
+          <mxGeometry height="56" width="220" y="30" as="geometry" />
+        </mxCell>
+
+        <!-- dockerExecute -->
+        <mxCell id="execute" parent="1" style="swimlane;fontStyle=1;align=center;startSize=30;" value="dockerExecute" vertex="1">
+          <mxGeometry height="58" width="230" x="1360" y="1200" as="geometry" />
+        </mxCell>
+        <mxCell id="execute_m" parent="execute" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;" value="+dockerExecute(request: DockerExecuteRequest)" vertex="1">
+          <mxGeometry height="28" width="230" y="30" as="geometry" />
+        </mxCell>
+
+        <!-- Docker Daemon (external) -->
+        <mxCell id="daemon" parent="1" style="swimlane;fontStyle=1;align=center;startSize=30;" value="&lt;&lt;external&gt;&gt; Docker Daemon" vertex="1">
+          <mxGeometry height="86" width="210" x="1650" y="1200" as="geometry" />
+        </mxCell>
+        <mxCell id="daemon_m" parent="daemon" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;" value="gcc:14&#xa;python:3.12-slim (future)&#xa;eclipse-temurin:21 (future)" vertex="1">
+          <mxGeometry height="56" width="210" y="30" as="geometry" />
+        </mxCell>
+
+        <!-- SourceFilesUtil -->
+        <mxCell id="srcutil" parent="1" style="swimlane;fontStyle=1;align=center;startSize=30;" value="SourceFilesUtil" vertex="1">
+          <mxGeometry height="86" width="310" x="630" y="1420" as="geometry" />
+        </mxCell>
+        <mxCell id="srcutil_m" parent="srcutil" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;" value="+getCppImplementationFiles(sourceFiles)&#xa;+getCommonWorkingDirectory(sourceFiles)" vertex="1">
+          <mxGeometry height="56" width="310" y="30" as="geometry" />
+        </mxCell>
+
+        <!-- DockerInstallationInfo -->
+        <mxCell id="dockerInfo" parent="1" style="swimlane;fontStyle=1;align=center;startSize=30;" value="DockerInstallationInfo" vertex="1">
+          <mxGeometry height="198" width="240" x="60" y="1660" as="geometry" />
+        </mxCell>
+        <mxCell id="dockerInfo_f" parent="dockerInfo" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;" value="+containerId: string&#xa;+status: 'ready'|'not-running'|'missing'&#xa;+platform: SupportedPlatform&#xa;+path: string | null&#xa;+message: string&#xa;+version: string | null&#xa;+source: string | null" vertex="1">
+          <mxGeometry height="168" width="240" y="30" as="geometry" />
+        </mxCell>
+
+        <!-- DockerCompileRequest -->
+        <mxCell id="compileReq" parent="1" style="swimlane;fontStyle=1;align=center;startSize=30;" value="DockerCompileRequest" vertex="1">
+          <mxGeometry height="86" width="210" x="370" y="1660" as="geometry" />
+        </mxCell>
+        <mxCell id="compileReq_f" parent="compileReq" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;" value="+sourceFiles: string[]&#xa;+language: Language" vertex="1">
+          <mxGeometry height="56" width="210" y="30" as="geometry" />
+        </mxCell>
+
+        <!-- DockerCompileResult -->
+        <mxCell id="compileRes" parent="1" style="swimlane;fontStyle=1;align=center;startSize=30;" value="DockerCompileResult" vertex="1">
+          <mxGeometry height="170" width="240" x="640" y="1660" as="geometry" />
+        </mxCell>
+        <mxCell id="compileRes_f" parent="compileRes" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;" value="+success: boolean&#xa;+executablePath: string | null&#xa;+stdout: string&#xa;+stderr: string&#xa;+message: string" vertex="1">
+          <mxGeometry height="140" width="240" y="30" as="geometry" />
+        </mxCell>
+
+        <!-- DockerJudgeRequest -->
+        <mxCell id="judgeReq" parent="1" style="swimlane;fontStyle=1;align=center;startSize=30;" value="DockerJudgeRequest" vertex="1">
+          <mxGeometry height="142" width="210" x="950" y="1700" as="geometry" />
+        </mxCell>
+        <mxCell id="judgeReq_f" parent="judgeReq" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;" value="+executablePath: string&#xa;+stdin: string&#xa;+expectedOutput: string&#xa;+timeoutMs: number&#xa;+language: Language" vertex="1">
+          <mxGeometry height="112" width="210" y="30" as="geometry" />
+        </mxCell>
+
+        <!-- DockerJudgeResult -->
+        <mxCell id="judgeRes" parent="1" style="swimlane;fontStyle=1;align=center;startSize=30;" value="DockerJudgeResult" vertex="1">
+          <mxGeometry height="142" width="210" x="1220" y="1700" as="geometry" />
+        </mxCell>
+        <mxCell id="judgeRes_f" parent="judgeRes" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;" value="+passed: boolean&#xa;+timedOut: boolean&#xa;+expectedOutput: string&#xa;+actualOutput: string" vertex="1">
+          <mxGeometry height="112" width="210" y="30" as="geometry" />
+        </mxCell>
+
+        <!-- DockerExecuteRequest -->
+        <mxCell id="execReq" parent="1" style="swimlane;fontStyle=1;align=center;startSize=30;" value="DockerExecuteRequest" vertex="1">
+          <mxGeometry height="142" width="220" x="1490" y="1700" as="geometry" />
+        </mxCell>
+        <mxCell id="execReq_f" parent="execReq" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;" value="+executablePath: string&#xa;+stdin: string&#xa;+timeoutMs: number&#xa;+language: Language" vertex="1">
+          <mxGeometry height="112" width="220" y="30" as="geometry" />
+        </mxCell>
+
+        <!-- Relationships -->
+        <mxCell id="e1" edge="1" parent="1" source="user" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;exitX=0.5;exitY=1.0;exitDx=0;exitDy=0;entryX=0.5;entryY=0.0;entryDx=0;entryDy=0;" target="grading" value="interacts with">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e2" edge="1" parent="1" source="grading" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;exitX=0.5;exitY=1.0;exitDx=0;exitDy=0;entryX=0.5;entryY=0.0;entryDx=0;entryDy=0;" target="preload" value="uses">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e3" edge="1" parent="1" source="preload" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;exitX=0.5;exitY=1.0;exitDx=0;exitDy=0;entryX=0.5;entryY=0.0;entryDx=0;entryDy=0;" target="main" value="IPC">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e4" edge="1" parent="1" source="grading" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;exitX=0.0;exitY=0.5;exitDx=0;exitDy=0;entryX=1.0;entryY=0.5;entryDx=0;entryDy=0;" target="workflow" value="renders">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e5" edge="1" parent="1" source="grading" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;exitX=1.0;exitY=0.5;exitDx=0;exitDy=0;entryX=0.0;entryY=0.5;entryDx=0;entryDy=0;" target="judgepanel" value="passes compileResult to">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e6" edge="1" parent="1" source="workflow" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;exitX=1.0;exitY=0.5;exitDx=0;exitDy=0;entryX=0.0;entryY=0.5;entryDx=0;entryDy=0;" target="preload" value="uses">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e7" edge="1" parent="1" source="judgepanel" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;exitX=0.0;exitY=0.5;exitDx=0;exitDy=0;entryX=1.0;entryY=0.5;entryDx=0;entryDy=0;" target="preload" value="uses">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e8" edge="1" parent="1" source="main" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;exitX=0.0;exitY=0.5;exitDx=0;exitDy=0;entryX=1.0;entryY=0.5;entryDx=0;entryDy=0;" target="gcc" value="queries Docker status">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e9" edge="1" parent="1" source="main" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;exitX=0.0;exitY=0.5;exitDx=0;exitDy=0;entryX=1.0;entryY=0.5;entryDx=0;entryDy=0;" target="filesel" value="opens picker / reads files">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e10" edge="1" parent="1" source="main" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;exitX=0.5;exitY=1.0;exitDx=0;exitDy=0;entryX=0.5;entryY=0.0;entryDx=0;entryDy=0;" target="compile" value="compiles via Docker">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e11" edge="1" parent="1" source="main" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;exitX=1.0;exitY=0.5;exitDx=0;exitDy=0;entryX=0.0;entryY=0.5;entryDx=0;entryDy=0;" target="judge" value="judges output">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e12" edge="1" parent="1" source="judge" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;exitX=1.0;exitY=0.5;exitDx=0;exitDy=0;entryX=0.0;entryY=0.5;entryDx=0;entryDy=0;" target="execute" value="delegates execution to">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e13" edge="1" parent="1" source="compile" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;exitX=1.0;exitY=0.5;exitDx=0;exitDy=0;entryX=0.0;entryY=0.5;entryDx=0;entryDy=0;" target="daemon" value="docker run gcc:14 g++">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e14" edge="1" parent="1" source="execute" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;exitX=1.0;exitY=0.5;exitDx=0;exitDy=0;entryX=0.0;entryY=0.5;entryDx=0;entryDy=0;" target="daemon" value="docker run gcc:14 /app/program">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e15" edge="1" parent="1" source="compile" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;exitX=0.5;exitY=1.0;exitDx=0;exitDy=0;entryX=0.5;entryY=0.0;entryDx=0;entryDy=0;" target="srcutil" value="uses">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e16" edge="1" parent="1" source="compile" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;dashed=1;dashPattern=6 4;exitX=0.5;exitY=1.0;exitDx=0;exitDy=0;entryX=0.5;entryY=0.0;entryDx=0;entryDy=0;" target="compileReq" value="consumes">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="805" y="1360" />
+              <mxPoint x="475" y="1360" />
+              <mxPoint x="475" y="1660" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e17" edge="1" parent="1" source="compile" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;dashed=1;dashPattern=6 4;exitX=0.5;exitY=1.0;exitDx=0;exitDy=0;entryX=0.5;entryY=0.0;entryDx=0;entryDy=0;" target="compileRes" value="produces">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="805" y="1360" />
+              <mxPoint x="760" y="1360" />
+              <mxPoint x="760" y="1660" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e18" edge="1" parent="1" source="judge" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;dashed=1;dashPattern=6 4;exitX=0.5;exitY=1.0;exitDx=0;exitDy=0;entryX=0.5;entryY=0.0;entryDx=0;entryDy=0;" target="judgeReq" value="consumes">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1170" y="1640" />
+              <mxPoint x="1055" y="1640" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e19" edge="1" parent="1" source="judge" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;dashed=1;dashPattern=6 4;exitX=0.5;exitY=1.0;exitDx=0;exitDy=0;entryX=0.5;entryY=0.0;entryDx=0;entryDy=0;" target="judgeRes" value="produces">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1170" y="1640" />
+              <mxPoint x="1325" y="1640" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e20" edge="1" parent="1" source="execute" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;dashed=1;dashPattern=6 4;exitX=0.5;exitY=1.0;exitDx=0;exitDy=0;entryX=0.5;entryY=0.0;entryDx=0;entryDy=0;" target="execReq" value="consumes">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1475" y="1640" />
+              <mxPoint x="1600" y="1640" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e21" edge="1" parent="1" source="gcc" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;dashed=1;dashPattern=6 4;exitX=0.5;exitY=1.0;exitDx=0;exitDy=0;entryX=0.5;entryY=0.0;entryDx=0;entryDy=0;" target="dockerInfo" value="produces">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="180" y="1580" />
+              <mxPoint x="180" y="1660" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e22" edge="1" parent="1" source="workflow" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;dashed=1;dashPattern=6 4;exitX=0.5;exitY=1.0;exitDx=0;exitDy=0;entryX=0.5;entryY=0.0;entryDx=0;entryDy=0;" target="compileRes" value="receives">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="195" y="870" />
+              <mxPoint x="340" y="870" />
+              <mxPoint x="340" y="1580" />
+              <mxPoint x="760" y="1580" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e23" edge="1" parent="1" source="judgepanel" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;dashed=1;dashPattern=6 4;exitX=0.5;exitY=1.0;exitDx=0;exitDy=0;entryX=0.5;entryY=0.0;entryDx=0;entryDy=0;" target="judgeRes" value="displays">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1475" y="1060" />
+              <mxPoint x="1620" y="1060" />
+              <mxPoint x="1620" y="1610" />
+              <mxPoint x="1325" y="1610" />
+              <mxPoint x="1325" y="1700" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

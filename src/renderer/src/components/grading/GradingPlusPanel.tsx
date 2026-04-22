@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from 'react'
-import { compileCppFiles } from '../compiler/cppWorkflowApi'
 import type { BatchJudgeCaseResult, BatchStudentSubmission } from '../../../../shared/batchGrading'
 import type { GradebookRecord } from '../../../../shared/gradebookTypes'
 import type { Assignment } from '../../../../shared/types'
@@ -355,7 +354,17 @@ export function GradingPlusPanel({
     })
 
     try {
-      const compileResult = await compileCppFiles(student.filePaths)
+      const dockerResult = await window.api.compiler.dockerCompileCpp(student.filePaths)
+
+      const compileResult = {
+        compileSuccess: dockerResult.success,
+        compilerPath: 'docker',
+        executablePath: dockerResult.executablePath,
+        sourceFiles: student.filePaths,
+        stdout: dockerResult.stdout,
+        stderr: dockerResult.stderr,
+        message: dockerResult.message
+      }
 
       updateStudent(index, {
         compileResult

@@ -10,6 +10,7 @@
 ![Drizzle](https://img.shields.io/badge/Drizzle-C5F74F?style=for-the-badge&logo=drizzle&logoColor=black)
 ![SQLite](https://img.shields.io/badge/SQLite-07405E?style=for-the-badge&logo=sqlite&logoColor=white)
 ![Vitest](https://img.shields.io/badge/Vitest-6E9F18?style=for-the-badge&logo=vitest&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)
 
 ---
 
@@ -58,6 +59,10 @@ If you do install the VSCode extension, add the following lines to your settings
 If you encounter native build issues (for example with `better-sqlite3` or other native modules), switch to a Node.js version compatible with the Electron binary in `devDependencies` or rebuild native modules after switching versions.
 
 ### Install
+
+If needed, install Docker Desktop from here: <https://www.docker.com/get-started/>
+
+Note: You may not need to do this step if you are NOT using windows, so I would try first.
 
 If needed, install Node.js for your appropriate Operating System from here: <https://nodejs.org/en/download>
 
@@ -270,3 +275,4 @@ This document lists the project's primary technologies with links to their offic
 - Vitest: <https://vitest.dev/>
 - ESLint: <https://eslint.org/>
 - Prettier: <https://prettier.io/>
+- Docker: <https://www.docker.com/get-started/>
