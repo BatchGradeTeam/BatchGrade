@@ -13,7 +13,7 @@
  *  - Viewing automated grading feedback
  *  - Accessing submission history
  */
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { NavBar } from '../components/Navbar'
 import { Footer } from '../components/Footer'
@@ -69,6 +69,17 @@ export function StudentDashboard(): React.JSX.Element {
     const assignment = assignments.find((a) => a.uuid === uuid)
     setExpectedOutput(assignment?.expectedOutputText ?? null)
   }
+
+  const handleAssignmentsLoaded = useCallback(
+    (loaded: Assignment[]): void => {
+      setAssignments(loaded)
+      if (loaded.length > 0 && !selectedAssignmentId) {
+        setSelectedAssignmentId(loaded[0].uuid)
+        setExpectedOutput(loaded[0].expectedOutputText ?? null)
+      }
+    },
+    [selectedAssignmentId]
+  )
 
   return (
     <>
@@ -127,13 +138,7 @@ export function StudentDashboard(): React.JSX.Element {
                 selectedFiles={selectedFiles}
                 userId={user?.uuid}
                 selectedAssignmentId={selectedAssignmentId}
-                onAssignmentsLoaded={(loaded) => {
-                  setAssignments(loaded)
-                  if (loaded.length > 0 && !selectedAssignmentId) {
-                    setSelectedAssignmentId(loaded[0].uuid)
-                    setExpectedOutput(loaded[0].expectedOutputText ?? null)
-                  }
-                }}
+                onAssignmentsLoaded={handleAssignmentsLoaded}
                 onExpectedOutputChange={setExpectedOutput}
               />
             </>

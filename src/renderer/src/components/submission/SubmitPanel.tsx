@@ -17,6 +17,7 @@
  */
 import type { Assignment } from '../../../../shared/types'
 import type { CompileCppResult } from '../../../../shared/compiler'
+import { useEffect } from 'react'
 import { useSubmitWorkflow } from './useSubmitWorkflow'
 
 type SubmitPanelProps = {
@@ -42,9 +43,17 @@ export function SubmitPanel({
   selectedFiles,
   userId,
   selectedAssignmentId,
-  onAssignmentsLoaded
+  onAssignmentsLoaded,
+  onExpectedOutputChange
 }: SubmitPanelProps): React.JSX.Element {
-  const { selectedAssignment, submitResult, errorMessage, isSubmitting, handleSubmit } =
+  const {
+    selectedAssignment,
+    submitResult,
+    errorMessage,
+    statusMessage,
+    isSubmitting,
+    handleSubmit
+  } =
     useSubmitWorkflow({
       compileResult,
       selectedFiles,
@@ -63,6 +72,9 @@ export function SubmitPanel({
    * fires whenever selectedAssignment changes — including on first load —
    * ensuring the parent always has the current expected output.
    */
+  useEffect(() => {
+    onExpectedOutputChange?.(selectedAssignment?.expectedOutputText ?? null)
+  }, [onExpectedOutputChange, selectedAssignment])
 
   return (
     <div
@@ -90,6 +102,19 @@ export function SubmitPanel({
           }}
         >
           <p>{errorMessage}</p>
+        </div>
+      )}
+
+      {statusMessage && (
+        <div
+          style={{
+            backgroundColor: '#1f3a1f',
+            border: '1px solid #22c55e',
+            padding: '10px',
+            marginBottom: '1rem'
+          }}
+        >
+          <p>{statusMessage}</p>
         </div>
       )}
 
