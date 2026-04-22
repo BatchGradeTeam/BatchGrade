@@ -58,9 +58,11 @@ If you do install the VSCode extension, add the following lines to your settings
 
 If you encounter native build issues (for example with `better-sqlite3` or other native modules), switch to a Node.js version compatible with the Electron binary in `devDependencies` or rebuild native modules after switching versions.
 
-Docker packages applications and their dependencies into containers so they run consistently across different machines. If you need Docker on your system, install Docker Desktop from <https://www.docker.com/get-started/> and follow the setup steps for your operating system before running any container-based workflows for this project.
-
 ### Install
+
+If needed, install Docker Desktop from here: <https://www.docker.com/get-started/>
+
+Note: You may not need to do this step if you are NOT using windows, so I would try first.
 
 If needed, install Node.js for your appropriate Operating System from here: <https://nodejs.org/en/download>
 
