@@ -4,6 +4,12 @@ import type { SubmitCppResult } from '../../../shared/submission'
 import { supabase } from './supabase'
 import { getProfile, type Profile } from './profiles'
 
+/**
+ * Supabase-backed data helpers used by the renderer.
+ *
+ * This file keeps shared assignment, submission, and gradebook reads/writes in
+ * one place so UI components do not need to know the database table shapes.
+ */
 type InstructorAssignmentRow = {
   assignments_id: string
   section_id: string | null
@@ -19,7 +25,7 @@ type InstructorAssignmentRow = {
 }
 
 type SectionRow = {
-  section_id: string
+  section_id: string | null
 }
 
 type EnrollmentRow = {
@@ -54,15 +60,35 @@ type StudentRow = {
 
 const ASSIGNMENT_COLUMNS =
   'assignments_id, section_id, assignment_name, due_date, grading_criteria, solution_type, solution_file_name, solution_file_path, expected_output, created_by, created_at'
+const ASSIGNMENTS_TABLE = 'instructors_assignments'
 
-function requireString(value: string | undefined, message: string): string {
-  if (!value) {
-    throw new Error(message)
+// Supabase errors are plain objects, so normalize the useful fields for UI messages.
+function getErrorMessage(error: unknown): string {
+  if (error instanceof Error) {
+    return error.message
   }
 
-  return value
+  if (typeof error === 'object' && error !== null) {
+    const maybeError = error as {
+      message?: unknown
+      details?: unknown
+      hint?: unknown
+      code?: unknown
+    }
+
+    const message = [maybeError.message, maybeError.details, maybeError.hint, maybeError.code]
+      .filter((part): part is string => typeof part === 'string' && part.length > 0)
+      .join(' ')
+
+    if (message) {
+      return message
+    }
+  }
+
+  return String(error)
 }
 
+// Server timestamps can arrive as ISO strings, seconds, or milliseconds.
 function toUnixSeconds(value: string | number | null): number {
   if (typeof value === 'number') {
     return value > 9999999999 ? Math.floor(value / 1000) : value
@@ -76,6 +102,7 @@ function toUnixSeconds(value: string | number | null): number {
   return Number.isNaN(timestamp) ? Math.floor(Date.now() / 1000) : Math.floor(timestamp / 1000)
 }
 
+// Convert the Supabase assignment row into the shared app Assignment shape.
 function toAssignment(row: InstructorAssignmentRow): Assignment {
   return {
     uuid: row.assignments_id,
@@ -91,6 +118,7 @@ function toAssignment(row: InstructorAssignmentRow): Assignment {
   }
 }
 
+// Profile reads can fail while auth still succeeds, so callers can decide fallback behavior.
 async function getCurrentProfile(): Promise<Profile | null> {
   try {
     return await getProfile()
@@ -100,6 +128,7 @@ async function getCurrentProfile(): Promise<Profile | null> {
   }
 }
 
+// Require an app profile and optionally enforce the role needed by the current operation.
 async function requireCurrentProfile(role?: Profile['role']): Promise<Profile> {
   const profile = await getCurrentProfile()
 
@@ -114,7 +143,49 @@ async function requireCurrentProfile(role?: Profile['role']): Promise<Profile> {
   return profile
 }
 
-async function getInstructorSectionId(instructorId: string): Promise<string> {
+// Use Supabase auth directly for writes so publishing can work even before profile state refreshes.
+async function getAuthenticatedUser(): Promise<{ id: string; email: string | null }> {
+  const {
+    data: { user },
+    error
+  } = await supabase.auth.getUser()
+
+  if (error) {
+    throw error
+  }
+
+  if (!user) {
+    throw new Error('Log in before publishing shared assignment data.')
+  }
+
+  return {
+    id: user.id,
+    email: user.email ?? null
+  }
+}
+
+// Make sure a matching profiles row exists for RLS policies and role-based queries.
+async function ensureServerProfile(
+  authUserId: string,
+  email: string | null,
+  role: Profile['role']
+): Promise<void> {
+  const { error } = await supabase.from('profiles').upsert(
+    {
+      id: authUserId,
+      email: email ?? `${authUserId}@unknown.local`,
+      role
+    },
+    { onConflict: 'id' }
+  )
+
+  if (error) {
+    throw new Error(`Could not create Supabase profile row: ${getErrorMessage(error)}`)
+  }
+}
+
+// Assignments can be published before course sections are configured.
+async function getInstructorSectionId(instructorId: string): Promise<string | null> {
   const { data, error } = await supabase
     .from('sections')
     .select('section_id')
@@ -123,13 +194,14 @@ async function getInstructorSectionId(instructorId: string): Promise<string> {
     .maybeSingle()
 
   if (error) {
-    throw error
+    console.error('Could not load instructor section; publishing without a section:', error)
+    return null
   }
 
-  const sectionId = (data as SectionRow | null)?.section_id
-  return requireString(sectionId, 'Create a section for this instructor before publishing.')
+  return (data as SectionRow | null)?.section_id ?? null
 }
 
+// Student assignment visibility is based on the sections they are enrolled in.
 async function getStudentSectionIds(studentId: string): Promise<string[]> {
   const { data, error } = await supabase
     .from('enrollments')
@@ -143,10 +215,11 @@ async function getStudentSectionIds(studentId: string): Promise<string[]> {
   return ((data ?? []) as EnrollmentRow[]).map((row) => row.section_id).filter(Boolean)
 }
 
+// Map the local assignment model into the Supabase instructor assignment row shape.
 function assignmentPayload(
   assignment: Assignment,
   instructorId: string,
-  sectionId: string
+  sectionId: string | null
 ): Partial<InstructorAssignmentRow> {
   return {
     assignments_id: assignment.uuid,
@@ -162,11 +235,12 @@ function assignmentPayload(
   }
 }
 
+// Load instructor-owned assignments or student-visible assignments from Supabase.
 export async function loadServerAssignments(): Promise<Assignment[]> {
   const profile = await requireCurrentProfile()
 
   let query = supabase
-    .from('instructor_assignments')
+    .from(ASSIGNMENTS_TABLE)
     .select(ASSIGNMENT_COLUMNS)
     .order('created_at', { ascending: false })
 
@@ -191,13 +265,15 @@ export async function loadServerAssignments(): Promise<Assignment[]> {
   return ((data ?? []) as InstructorAssignmentRow[]).map(toAssignment)
 }
 
+// Create or replace the shared Supabase copy of a locally created assignment.
 export async function publishServerAssignment(assignment: Assignment): Promise<Assignment> {
-  const profile = await requireCurrentProfile('instructor')
-  const sectionId = await getInstructorSectionId(profile.id)
+  const authUser = await getAuthenticatedUser()
+  await ensureServerProfile(authUser.id, authUser.email, 'instructor')
+  const sectionId = await getInstructorSectionId(authUser.id)
 
   const { data, error } = await supabase
-    .from('instructor_assignments')
-    .upsert(assignmentPayload(assignment, profile.id, sectionId), {
+    .from(ASSIGNMENTS_TABLE)
+    .upsert(assignmentPayload(assignment, authUser.id, sectionId), {
       onConflict: 'assignments_id'
     })
     .select(ASSIGNMENT_COLUMNS)
@@ -210,13 +286,15 @@ export async function publishServerAssignment(assignment: Assignment): Promise<A
   return toAssignment(data as InstructorAssignmentRow)
 }
 
+// Keep the shared assignment row in sync after edits in the instructor config panel.
 export async function updateServerAssignment(assignment: Assignment): Promise<Assignment> {
-  const profile = await requireCurrentProfile('instructor')
-  const sectionId = await getInstructorSectionId(profile.id)
+  const authUser = await getAuthenticatedUser()
+  await ensureServerProfile(authUser.id, authUser.email, 'instructor')
+  const sectionId = await getInstructorSectionId(authUser.id)
 
   const { data, error } = await supabase
-    .from('instructor_assignments')
-    .upsert(assignmentPayload(assignment, profile.id, sectionId), {
+    .from(ASSIGNMENTS_TABLE)
+    .upsert(assignmentPayload(assignment, authUser.id, sectionId), {
       onConflict: 'assignments_id'
     })
     .select(ASSIGNMENT_COLUMNS)
@@ -229,20 +307,22 @@ export async function updateServerAssignment(assignment: Assignment): Promise<As
   return toAssignment(data as InstructorAssignmentRow)
 }
 
+// Delete only assignments owned by the currently authenticated instructor.
 export async function deleteServerAssignment(assignmentId: string): Promise<void> {
-  const profile = await requireCurrentProfile('instructor')
+  const authUser = await getAuthenticatedUser()
 
   const { error } = await supabase
-    .from('instructor_assignments')
+    .from(ASSIGNMENTS_TABLE)
     .delete()
     .eq('assignments_id', assignmentId)
-    .eq('created_by', profile.id)
+    .eq('created_by', authUser.id)
 
   if (error) {
     throw error
   }
 }
 
+// Record a successful student submission in the shared database.
 export async function publishServerSubmission(result: SubmitCppResult): Promise<void> {
   if (!result.submissionSuccess || !result.submissionId) {
     return
@@ -268,6 +348,7 @@ export async function publishServerSubmission(result: SubmitCppResult): Promise<
   }
 }
 
+// Reuse detailed feedback when present, otherwise summarize the batch grading result.
 function buildBatchFeedback(record: GradebookRecord): string {
   if (record.feedback) {
     return record.feedback
@@ -278,6 +359,7 @@ function buildBatchFeedback(record: GradebookRecord): string {
     : `${record.passedCount} / ${record.totalCount} test cases passed.`
 }
 
+// Persist a batch grading result as a server submission plus grade row.
 export async function saveServerGradebookRecord(record: GradebookRecord): Promise<void> {
   const profile = await requireCurrentProfile('instructor')
   const submissionId = crypto.randomUUID()
@@ -311,6 +393,7 @@ export async function saveServerGradebookRecord(record: GradebookRecord): Promis
   }
 }
 
+// Resolve display names for gradebook rows without failing the whole gradebook load.
 async function loadStudentNames(studentIds: string[]): Promise<Map<string, string>> {
   if (studentIds.length === 0) {
     return new Map()
@@ -334,6 +417,7 @@ async function loadStudentNames(studentIds: string[]): Promise<Map<string, strin
   )
 }
 
+// Join submissions, grades, assignments, and student names into renderer-friendly records.
 function mapGradebookRecords(
   submissions: SubmissionRow[],
   grades: GradeRow[],
@@ -376,6 +460,7 @@ function mapGradebookRecords(
   return records
 }
 
+// Load grades for assignments owned by the current instructor.
 export async function loadServerGradebookRecords(): Promise<GradebookRecord[]> {
   const profile = await requireCurrentProfile('instructor')
   const assignments = await loadServerAssignments()
@@ -416,6 +501,7 @@ export async function loadServerGradebookRecords(): Promise<GradebookRecord[]> {
   return mapGradebookRecords(submissions, (gradesData ?? []) as GradeRow[], assignments, studentNames)
 }
 
+// Load the current student's own submitted and graded work.
 export async function loadServerStudentGradebookRecords(): Promise<GradebookRecord[]> {
   const profile = await requireCurrentProfile('student')
   const assignments = await loadServerAssignments()

@@ -1,5 +1,12 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import type { Assignment } from '../../../shared/types'
+import { useAuth } from './AuthContext'
+import {
+  deleteServerAssignment,
+  loadServerAssignments,
+  publishServerAssignment,
+  updateServerAssignment
+} from '../lib/serverData'
 
 /**
  * @brief Local form state used by AssignmentConfigPanel.
@@ -54,6 +61,7 @@ const emptyForm: FormState = {
  * @return React JSX element for the assignment configuration panel.
  */
 export function AssignmentConfigPanel(): React.JSX.Element {
+  const { user } = useAuth()
   const [assignments, setAssignments] = useState<Assignment[]>([])
   const [form, setForm] = useState<FormState>(emptyForm)
   const [editingUuid, setEditingUuid] = useState<string | null>(null)
@@ -108,12 +116,48 @@ export function AssignmentConfigPanel(): React.JSX.Element {
    *
    * @throws Error if the preload or IPC layer fails.
    */
-  const loadAssignments = async (): Promise<void> => {
+  const loadAssignments = useCallback(async (): Promise<void> => {
     try {
-      const result = await window.api.assignments.getAll()
+      const result = user ? await loadServerAssignments() : await window.api.assignments.getAll()
       setAssignments(result)
     } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : 'Failed to load assignments.')
+      console.error('Failed to load server assignments, using local assignments:', e)
+      try {
+        const fallback = await window.api.assignments.getAll()
+        setAssignments(fallback)
+      } catch (fallbackError: unknown) {
+        setError(
+          fallbackError instanceof Error ? fallbackError.message : 'Failed to load assignments.'
+        )
+      }
+    }
+  }, [user])
+
+  async function publishAssignmentAfterLocalSave(
+    action: 'created' | 'updated',
+    assignment: Assignment
+  ): Promise<void> {
+    if (!user) {
+      setStatusMessage(`Assignment ${action} locally.`)
+      return
+    }
+
+    try {
+      if (action === 'created') {
+        await publishServerAssignment(assignment)
+      } else {
+        await updateServerAssignment(assignment)
+      }
+
+      setStatusMessage(`Assignment ${action} and published successfully.`)
+    } catch (publishError) {
+      console.error('Assignment was saved locally but could not be published:', publishError)
+      setStatusMessage(`Assignment ${action} locally.`)
+      setError(
+        publishError instanceof Error
+          ? `Could not publish to Supabase: ${publishError.message}`
+          : 'Could not publish to Supabase.'
+      )
     }
   }
 
@@ -125,11 +169,10 @@ export function AssignmentConfigPanel(): React.JSX.Element {
   useEffect(() => {
     let isMounted = true
 
-    window.api.assignments
-      .getAll()
-      .then((result) => {
+    loadAssignments()
+      .then(() => {
         if (isMounted) {
-          setAssignments(result)
+          setError(null)
         }
       })
       .catch((e: unknown) => {
@@ -141,7 +184,7 @@ export function AssignmentConfigPanel(): React.JSX.Element {
     return () => {
       isMounted = false
     }
-  }, [])
+  }, [loadAssignments])
 
   /**
    * @brief Starts editing an existing assignment.
@@ -317,7 +360,7 @@ export function AssignmentConfigPanel(): React.JSX.Element {
 
     try {
       if (editingUuid) {
-        await window.api.assignments.update({
+        const updatedAssignment = await window.api.assignments.update({
           uuid: editingUuid,
           name: trimmedName,
           dueDate: trimmedDueDate,
@@ -330,9 +373,9 @@ export function AssignmentConfigPanel(): React.JSX.Element {
           expectedOutputText:
             form.solutionType === 'text' ? trimmedExpectedOutput : (compiledOutput ?? undefined)
         })
-        setStatusMessage('Assignment updated successfully.')
+        await publishAssignmentAfterLocalSave('updated', updatedAssignment)
       } else {
-        await window.api.assignments.create({
+        const createdAssignment = await window.api.assignments.create({
           name: trimmedName,
           dueDate: trimmedDueDate,
           gradingCriteria: trimmedCriteria,
@@ -340,9 +383,9 @@ export function AssignmentConfigPanel(): React.JSX.Element {
           solutionFileName: form.solutionType === 'file' ? (selectedFileName ?? null) : null,
           solutionFilePath: form.solutionType === 'file' ? (selectedFilePath ?? null) : null,
           expectedOutputText: form.solutionType === 'text' ? trimmedExpectedOutput : compiledOutput,
-          createdByUserUuid: null
+          createdByUserUuid: user?.uuid ?? null
         })
-        setStatusMessage('Assignment created successfully.')
+        await publishAssignmentAfterLocalSave('created', createdAssignment)
       }
 
       setForm(emptyForm)
@@ -368,8 +411,20 @@ export function AssignmentConfigPanel(): React.JSX.Element {
   async function handleDelete(uuid: string): Promise<void> {
     try {
       await window.api.assignments.delete(uuid)
+      if (user) {
+        try {
+          await deleteServerAssignment(uuid)
+        } catch (deleteError) {
+          console.error('Assignment was deleted locally but not from Supabase:', deleteError)
+          setError(
+            deleteError instanceof Error
+              ? `Could not delete from Supabase: ${deleteError.message}`
+              : 'Could not delete from Supabase.'
+          )
+        }
+      }
       setDeleteConfirm(null)
-      setStatusMessage('Assignment deleted successfully.')
+      setStatusMessage('Assignment deleted locally.')
       await loadAssignments()
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : 'Failed to delete assignment.')
