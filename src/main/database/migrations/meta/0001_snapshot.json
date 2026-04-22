@@ -46,9 +46,7 @@
       "indexes": {
         "courses_course_code_unique": {
           "name": "courses_course_code_unique",
-          "columns": [
-            "course_code"
-          ],
+          "columns": ["course_code"],
           "isUnique": true
         }
       },

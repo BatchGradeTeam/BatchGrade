@@ -18,7 +18,8 @@ import { useNavigate } from 'react-router-dom'
 import { NavBar } from '../components/Navbar'
 import { Footer } from '../components/Footer'
 import { CppWorkflowPanel } from '../components/compiler/CppWorkflowPanel'
-import { CompileCppResult } from 'src/shared/compiler'
+import { DockerDetectionPanel } from '../components/DockerDetectionPanel'
+import { DockerCppGradePanel } from '../components/DockerCppGradePanel'
 
 /**
  * StudentUploadInterface Component
@@ -31,11 +32,11 @@ import { CompileCppResult } from 'src/shared/compiler'
 export function GuestStudentInterface(): React.JSX.Element {
   const navigate = useNavigate()
   const [selectedFiles, setSelectedFiles] = useState<string[]>([])
-  const [compileResult, setCompileResult] = useState<CompileCppResult | null>(null)
+  // const [compileResult, setCompileResult] = useState<CompileCppResult | null>(null)
 
   // This is just an easy work around, so that way we dont trigger selectFiles, compileResult not used
   console.log(selectedFiles)
-  console.log(compileResult)
+  // console.log(compileResult)
 
   return (
     <>
@@ -54,7 +55,7 @@ export function GuestStudentInterface(): React.JSX.Element {
           autoCompileOnSelection={true}
           allowExecution={true}
           onSelectionChange={setSelectedFiles}
-          onCompileResultChange={setCompileResult}
+          // onCompileResultChange={setCompileResult}
         />
 
         {/* <SubmitPanel
@@ -62,6 +63,9 @@ export function GuestStudentInterface(): React.JSX.Element {
           selectedFiles={selectedFiles}
           userId={user?.uuid}
         /> */}
+
+        <DockerDetectionPanel />
+        <DockerCppGradePanel sourceFiles={selectedFiles} />
       </div>
 
       <div className="button-container">

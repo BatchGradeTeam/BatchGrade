@@ -18,12 +18,15 @@ import { selectFile, stringifyFile, selectCppFiles, selectSubmissionFolder, sele
 
 // @ Issue 9: Implement Automated Build & Compilation
 import { detectGccInstallation, validateGccPath } from './compiler/gccDetection'
+import { detectDockerInstallation } from './compiler/dockerDetection'
 import type { GccInstallationInfo, SupportedPlatform } from '../shared/compiler'
 
 import { compileCppFiles } from './compiler/compileCppFiles'
 import { executeCppFiles } from './compiler/executeCppFiles'
 import { judgeCppFiles } from './compiler/judgeCppFiles'
 import { submitCppSubmission } from './submissions/submitCppSubmission'
+import { dockerCompile } from './compiler/dockerCompile'
+import { dockerJudge } from './compiler/dockerJudge'
 
 let gccStatusPromise: Promise<GccInstallationInfo> | undefined
 let manualGccPath: string | null = null
@@ -209,9 +212,12 @@ app.whenReady().then(() => {
 
         gccStatusPromise = Promise.resolve(manualRes)
 
-        return manualRes
-      }
-    })
+      return manualRes
+    }
+  })
+
+  // Docker Detection
+  ipcMain.handle('compiler:getDockerStatus', () => detectDockerInstallation()) 
 
     /* TEST ONLY DELETE WHEN DONE */
     // File selection
@@ -272,9 +278,19 @@ app.whenReady().then(() => {
       return executeCppFiles(request)
     })
 
-    ipcMain.handle('compiler:judgeCpp', (_e, request) => {
-      return judgeCppFiles(request)
-    })
+  ipcMain.handle('compiler:judgeCpp', (_e, request) => {
+    return judgeCppFiles(request)
+  })
+
+  // Docker Compilation
+  ipcMain.handle('compiler:dockerCompileCpp', async (_e, sourceFiles: string[]) => {
+    return dockerCompile({ sourceFiles, language: 'cpp' })
+  })
+
+  // Docker Judge
+  ipcMain.handle('compiler:dockerJudgeCpp', async (_e, request) => {
+    return dockerJudge({ ...request, language: 'cpp' })
+  })
 
     ipcMain.handle('submissions:submitCpp', (_e, request) => {
       return submitCppSubmission(request)
