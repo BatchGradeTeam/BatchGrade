@@ -121,7 +121,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
     return {
       uuid: userRecord?.id,
-      firstName: metadata.first_name,  // Access via metadata
+      firstName: metadata.first_name, // Access via metadata
       lastName: metadata.last_name,
       email: userRecord?.email,
       role
@@ -238,7 +238,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       isMounted = false
       subscription.unsubscribe()
     }
-  }, [refreshProfile])
+  })
 
   // Handles user login with Supabase then refreshes the user's profile to update authentication state and user information
   const login = async (email: string, password: string): Promise<AuthUser> => {
@@ -275,7 +275,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         data: {
           role,
           first_name: firstName, // store in metadata
-          last_name: lastName  // since these are column names in Supabase
+          last_name: lastName // since these are column names in Supabase
         }
       }
     })
