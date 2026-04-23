@@ -310,7 +310,7 @@ export function GradingPlusPanel({
       for (const [i, outputFile] of selectedOutputFiles.entries()) {
         const inputFile = selectedInputFiles[i] ?? null
 
-        const result = await window.api.compiler.judgeCpp({
+        const result = await window.api.compiler.dockerJudgeCpp({
           executablePath: compileResult.executablePath,
           stdin: stdinValues[i] ?? '',
           expectedOutput: expectedOutputs[i] ?? '',
