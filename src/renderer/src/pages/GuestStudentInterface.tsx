@@ -57,6 +57,8 @@ export function GuestStudentInterface(): React.JSX.Element {
           onCompileResultChange={setCompileResult}
         />
 
+        
+
         {/* <SubmitPanel
           compileResult={compileResult}
           selectedFiles={selectedFiles}
@@ -65,7 +67,7 @@ export function GuestStudentInterface(): React.JSX.Element {
       </div>
 
       <div className="button-container">
-        <button className="secondary-button" onClick={() => navigate('/studentdashboard')}>
+        <button className="secondary-button" onClick={() => navigate('/guestDashboard')}>
           Go Home
         </button>
       </div>
