@@ -22,6 +22,8 @@ type JudgeFilePairPreview = {
   outputFile: string
 }
 
+type GradingMode = 'local' | 'docker'
+
 function buildJudgeFilePairPreview(
   inputFiles: string[],
   outputFiles: string[]
@@ -72,6 +74,8 @@ export function GradingPlusPanel({
   const [expandedStudentIndex, setExpandedStudentIndex] = useState<number | null>(null)
   const [showInputMenu, setShowInputMenu] = useState(false)
   const [showOutputMenu, setShowOutputMenu] = useState(false)
+  const [gradingMode, setGradingMode] = useState<GradingMode>('local')
+  const [showModeMenu, setShowModeMenu] = useState(false)
 
   const judgeFilePairPreview = buildJudgeFilePairPreview(selectedInputFiles, selectedOutputFiles)
   const studentCardRefs = useRef<(HTMLDivElement | null)[]>([])
@@ -265,16 +269,23 @@ export function GradingPlusPanel({
     })
 
     try {
-      const dockerResult = await window.api.compiler.dockerCompileCpp(student.filePaths)
+      let compileResult
+      if (gradingMode === 'docker') {
+        const dockerResult = await window.api.compiler.dockerCompileCpp(student.filePaths)
 
-      const compileResult = {
-        compileSuccess: dockerResult.success,
-        compilerPath: 'docker',
-        executablePath: dockerResult.executablePath,
-        sourceFiles: student.filePaths,
-        stdout: dockerResult.stdout,
-        stderr: dockerResult.stderr,
-        message: dockerResult.message
+        compileResult = {
+          compileSuccess: dockerResult.success,
+          compilerPath: 'docker',
+          executablePath: dockerResult.executablePath,
+          sourceFiles: student.filePaths,
+          stdout: dockerResult.stdout,
+          stderr: dockerResult.stderr,
+          message: dockerResult.message
+        }
+      } else {
+        compileResult = await window.api.compiler.compileCpp({
+          sourceFiles: student.filePaths
+        })
       }
 
       updateStudent(index, {
@@ -310,12 +321,20 @@ export function GradingPlusPanel({
       for (const [i, outputFile] of selectedOutputFiles.entries()) {
         const inputFile = selectedInputFiles[i] ?? null
 
-        const result = await window.api.compiler.dockerJudgeCpp({
-          executablePath: compileResult.executablePath,
-          stdin: stdinValues[i] ?? '',
-          expectedOutput: expectedOutputs[i] ?? '',
-          timeoutMs: 5000
-        })
+        const result =
+          gradingMode === 'docker'
+            ? await window.api.compiler.dockerJudgeCpp({
+                executablePath: compileResult.executablePath,
+                stdin: stdinValues[i] ?? '',
+                expectedOutput: expectedOutputs[i] ?? '',
+                timeoutMs: 5000
+              })
+            : await window.api.compiler.judgeCpp({
+                executablePath: compileResult.executablePath,
+                stdin: stdinValues[i] ?? '',
+                expectedOutput: expectedOutputs[i] ?? '',
+                timeoutMs: 5000
+              })
 
         judgeResults.push({
           testNumber: i + 1,
@@ -478,6 +497,56 @@ export function GradingPlusPanel({
         <h2 style={{ marginBottom: '10px' }}>Batch Setup</h2>
 
         <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+          <div style={{ position: 'relative' }}>
+            <button
+              onClick={(e) => {
+                e.stopPropagation()
+                setShowModeMenu((prev) => !prev)
+              }}
+              className="primary-button"
+            >
+              Mode: {gradingMode === 'local' ? 'Local' : 'Docker'} ▼
+            </button>
+
+            {showModeMenu && (
+              <div
+                style={{
+                  position: 'absolute',
+                  backgroundColor: '#1f1f1f',
+                  border: '1px solid gray',
+                  marginTop: '4px',
+                  zIndex: 10,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '6px',
+                  padding: '6px'
+                }}
+              >
+                <button
+                  onClick={() => {
+                    setGradingMode('local')
+                    setShowModeMenu(false)
+                  }}
+                  className="secondary-button"
+                  style={{ display: 'block', width: '100%' }}
+                >
+                  Local Compiler
+                </button>
+
+                <button
+                  onClick={() => {
+                    setGradingMode('docker')
+                    setShowModeMenu(false)
+                  }}
+                  className="secondary-button"
+                  style={{ display: 'block', width: '100%' }}
+                >
+                  Docker Sandbox
+                </button>
+              </div>
+            )}
+          </div>
+
           <button onClick={() => void handleImportSubmissionFolder()} className="primary-button">
             Import Submission Folder
           </button>
@@ -662,21 +731,11 @@ export function GradingPlusPanel({
       </div>
 
       {showHomeButton && onGoHome && (
-        <button
-          onClick={onGoHome}
-          style={{
-            padding: '9px 14px',
-            backgroundColor: '#2563eb',
-            color: 'white',
-            border: '2px solid #93c5fd',
-            borderRadius: '6px',
-            fontWeight: 'bold',
-            cursor: 'pointer',
-            marginTop: '16px'
-          }}
-        >
-          Go to home
-        </button>
+        <div className="button-container">
+          <button className="secondary-button" onClick={onGoHome}>
+            Back to Dashboard
+          </button>
+        </div>
       )}
     </div>
   )
