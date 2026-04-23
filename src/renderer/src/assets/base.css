@@ -33,11 +33,11 @@
 }
 
 :root {
-  --color-background: var(--ev-c-black);
-  --color-background-soft: var(--ev-c-black-soft);
-  --color-background-mute: var(--ev-c-black-mute);
+  --color-background: var(--ev-c-white);
+  --color-background-soft: var(--ev-c-white-soft);
+  --color-background-mute: var(--ev-c-white-mute);
 
-  --color-text: var(--ev-c-gray-1);
+  --color-text: var(--ev-c-text-3);
 }
 
 *,

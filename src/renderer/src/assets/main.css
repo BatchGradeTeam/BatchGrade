@@ -70,7 +70,7 @@ footer {
 }
 
 .versions {
-  position: absolute;
+  position: fixed;
   bottom: 30px;
   margin: 0 auto;
   padding: 15px 0;
@@ -213,20 +213,6 @@ footer {
   border-radius: 30px;
 }
 
-.menu-button {
-  background: none;
-  border: none;
-  font-size: 2rem;
-  cursor: pointer;
-  padding: 0.5rem 1rem 0.5rem 0;
-  color: var(--ev-c-gray-1);
-  transition: color 0.2s;
-}
-
-.menu-button:hover {
-  color: var(--ev-c-blue-1);
-}
-
 .primary-button {
   padding: 12px 30px;
   font-size: 16px;
@@ -340,11 +326,6 @@ footer {
   width: 100vw;
 }
 
-.navbar-menu {
-  display: flex;
-  flex-direction: column;
-}
-
 .navbar .primary-button {
   margin: 0;
 }
@@ -362,44 +343,6 @@ footer {
 .profile-image:hover {
   background-color: var(--ev-c-blue-1);
   border: 1px solid var(--ev-c-blue-1);
-}
-
-/* ==========================================================
-  Dropdown Menu Components
-========================================================== */
-
-.dropdown-menu {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  background-color: var(--ev-c-white);
-  border: 1px solid #ddd;
-  border-top: none;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-  z-index: 999;
-  display: flex;
-  flex-direction: column;
-  padding: 1rem 0;
-  margin-top: 5rem;
-}
-
-.dropdown-item {
-  background: none;
-  border: none;
-  padding: 0.75rem 1.5rem;
-  text-align: left;
-  cursor: pointer;
-  font-size: 1rem;
-  color: var(--ev-c-gray-1);
-  transition: background-color 0.2s;
-  border: none;
-  width: 100%;
-}
-
-.dropdown-item:hover {
-  background-color: var(--ev-c-gray-6);
-  color: var(--ev-c-blue-1);
 }
 
 /* ==========================================================
@@ -675,11 +618,11 @@ footer {
   justify-content: space-between;
   width: 100%;
   max-width: 90vw;
-  margin: 6rem auto 1rem auto;
+  margin: 8rem auto 3rem auto;
   padding: 2rem;
   gap: 2rem;
   color: var(--ev-c-white);
-  background: -webkit-linear-gradient(45deg, var(--ev-c-blue-2), var(--ev-c-blue-4));
+  background: -webkit-linear-gradient(180deg, var(--ev-c-blue-2), var(--ev-c-blue-3));
   border-radius: 30px;
   box-shadow: 0 10px 30px rgba(0,0,0,0.2);
 }
@@ -954,17 +897,46 @@ footer {
 .dashboard-toolbar {
   display: flex;
   gap: 1rem;
+  flex-wrap: wrap;
   margin-bottom: 1.5rem;
+}
+
+.dashboard-tab-button.active {
+  background-color: var(--ev-c-blue-1);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.18);
+  transform: translateY(-1px);
+}
+
+.dashboard-tab-button.active:hover {
+  background-color: var(--ev-c-blue-1);
+  transform: translateY(-1px);
+}
+
+.dashboard-panel-transition {
+  animation: dashboard-panel-reveal 220ms ease-out;
+  transform-origin: top center;
+}
+
+@keyframes dashboard-panel-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.995);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 .dashboard-empty-state {
   width: 100%;
-  max-width: 900px;
   padding: 1.25rem 1.5rem;
   border-radius: 12px;
-  background: var(--ev-c-white);
-  border: 1px solid #a2c1e5;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  background-color: var(--ev-c-white);
+  color: var(--ev-c-text-3);
+  border-radius: 30px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
 }
 
 .dashboard-empty-state h2 {
@@ -980,13 +952,11 @@ footer {
 
 .panel-shell {
   width: 100%;
-  max-width: 980px;
   background: var(--ev-c-white);
   color: var(--ev-c-gray-1);
   padding: 1.5rem;
-  border-radius: 14px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
-  border: 1px solid #d9e2ec;
+  border-radius: 30px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
 }
 
 .panel-header {

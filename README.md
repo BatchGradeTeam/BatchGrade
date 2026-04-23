@@ -10,6 +10,7 @@
 ![Drizzle](https://img.shields.io/badge/Drizzle-C5F74F?style=for-the-badge&logo=drizzle&logoColor=black)
 ![SQLite](https://img.shields.io/badge/SQLite-07405E?style=for-the-badge&logo=sqlite&logoColor=white)
 ![Vitest](https://img.shields.io/badge/Vitest-6E9F18?style=for-the-badge&logo=vitest&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)
 
 ---
 
@@ -59,11 +60,29 @@ If you encounter native build issues (for example with `better-sqlite3` or other
 
 ### Install
 
+If needed, install Docker Desktop from here: <https://www.docker.com/get-started/>
+
+Note: You may not need to do this step if you are NOT using windows, so I would try first.
+
 If needed, install Node.js for your appropriate Operating System from here: <https://nodejs.org/en/download>
 
 ```bash
 npm install
 ```
+
+### Environment Variables
+
+For development, a `.env` file must be created in the project root directory.
+
+The required environment variables are available in the Discord server (see pinned messages).
+
+```bash
+# .env
+VARIABLE_NAME=value
+```
+
+The `.env` file is included in `.gitignore` and must not be committed. **Never commit sensitive credentials or secrets to the repository.**
+
 
 ### Development
 
@@ -256,3 +275,4 @@ This document lists the project's primary technologies with links to their offic
 - Vitest: <https://vitest.dev/>
 - ESLint: <https://eslint.org/>
 - Prettier: <https://prettier.io/>
+- Docker: <https://www.docker.com/get-started/>

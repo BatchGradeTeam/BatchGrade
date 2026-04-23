@@ -1,4 +1,5 @@
 import path from 'path'
+import fs from 'fs'
 import { createRequire } from 'node:module'
 
 const nodeRequire = createRequire(import.meta.url)
@@ -15,18 +16,24 @@ const nodeRequire = createRequire(import.meta.url)
  * @returns Absolute path to the database file.
  */
 export function getDbPath(): string {
+  let dbPath = path.resolve('./dev.db')
+
   try {
     if (!process.versions.electron) {
-      return path.resolve('./dev.db')
+      return dbPath
     }
 
     const { app } = nodeRequire('electron') as typeof import('electron')
     if (app.isPackaged) {
-      return path.join(app.getPath('userData'), 'batchgrade.db')
+      dbPath = path.join(app.getPath('userData'), 'batchgrade.db')
     }
   } catch {
     // Running outside Electron (e.g. drizzle-kit, tests)
   }
 
-  return path.resolve('./dev.db')
+  // Packaged Windows builds may start before the user-data directory exists.
+  // Ensure the parent folder is present so SQLite can create/open the database.
+  fs.mkdirSync(path.dirname(dbPath), { recursive: true })
+
+  return dbPath
 }

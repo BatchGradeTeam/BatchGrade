@@ -1,12 +1,16 @@
 import type { User, NewUser, UpdateUser } from '../shared/types'
 import type {
   GccInstallationInfo,
+  DockerInstallationInfo,
   CompileCppRequest,
   CompileCppResult,
   RunCppRequest,
   RunCppResult,
   JudgeCppRequest,
-  JudgeCppResult
+  JudgeCppResult,
+  DockerCompileResult,
+  DockerJudgeRequest,
+  DockerJudgeResult
 } from '../shared/compiler'
 import type { SubmitCppRequest, SubmitCppResult } from '../shared/submission'
 import type { Assignment, NewAssignment, UpdateAssignment } from '../shared/types'
@@ -21,9 +25,12 @@ export type UsersAPI = {
 export type CompilerAPI = {
   getGccStatus: () => Promise<GccInstallationInfo>
   setGccPath: (filePath: string) => Promise<GccInstallationInfo>
+  getDockerStatus: () => Promise<DockerInstallationInfo>
   compileCpp: (request: CompileCppRequest) => Promise<CompileCppResult>
   runCompiledProgram: (request: RunCppRequest) => Promise<RunCppResult>
   judgeCpp: (request: JudgeCppRequest) => Promise<JudgeCppResult>
+  dockerCompileCpp: (sourceFiles: string[]) => Promise<DockerCompileResult>
+  dockerJudgeCpp: (request: DockerJudgeRequest) => Promise<DockerJudgeResult>
 }
 
 export type AssignmentsAPI = {

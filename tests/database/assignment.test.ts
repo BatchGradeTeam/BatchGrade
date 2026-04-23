@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest'
+import { getAllAssignments, createAssignment, updateAssignment, deleteAssignment } from '../../src/main/database/queries/assignment'
 
 // Wipes the assignmentsInstrc table before each test
 beforeEach(async () => {
@@ -94,23 +95,14 @@ describe('Assignment (Instructor Config) Schema', () => {
     expect(result.createdByUserUuid).toBe('some-instructor-uuid')
   })
 
-  it('twoAssignmentsInserted_selectAll_returnsBothRecords', async () => {
-    const { getDb } = await import('../../src/main/database/index')
-    const { assignmentsInstrc } = await import('../../src/main/database/schema')
+  it('twoAssignmentsInserted_getAllAssignments_returnsBothRecords', async () => { 
+    createAssignment({ name: 'HW1', dueDate: '2026-03-01', gradingCriteria: 'c', solutionType: 'text', expectedOutputText: 'a' })
+    createAssignment({ name: 'HW2', dueDate: '2026-03-15', gradingCriteria: 'c', solutionType: 'text', expectedOutputText: 'b' })
 
-    getDb()
-      .insert(assignmentsInstrc)
-      .values({ name: 'HW1', dueDate: '2026-03-01', gradingCriteria: 'c', solutionType: 'text', expectedOutputText: 'a' })
-      .run()
-    getDb()
-      .insert(assignmentsInstrc)
-      .values({ name: 'HW2', dueDate: '2026-03-15', gradingCriteria: 'c', solutionType: 'text', expectedOutputText: 'b' })
-      .run()
-
-    expect(getDb().select().from(assignmentsInstrc).all()).toHaveLength(2)
+    expect(getAllAssignments()).toHaveLength(2)
   })
 
-  it('existingAssignment_deleteAll_tableIsEmpty', async () => {
+  it('existingAssignment_deleteAssignment_tableIsEmpty', async () => {
     const { getDb } = await import('../../src/main/database/index')
     const { assignmentsInstrc } = await import('../../src/main/database/schema')
 
@@ -118,8 +110,33 @@ describe('Assignment (Instructor Config) Schema', () => {
       .insert(assignmentsInstrc)
       .values({ name: 'HW3', dueDate: '2026-04-01', gradingCriteria: 'c', solutionType: 'text', expectedOutputText: 'z' })
       .run()
-    getDb().delete(assignmentsInstrc).run()
+    
+    const result = getAllAssignments()
+    expect(getAllAssignments()).toHaveLength(1)
 
-    expect(getDb().select().from(assignmentsInstrc).all()).toHaveLength(0)
+    deleteAssignment(result[0].uuid)
+
+    expect(getAllAssignments()).toHaveLength(0)
+  })
+
+  it('existingAssignment_updateAssignment_updatesDueDate&Solution', async () => {
+    const { getDb } = await import('../../src/main/database/index')
+    const { assignmentsInstrc } = await import('../../src/main/database/schema')
+
+    getDb()
+      .insert(assignmentsInstrc)
+      .values({ name: 'HW3', dueDate: '2026-04-01', gradingCriteria: 'c', solutionType: 'text', expectedOutputText: 'z' })
+      .run()
+    
+    const result = getAllAssignments()
+    expect(getAllAssignments()).toHaveLength(1)
+
+    const update = updateAssignment({ uuid: result[0].uuid, name: 'HW3', dueDate: '2026-04-10', gradingCriteria: 'c', solutionType: 'file', solutionFileName: 'solution.cpp', solutionFilePath: '/solutions/HW2/solution.cpp', expectedOutputText: 'z' })
+
+    expect(update.dueDate).toBe('2026-04-10')
+    expect(update.solutionType).toBe('file')
+    expect(update.solutionFileName).toBe('solution.cpp')
+    expect(update.solutionFilePath).toBe('/solutions/HW2/solution.cpp')
+
   })
 })

@@ -11,14 +11,12 @@
  * which currently functions as a logout trigger. If the
  * user is not logged in, a login button is shown instead.
  */
-import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useAuth } from './AuthContext'
-import { DropdownMenu } from './DropdownMenu'
+import { INSTRUCTOR_ROLE, STUDENT_ROLE } from '../../../main/database/schema'
 import avatar from '../assets/profile.png'
-import studentProfile from '../assets/student-profile.png'
 import instructorProfile from '../assets/instructor-profile.png'
-import { STUDENT_ROLE, INSTRUCTOR_ROLE } from '../../../main/database/schema'
+import studentProfile from '../assets/student-profile.png'
+import { useAuth } from './AuthContext'
 
 /**
  * Navbar Component
@@ -36,8 +34,6 @@ export function NavBar(): React.JSX.Element {
   const navigate = useNavigate()
   // Access authentication state and logout function
   const { isLoggedIn, user, logout } = useAuth()
-  // Menu state for collapsible menu
-  const [isMenuOpen, setIsMenuOpen] = useState(false)
 
   // Determine which profile image to display based on user role
   const profileImage =
@@ -51,13 +47,6 @@ export function NavBar(): React.JSX.Element {
     <div className="navbar-container">
       <nav className="navbar">
         <div className="navbar-item">
-          <button
-            className="menu-button"
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-            aria-label="Toggle menu"
-          >
-            ☰
-          </button>
           {/* Application Title */}
           <h1 className="navbar-title hover-underline">BatchGrade</h1>
         </div>
@@ -74,10 +63,14 @@ export function NavBar(): React.JSX.Element {
             alt="Profile"
             className="profile-image"
             onClick={() => {
-              // Log the user out of the application
-              logout()
-              // Redirect user to the Login page
-              navigate('/login')
+              void logout()
+                .then(() => {
+                  // Redirect user to the Login page
+                  navigate('/login')
+                })
+                .catch((error) => {
+                  console.error('Error signing out: ', error)
+                })
             }}
           />
         ) : (
@@ -88,11 +81,6 @@ export function NavBar(): React.JSX.Element {
           </button>
         )}
       </nav>
-
-      {/*-----------------------------------------------------------
-        Collapsible Menu
-      -----------------------------------------------------------*/}
-      <DropdownMenu isOpen={isMenuOpen} onClose={() => setIsMenuOpen(false)} />
     </div>
   )
 }

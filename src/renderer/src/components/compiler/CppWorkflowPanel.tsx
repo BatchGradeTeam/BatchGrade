@@ -1,4 +1,21 @@
 import './CppWorkflowPanel.css'
+/**
+ * CppWorkflowPanel.tsx
+ *
+ * Description:
+ * This component provides a user interface for compiling and optionally running C++ code
+ * within the BatchGrade application. It is designed to be used in both the StudentDashboard
+ * and StudentUploadInterface pages, allowing students to select their C++ source files,
+ * compile them locally, and review the results before submission.
+ *
+ * The panel includes:
+ *  - A section for checking GCC compiler status and setting a manual path if needed
+ *  - A section for selecting C++ files and compiling them, with output display
+ *  - An optional section for running the compiled executable with custom input
+ *
+ *  onRunResultChange is passed down into useCppWorkflow so the parent page
+ *  can receive runResult.stdout and feed it into OutputDiffPanel.
+ */
 import type { CompileCppResult, RunCppResult } from '../../../../shared/compiler'
 import { useCppWorkflow } from '../../components/compiler/useCPPWorkflow'
 
