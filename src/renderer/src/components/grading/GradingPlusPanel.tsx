@@ -541,7 +541,7 @@ export function GradingPlusPanel({
                   className="secondary-button"
                   style={{ display: 'block', width: '100%' }}
                 >
-                  Docker Sandbox
+                  Docker
                 </button>
               </div>
             )}
