@@ -165,7 +165,7 @@ export function SignUp(): React.JSX.Element {
                   <option value={STUDENT_ROLE}>Student</option>
                   <option value={INSTRUCTOR_ROLE}>Instructor</option>
                 </select>
-                
+
                 <input
                   type="text"
                   placeholder="First Name"

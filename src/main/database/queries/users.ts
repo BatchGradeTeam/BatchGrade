@@ -90,7 +90,8 @@ export function createUser(data: NewUser): User {
  * @throws Error - If no fields provided or user not found
  */
 export function updateUser(data: UpdateUser): User {
-  const changes: Partial<Pick<DbUser, 'firstName' | 'lastName' | 'email' | 'password' | 'role'>> = {}
+  const changes: Partial<Pick<DbUser, 'firstName' | 'lastName' | 'email' | 'password' | 'role'>> =
+    {}
 
   // If first or last name is changed, update it. Otherwise, keep existing name.
   if (data.firstName !== undefined) {

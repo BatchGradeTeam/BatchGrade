@@ -35,7 +35,13 @@ type FormState = {
 }
 
 /** Default empty form state */
-const emptyForm: FormState = { firstName: '', lastName: '', email: '', password: '', role: STUDENT_ROLE }
+const emptyForm: FormState = {
+  firstName: '',
+  lastName: '',
+  email: '',
+  password: '',
+  role: STUDENT_ROLE
+}
 
 /**
  * UserPanel Component

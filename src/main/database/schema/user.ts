@@ -7,7 +7,8 @@ export const VALID_ROLES = [STUDENT_ROLE, INSTRUCTOR_ROLE]
 
 export type User = InferSelectModel<typeof users>
 export type NewUser = InferInsertModel<typeof users>
-export type UpdateUser = Pick<User, 'uuid'> & Partial<Pick<User, 'firstName' | 'lastName' | 'email' | 'password' | 'role'>>
+export type UpdateUser = Pick<User, 'uuid'> &
+  Partial<Pick<User, 'firstName' | 'lastName' | 'email' | 'password' | 'role'>>
 
 export const users = sqliteTable('users', {
   uuid: text('uuid')
