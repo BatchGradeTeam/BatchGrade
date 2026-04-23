@@ -5,6 +5,8 @@ import { saveGradebookRecord } from '../../lib/gradebookStorage'
 import { StudentGradingCard } from './StudentGradingCard'
 
 interface GradingPlusPanelProps {
+  title?: string
+  description?: string
   showHomeButton?: boolean
   onGoHome?: () => void
 }
@@ -61,6 +63,8 @@ function buildGradebookRecord(
 }
 
 export function GradingPlusPanel({
+  title = 'Grading+ Page',
+  description = 'Batch grading workflow for compiling and judging multiple student submissions.',
   showHomeButton = false,
   onGoHome
 }: GradingPlusPanelProps): React.JSX.Element {
@@ -456,10 +460,8 @@ export function GradingPlusPanel({
 
   return (
     <div className="panel-shell">
-      <h1>Grading+ Page</h1>
-      <p>
-        Instructor batch grading workflow for compiling and judging multiple student submissions.
-      </p>
+      <h1>{title}</h1>
+      <p>{description}</p>
 
       {batchError && (
         <div
