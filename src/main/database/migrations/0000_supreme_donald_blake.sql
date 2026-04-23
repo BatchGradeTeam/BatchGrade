@@ -13,6 +13,8 @@ CREATE TABLE IF NOT EXISTS `instructor_assignments` (
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS `users` (
 	`uuid` text PRIMARY KEY NOT NULL,
+	`firstName` text NOT NULL,
+	`lastName` text NOT NULL,
 	`email` text NOT NULL,
 	`password` text NOT NULL,
 	`role` text DEFAULT 'student' NOT NULL,
