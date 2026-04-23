@@ -1,6 +1,10 @@
 import { useEffect, useState, type CSSProperties } from 'react'
 import type { GradebookRecord } from '../../../../shared/gradebookTypes'
-import { clearGradebookRecords, loadGradebookRecords } from '../../lib/gradebookStorage'
+import {
+  clearGradebookRecords,
+  loadGradebookRecords,
+  type GradebookStorageMode
+} from '../../lib/gradebookStorage'
 
 // =============================================================================
 // Helper Types
@@ -142,7 +146,11 @@ const cellStyle: CSSProperties = {
   textAlign: 'left'
 }
 
-export function GradebookPanel(): React.JSX.Element {
+interface GradebookPanelProps {
+  dataMode?: GradebookStorageMode
+}
+
+export function GradebookPanel({ dataMode = 'server' }: GradebookPanelProps): React.JSX.Element {
   const [selectedAssignment, setSelectedAssignment] = useState('')
   const [gradebookRecords, setGradebookRecords] = useState<GradebookRecord[]>([])
   const [searchTerm, setSearchTerm] = useState('')
@@ -150,12 +158,12 @@ export function GradebookPanel(): React.JSX.Element {
 
   useEffect(() => {
     async function fetchGradebookRecords(): Promise<void> {
-      const records = await loadGradebookRecords()
+      const records = await loadGradebookRecords(dataMode)
       setGradebookRecords(records)
     }
 
     void fetchGradebookRecords()
-  }, [])
+  }, [dataMode])
 
   const assignmentOptions = Array.from(
     new Map(

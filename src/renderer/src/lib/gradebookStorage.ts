@@ -9,7 +9,9 @@ import { loadServerGradebookRecords, saveServerGradebookRecord } from './serverD
 
 const GRADEBOOK_STORAGE_KEY = 'gradebookRecords'
 
-async function loadLocalGradebookRecords(): Promise<GradebookRecord[]> {
+export type GradebookStorageMode = 'server' | 'local'
+
+export async function loadLocalGradebookRecords(): Promise<GradebookRecord[]> {
   try {
     const rawData = localStorage.getItem(GRADEBOOK_STORAGE_KEY)
 
@@ -29,12 +31,16 @@ async function loadLocalGradebookRecords(): Promise<GradebookRecord[]> {
  *
  * @returns Promise resolving to all saved Gradebook records
  */
-export async function loadGradebookRecords(): Promise<GradebookRecord[]> {
-  try {
-    const serverRecords = await loadServerGradebookRecords()
-    return serverRecords
-  } catch (error) {
-    console.error('Failed to load server Gradebook records, using local cache:', error)
+export async function loadGradebookRecords(
+  mode: GradebookStorageMode = 'server'
+): Promise<GradebookRecord[]> {
+  if (mode === 'server') {
+    try {
+      const serverRecords = await loadServerGradebookRecords()
+      return serverRecords
+    } catch (error) {
+      console.error('Failed to load server Gradebook records, using local cache:', error)
+    }
   }
 
   return loadLocalGradebookRecords()
@@ -46,13 +52,22 @@ export async function loadGradebookRecords(): Promise<GradebookRecord[]> {
  * @param record - Gradebook record to save
  * @returns Promise resolving when save is complete
  */
-export async function saveGradebookRecord(record: GradebookRecord): Promise<void> {
-  try {
-    await saveServerGradebookRecord(record)
-  } catch (error) {
-    console.error('Failed to save server Gradebook record, using local cache:', error)
+export async function saveGradebookRecord(
+  record: GradebookRecord,
+  mode: GradebookStorageMode = 'server'
+): Promise<void> {
+  if (mode === 'server') {
+    try {
+      await saveServerGradebookRecord(record)
+    } catch (error) {
+      console.error('Failed to save server Gradebook record, using local cache:', error)
+    }
   }
 
+  await saveLocalGradebookRecord(record)
+}
+
+export async function saveLocalGradebookRecord(record: GradebookRecord): Promise<void> {
   try {
     const existingRecords = await loadLocalGradebookRecords()
     const updatedRecords = [...existingRecords, record]

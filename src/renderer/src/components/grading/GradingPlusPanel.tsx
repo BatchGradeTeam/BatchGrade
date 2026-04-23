@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import type { BatchJudgeCaseResult, BatchStudentSubmission } from '../../../../shared/batchGrading'
 import type { GradebookRecord } from '../../../../shared/gradebookTypes'
 import type { Assignment, AssignmentTestCase } from '../../../../shared/types'
-import { saveGradebookRecord } from '../../lib/gradebookStorage'
+import { saveGradebookRecord, type GradebookStorageMode } from '../../lib/gradebookStorage'
 import {
   loadAssignmentTestCases,
   loadServerAssignments,
@@ -11,6 +11,7 @@ import {
 import { StudentGradingCard } from './StudentGradingCard'
 
 interface GradingPlusPanelProps {
+  dataMode?: GradebookStorageMode
   showHomeButton?: boolean
   onGoHome?: () => void
 }
@@ -81,6 +82,7 @@ function buildGradebookRecord(
 }
 
 export function GradingPlusPanel({
+  dataMode = 'server',
   showHomeButton = false,
   onGoHome
 }: GradingPlusPanelProps): React.JSX.Element {
@@ -100,6 +102,7 @@ export function GradingPlusPanel({
   const [assignmentTestCases, setAssignmentTestCases] = useState<AssignmentTestCase[]>([])
   const [isLoadingAssignmentTestCases, setIsLoadingAssignmentTestCases] = useState(false)
   const [testCaseMode, setTestCaseMode] = useState<TestCaseMode>('saved')
+  const isServerMode = dataMode === 'server'
 
   const useSavedTestCases = testCaseMode === 'saved' && assignmentTestCases.length > 0
   const judgeFilePairPreview = useSavedTestCases
@@ -128,27 +131,34 @@ export function GradingPlusPanel({
   useEffect(() => {
     let isMounted = true
 
-    loadServerAssignments()
-      .then(async (result) => (result.length > 0 ? result : window.api.assignments.getAll()))
-      .then((result) => {
+    async function loadAssignmentsForMode(): Promise<void> {
+      try {
+        const result = isServerMode
+          ? await loadServerAssignments().then(async (serverAssignments) =>
+              serverAssignments.length > 0 ? serverAssignments : window.api.assignments.getAll()
+            )
+          : await window.api.assignments.getAll()
+
         if (!isMounted) {
           return
         }
 
         setAssignments(result)
         setSelectedAssignmentId((current) => current || result[0]?.uuid || '')
-      })
-      .catch((error) => {
+      } catch (error) {
         console.error('Error loading assignments for batch grading:', error)
         if (isMounted) {
           setBatchError('Could not load assignments for grading.')
         }
-      })
+      }
+    }
+
+    void loadAssignmentsForMode()
 
     return () => {
       isMounted = false
     }
-  }, [])
+  }, [isServerMode])
 
   useEffect(() => {
     if (currentStudentIndex === null) {
@@ -177,11 +187,13 @@ export function GradingPlusPanel({
       setIsLoadingAssignmentTestCases(true)
 
       try {
-        const serverTestCases = await loadAssignmentTestCases(selectedAssignmentId)
-        const testCases =
-          serverTestCases.length > 0
-            ? serverTestCases
-            : await window.api.assignments.getTestCases(selectedAssignmentId)
+        const testCases = isServerMode
+          ? await loadAssignmentTestCases(selectedAssignmentId).then(async (serverTestCases) =>
+              serverTestCases.length > 0
+                ? serverTestCases
+                : window.api.assignments.getTestCases(selectedAssignmentId)
+            )
+          : await window.api.assignments.getTestCases(selectedAssignmentId)
 
         if (isMounted) {
           setAssignmentTestCases(testCases)
@@ -217,7 +229,7 @@ export function GradingPlusPanel({
     return () => {
       isMounted = false
     }
-  }, [selectedAssignmentId])
+  }, [isServerMode, selectedAssignmentId])
 
   function updateStudent(index: number, updates: Partial<BatchStudentSubmission>): void {
     setStudents((currentStudents) =>
@@ -312,6 +324,11 @@ export function GradingPlusPanel({
   }
 
   async function handleLoadServerSubmissions(): Promise<void> {
+    if (!isServerMode) {
+      setBatchError('Server submissions are only available for signed-in grading.')
+      return
+    }
+
     if (!selectedAssignmentId) {
       setBatchError('Select an assignment before loading server submissions.')
       return
@@ -487,7 +504,7 @@ export function GradingPlusPanel({
 
       if (!compileResult.compileSuccess || !compileResult.executablePath) {
         const failedRecord = buildGradebookRecord(student, selectedAssignmentId, 0, 0, 'failed')
-        await saveGradebookRecord(failedRecord)
+        await saveGradebookRecord(failedRecord, dataMode)
 
         updateStudent(index, {
           status: 'failed',
@@ -529,7 +546,7 @@ export function GradingPlusPanel({
         totalCount,
         'done'
       )
-      await saveGradebookRecord(savedRecord)
+      await saveGradebookRecord(savedRecord, dataMode)
 
       updateStudent(index, {
         status: 'done',
@@ -542,7 +559,7 @@ export function GradingPlusPanel({
       console.error('Error grading student:', error)
 
       const failedRecord = buildGradebookRecord(student, selectedAssignmentId, 0, 0, 'failed')
-      await saveGradebookRecord(failedRecord)
+      await saveGradebookRecord(failedRecord, dataMode)
 
       updateStudent(index, {
         status: 'failed',
@@ -691,83 +708,91 @@ export function GradingPlusPanel({
       >
         <h2 style={{ marginBottom: '10px' }}>Batch Setup</h2>
 
-        <div style={{ marginBottom: '10px' }}>
-          <label htmlFor="batch-assignment-select" style={{ marginRight: '8px' }}>
-            Assignment:
-          </label>
-          <select
-            id="batch-assignment-select"
-            value={selectedAssignmentId}
-            onChange={(e) => setSelectedAssignmentId(e.target.value)}
-            disabled={assignments.length === 0 || isBatchGrading}
-            style={{ padding: '6px', minWidth: '220px' }}
-          >
-            {assignments.length === 0 ? (
-              <option value="">No assignments available</option>
+        {isServerMode && (
+          <div style={{ marginBottom: '10px' }}>
+            <label htmlFor="batch-assignment-select" style={{ marginRight: '8px' }}>
+              Assignment:
+            </label>
+            <select
+              id="batch-assignment-select"
+              value={selectedAssignmentId}
+              onChange={(e) => setSelectedAssignmentId(e.target.value)}
+              disabled={assignments.length === 0 || isBatchGrading}
+              style={{ padding: '6px', minWidth: '220px' }}
+            >
+              {assignments.length === 0 ? (
+                <option value="">No assignments available</option>
+              ) : (
+                assignments.map((assignment) => (
+                  <option key={assignment.uuid} value={assignment.uuid}>
+                    {assignment.name}
+                  </option>
+                ))
+              )}
+            </select>
+            {isLoadingAssignmentTestCases ? (
+              <span style={{ marginLeft: '8px', fontSize: '13px', color: '#facc15' }}>
+                Loading test cases...
+              </span>
+            ) : assignmentTestCases.length > 0 ? (
+              <span style={{ marginLeft: '8px', fontSize: '13px', color: '#22c55e' }}>
+                Loaded {assignmentTestCases.length} saved test case
+                {assignmentTestCases.length === 1 ? '' : 's'}
+              </span>
             ) : (
-              assignments.map((assignment) => (
-                <option key={assignment.uuid} value={assignment.uuid}>
-                  {assignment.name}
-                </option>
-              ))
+              <span style={{ marginLeft: '8px', fontSize: '13px', color: '#facc15' }}>
+                No saved test cases. Manual files will be used.
+              </span>
             )}
-          </select>
-          {isLoadingAssignmentTestCases ? (
-            <span style={{ marginLeft: '8px', fontSize: '13px', color: '#facc15' }}>
-              Loading test cases...
-            </span>
-          ) : assignmentTestCases.length > 0 ? (
-            <span style={{ marginLeft: '8px', fontSize: '13px', color: '#22c55e' }}>
-              Loaded {assignmentTestCases.length} saved test case
-              {assignmentTestCases.length === 1 ? '' : 's'}
-            </span>
-          ) : (
-            <span style={{ marginLeft: '8px', fontSize: '13px', color: '#facc15' }}>
-              No saved test cases. Manual files will be used.
-            </span>
-          )}
-        </div>
+          </div>
+        )}
 
-        <div style={{ marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '14px' }}>
-          <span style={{ fontSize: '14px' }}>Test cases:</span>
+        {isServerMode && (
+          <div
+            style={{ marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '14px' }}
+          >
+            <span style={{ fontSize: '14px' }}>Test cases:</span>
 
-          <label style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-            <input
-              type="radio"
-              name="grading-test-case-mode"
-              checked={testCaseMode === 'saved'}
-              disabled={assignmentTestCases.length === 0 || isBatchGrading}
-              onChange={() => setTestCaseMode('saved')}
-            />
-            Saved assignment cases
-          </label>
+            <label style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+              <input
+                type="radio"
+                name="grading-test-case-mode"
+                checked={testCaseMode === 'saved'}
+                disabled={assignmentTestCases.length === 0 || isBatchGrading}
+                onChange={() => setTestCaseMode('saved')}
+              />
+              Saved assignment cases
+            </label>
 
-          <label style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-            <input
-              type="radio"
-              name="grading-test-case-mode"
-              checked={testCaseMode === 'manual'}
-              disabled={isBatchGrading}
-              onChange={() => setTestCaseMode('manual')}
-            />
-            Manual files for this run
-          </label>
-        </div>
+            <label style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+              <input
+                type="radio"
+                name="grading-test-case-mode"
+                checked={testCaseMode === 'manual'}
+                disabled={isBatchGrading}
+                onChange={() => setTestCaseMode('manual')}
+              />
+              Manual files for this run
+            </label>
+          </div>
+        )}
 
         <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
           <button onClick={() => void handleImportSubmissionFolder()} className="primary-button">
             Import Submission Folder
           </button>
 
-          <button
-            onClick={() => void handleLoadServerSubmissions()}
-            className="primary-button"
-            disabled={isLoadingServerSubmissions || !selectedAssignmentId}
-          >
-            {isLoadingServerSubmissions
-              ? 'Loading Server Submissions...'
-              : 'Load Server Submissions'}
-          </button>
+          {isServerMode && (
+            <button
+              onClick={() => void handleLoadServerSubmissions()}
+              className="primary-button"
+              disabled={isLoadingServerSubmissions || !selectedAssignmentId}
+            >
+              {isLoadingServerSubmissions
+                ? 'Loading Server Submissions...'
+                : 'Load Server Submissions'}
+            </button>
+          )}
 
           <button onClick={() => void handleSelectStudentFiles()} className="primary-button">
             Select Student C++ Files
