@@ -82,6 +82,7 @@ export function GradingPlusPanel({
 
   useEffect(() => {
     function handleClickOutside(): void {
+      setShowModeMenu(false)
       setShowInputMenu(false)
       setShowOutputMenu(false)
     }
