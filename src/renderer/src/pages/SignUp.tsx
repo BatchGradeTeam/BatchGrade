@@ -79,7 +79,7 @@ export function SignUp(): React.JSX.Element {
     setIsSubmitting(true)
 
     try {
-      const result = await signup(email.trim(), password, role)
+      const result = await signup(firstName.trim(), lastName.trim(), email.trim(), password, role)
 
       if (!result.user) {
         setError('Could not confirm account creation. Please try again.')

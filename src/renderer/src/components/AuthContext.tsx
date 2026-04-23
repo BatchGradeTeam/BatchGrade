@@ -40,6 +40,8 @@ import { getProfile } from '../lib/profiles'
 
 type AuthUser = {
   uuid: string
+  firstName: string
+  lastName: string
   email: string
   role: (typeof VALID_ROLES)[number]
 }
@@ -57,6 +59,8 @@ interface AuthContextType {
   user: AuthUser | null // Stores information about the logged-in user
   login: (email: string, password: string) => Promise<AuthUser> // Function used to authenticate a user
   signup: (
+    firstName: string,
+    lastName: string,
     email: string,
     password: string,
     role: (typeof VALID_ROLES)[number]
@@ -90,7 +94,7 @@ interface AuthProviderProps {
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [isLoggedIn, setIsLoggedIn] = useState(false) // tracks whether a user is currently logged in
   const [isAuthLoading, setIsAuthLoading] = useState(true) // tracks whether authentication state is still being initialized
-  const [user, setUser] = useState<AuthUser | null>(null) // stores the current user's email and role (or null if no user is logged in)
+  const [user, setUser] = useState<AuthUser | null>(null) // stores the current user's name, email, and role (or null if no user is logged in)
 
   // Ensures the user role is always one of the allowed roles.
   const toRole = (candidate: unknown): (typeof VALID_ROLES)[number] | null => {
@@ -107,6 +111,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       return null
     }
 
+    const metadata = userRecord.user_metadata
     const roleCandidate = userRecord?.app_metadata?.role ?? userRecord?.user_metadata?.role
     const role = toRole(roleCandidate)
 
@@ -116,6 +121,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
     return {
       uuid: userRecord?.id,
+      firstName: metadata?.first_name,  // Access via metadata
+      lastName: metadata?.last_name,
       email: userRecord?.email,
       role
     }
@@ -150,6 +157,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
       const nextUser: AuthUser = {
         uuid: authUser.id,
+        firstName: profile?.first_name ?? '',
+        lastName: profile?.last_name ?? '',
         email: authUser.email ?? profile?.email ?? '',
         role
       }
@@ -253,6 +262,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   // This returns as soon as auth confirms the user record was created so the UI
   // can show a stable success state without waiting on profile restoration.
   const signup = async (
+    firstName: string,
+    lastName: string,
     email: string,
     password: string,
     role: (typeof VALID_ROLES)[number]
@@ -262,7 +273,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       password,
       options: {
         data: {
-          role
+          role,
+          first_name: firstName, // store in metadata
+          last_name: lastName  // since these are column names in Supabase
         }
       }
     })
@@ -278,6 +291,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     return {
       user: mapSupabaseUser(data.user) ?? {
         uuid: data.user.id,
+        firstName,
+        lastName,
         email: data.user.email ?? '',
         role
       },
