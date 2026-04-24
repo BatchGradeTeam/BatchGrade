@@ -40,8 +40,6 @@ import { getProfile } from '../lib/profiles'
 
 type AuthUser = {
   uuid: string
-  firstName: string
-  lastName: string
   email: string
   role: (typeof VALID_ROLES)[number]
 }
@@ -112,7 +110,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
 
     const metadata = userRecord.user_metadata
-    const roleCandidate = userRecord?.app_metadata?.role ?? userRecord?.user_metadata?.role
+    const roleCandidate = userRecord?.app_metadata?.role ?? metadata?.role
     const role = toRole(roleCandidate)
 
     if (!role) {
@@ -120,10 +118,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
 
     return {
-      uuid: userRecord?.id,
-      firstName: metadata.first_name, // Access via metadata
-      lastName: metadata.last_name,
-      email: userRecord?.email,
+      uuid: userRecord.id,
+      email: userRecord.email,
       role
     }
   }
@@ -157,8 +153,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
       const nextUser: AuthUser = {
         uuid: authUser.id,
-        firstName: profile?.first_name ?? '',
-        lastName: profile?.last_name ?? '',
         email: authUser.email ?? profile?.email ?? '',
         role
       }
@@ -268,6 +262,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     password: string,
     role: (typeof VALID_ROLES)[number]
   ): Promise<SignupResult> => {
+    // Create Auth User
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
@@ -275,7 +270,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         data: {
           role,
           first_name: firstName, // store in metadata
-          last_name: lastName // since these are column names in Supabase
+          last_name: lastName
         }
       }
     })
@@ -288,11 +283,33 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       return { user: null, hasSession: false }
     }
 
+    // ai-gen start (Gemini-3, 1)
+
+    // Supabase now has a Database Trigger that automatically
+    // inserts a profiles row whenever a user signs up in auth.users
+
+    // Insert the first name & last name into the correct Supabase
+    // table: students or instructors, based on the foreign key id
+    const table = role === 'student' ? 'students' : 'instructors'
+    const { error: roleError } = await supabase
+      .from(table)
+      .insert({
+        id: data.user.id,
+        first_name: firstName,
+        last_name: lastName,
+        // For the students table, student-id will be different from id
+        ...(role === 'student' ? { student_id: crypto.randomUUID() } : {})
+      })
+
+    if (roleError) {
+      console.error(`Error creating ${role} record:`, roleError)
+      throw new Error(`Auth created, but failed to set up ${role} profile.`)
+    }
+    // ai-gen end
+
     return {
       user: mapSupabaseUser(data.user) ?? {
         uuid: data.user.id,
-        firstName,
-        lastName,
         email: data.user.email ?? '',
         role
       },

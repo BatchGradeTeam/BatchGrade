@@ -9,8 +9,6 @@ import { supabase } from './supabase'
 
 export type Profile = {
   id: string
-  first_name: string
-  last_name: string
   email: string
   role: 'student' | 'instructor'
   created_at: string
@@ -36,7 +34,7 @@ async function getProfile(): Promise<Profile | null> {
   // Query the "profiles" table using the user's ID
   const { data, error } = await supabase
     .from('profiles')
-    .select('id, first_name, last_name, email, role, created_at')
+    .select('id, email, role, created_at')
     .eq('id', user.id)
     .single()
 
