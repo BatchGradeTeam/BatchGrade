@@ -64,7 +64,7 @@ jobs:
       - name: Test
         run: npm run test:ci # Statement coverage >=79 is currently enforced
 
-  # ai-gen start [(GPT-5.4), 2]
+  # ai-gen start (GPT-5.4, 2)
   # Prompt: https://chatgpt.com/share/69bf9b45-7fa0-800e-8f8a-31b7012f4f40
   package:
     needs: [build, test]

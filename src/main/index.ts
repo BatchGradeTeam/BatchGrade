@@ -9,11 +9,24 @@ import { getAllUsers, createUser, updateUser, deleteUser } from './database/quer
 import { createSubmission, getSubmissionById } from './database/queries/submissionServices'
 import { dialog } from 'electron'
 
-import { getAllAssignments, createAssignment, updateAssignment } from './database/queries'
+import {
+  getAllAssignments,
+  createAssignment,
+  updateAssignment,
+  getAssignmentTestCases,
+  replaceAssignmentTestCases
+} from './database/queries'
 import { deleteAssignment } from './database/queries'
 
 /* TEST ONLY DELETE WHEN DONE */
-import { selectFile, stringifyFile, selectCppFiles, selectSubmissionFolder, selectFilesFromFolder} from './utils/file'
+import {
+  selectFile,
+  stringifyFile,
+  selectCppFiles,
+  selectSubmissionFolder,
+  selectFilesFromFolder,
+  materializeServerSubmissions
+} from './utils/file'
 /* TEST ONLY DELETE WHEN DONE */
 
 // @ Issue 9: Implement Automated Build & Compilation
@@ -39,7 +52,7 @@ function refreshGccStatus(): Promise<GccInstallationInfo> {
 }
 
 function getSupportedPlatform(): SupportedPlatform {
-  let platform : SupportedPlatform = 'unknown'
+  let platform: SupportedPlatform = 'unknown'
 
   if (process.platform === 'win32') {
     platform = 'win32'
@@ -70,7 +83,9 @@ function getSupportedPlatform(): SupportedPlatform {
     - undefined references
     - bad student code
 */
-function isCompilerNotFoundError(stderr: string, message: string): boolean { // TODO: properly cite AI: https://chatgpt.com/share/69bb0b9d-e314-800e-8e15-cacc4b61f4e5
+function isCompilerNotFoundError(stderr: string, message: string): boolean {
+  // ai-gen start (GPT-5.4, 1)
+  // Prompt: https://chatgpt.com/share/69bb0b9d-e314-800e-8e15-cacc4b61f4e5
   const text = `${stderr}\n${message}`.toLowerCase()
 
   return (
@@ -81,6 +96,8 @@ function isCompilerNotFoundError(stderr: string, message: string): boolean { // 
     text.includes('spawn') ||
     text.includes('enoent')
   )
+
+  // ai-gen end
 }
 
 function createWindow(): void {
@@ -147,22 +164,28 @@ app.whenReady().then(() => {
 
     // openFile operation FR1
     ipcMain.handle('dialog:openFile', async () => {
-    const result = await dialog.showOpenDialog({
-      properties: ['openFile'],
-      // Only allows c++ files for now
-      filters: [{ name: 'Source Files', extensions: ['cpp'] }]
-    })
-    if (result.canceled) return null
-    return result.filePaths[0]
+      const result = await dialog.showOpenDialog({
+        properties: ['openFile'],
+        // Only allows c++ files for now
+        filters: [{ name: 'Source Files', extensions: ['cpp'] }]
+      })
+      if (result.canceled) return null
+      return result.filePaths[0]
     })
 
     // Submissions CRUD
-    ipcMain.handle('submissions:create', (_e, data: {
-      studentId: string
-      assignmentId: string
-      fileName: string
-      filePath: string
-    }) => createSubmission(data))
+    ipcMain.handle(
+      'submissions:create',
+      (
+        _e,
+        data: {
+          studentId: string
+          assignmentId: string
+          fileName: string
+          filePath: string
+        }
+      ) => createSubmission(data)
+    )
 
     ipcMain.handle('submissions:getById', (_e, submissionId: string) =>
       getSubmissionById(submissionId)
@@ -172,13 +195,19 @@ app.whenReady().then(() => {
     ipcMain.handle('assignments:create', (_event, data: NewAssignment) => createAssignment(data))
     ipcMain.handle('assignments:update', (_event, data: UpdateAssignment) => updateAssignment(data))
     ipcMain.handle('assignments:delete', (_event, uuid: string) => deleteAssignment(uuid))
+    ipcMain.handle('assignments:getTestCases', (_event, assignmentUuid: string) =>
+      getAssignmentTestCases(assignmentUuid)
+    )
+    ipcMain.handle('assignments:replaceTestCases', (_event, assignmentUuid: string, testCases) =>
+      replaceAssignmentTestCases(assignmentUuid, testCases)
+    )
 
     // Compiler Status
     ipcMain.handle('compiler:getGccStatus', async () => gccStatusPromise ?? refreshGccStatus())
 
     // Validate the manual compiler path from the UI and make it the current GCC selection
     ipcMain.handle('compiler:setGccPath', async (_e, filePath: string) => {
-      if ( !(await validateGccPath(filePath)) ) {
+      if (!(await validateGccPath(filePath))) {
         manualGccPath = null
 
         const missingRes: GccInstallationInfo = {
@@ -187,7 +216,7 @@ app.whenReady().then(() => {
           platform: getSupportedPlatform(),
           message: 'The selected path is invalid. Use a C++ compiler such as g++, c++, or clang++.',
           installInstruction: null, // the user is prompted to install with instructions for their OS if they don't have a compiler installed
-          path: null ,
+          path: null,
           source: null // User can manually set the path to a GCC installation
         }
 
@@ -196,8 +225,7 @@ app.whenReady().then(() => {
         gccStatusPromise = Promise.resolve(missingRes)
 
         return missingRes
-      }
-      else {
+      } else {
         manualGccPath = filePath
 
         const manualRes: GccInstallationInfo = {
@@ -212,12 +240,12 @@ app.whenReady().then(() => {
 
         gccStatusPromise = Promise.resolve(manualRes)
 
-      return manualRes
-    }
-  })
+        return manualRes
+      }
+    })
 
-  // Docker Detection
-  ipcMain.handle('compiler:getDockerStatus', () => detectDockerInstallation()) 
+    // Docker Detection
+    ipcMain.handle('compiler:getDockerStatus', () => detectDockerInstallation())
 
     /* TEST ONLY DELETE WHEN DONE */
     // File selection
@@ -226,6 +254,9 @@ app.whenReady().then(() => {
     ipcMain.handle('file:stringify', (_e, filePath: string) => stringifyFile(filePath))
     ipcMain.handle('file:selectSubmissionFolder', () => selectSubmissionFolder())
     ipcMain.handle('file:selectFilesFromFolder', () => selectFilesFromFolder())
+    ipcMain.handle('file:materializeServerSubmissions', (_e, bundles) =>
+      materializeServerSubmissions(bundles)
+    )
     /* TEST ONLY DELETE WHEN DONE */
 
     // Compilation
@@ -251,10 +282,7 @@ app.whenReady().then(() => {
       }
 
       // Only revalidate GCC if the failure looks like the compiler itself is missing or cannot be started
-      const isCompilerMissing = isCompilerNotFoundError(
-        compileRes.stderr,
-        compileRes.message
-      )
+      const isCompilerMissing = isCompilerNotFoundError(compileRes.stderr, compileRes.message)
       if (!isCompilerMissing) {
         return compileRes
       }
@@ -278,19 +306,19 @@ app.whenReady().then(() => {
       return executeCppFiles(request)
     })
 
-  ipcMain.handle('compiler:judgeCpp', (_e, request) => {
-    return judgeCppFiles(request)
-  })
+    ipcMain.handle('compiler:judgeCpp', (_e, request) => {
+      return judgeCppFiles(request)
+    })
 
-  // Docker Compilation
-  ipcMain.handle('compiler:dockerCompileCpp', async (_e, sourceFiles: string[]) => {
-    return dockerCompile({ sourceFiles, language: 'cpp' })
-  })
+    // Docker Compilation
+    ipcMain.handle('compiler:dockerCompileCpp', async (_e, sourceFiles: string[]) => {
+      return dockerCompile({ sourceFiles, language: 'cpp' })
+    })
 
-  // Docker Judge
-  ipcMain.handle('compiler:dockerJudgeCpp', async (_e, request) => {
-    return dockerJudge({ ...request, language: 'cpp' })
-  })
+    // Docker Judge
+    ipcMain.handle('compiler:dockerJudgeCpp', async (_e, request) => {
+      return dockerJudge({ ...request, language: 'cpp' })
+    })
 
     ipcMain.handle('submissions:submitCpp', (_e, request) => {
       return submitCppSubmission(request)

@@ -4,7 +4,9 @@ export type {
   UpdateUser,
   Assignment,
   NewAssignment,
-  UpdateAssignment
+  UpdateAssignment,
+  AssignmentTestCase,
+  NewAssignmentTestCase
 } from '../main/database/schema'
 /**
  * types.ts

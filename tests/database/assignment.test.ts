@@ -1,5 +1,12 @@
 import { describe, it, expect, beforeEach } from 'vitest'
-import { getAllAssignments, createAssignment, updateAssignment, deleteAssignment } from '../../src/main/database/queries/assignment'
+import {
+  getAllAssignments,
+  createAssignment,
+  updateAssignment,
+  deleteAssignment,
+  getAssignmentTestCases,
+  replaceAssignmentTestCases
+} from '../../src/main/database/queries/assignment'
 
 // Wipes the assignmentsInstrc table before each test
 beforeEach(async () => {
@@ -138,5 +145,52 @@ describe('Assignment (Instructor Config) Schema', () => {
     expect(update.solutionFileName).toBe('solution.cpp')
     expect(update.solutionFilePath).toBe('/solutions/HW2/solution.cpp')
 
+  })
+
+  it('existingAssignment_replaceTestCases_storesInputAndExpectedOutputPairs', async () => {
+    const assignment = createAssignment({
+      name: 'HW4',
+      dueDate: '2026-04-20',
+      gradingCriteria: 'c',
+      solutionType: 'text',
+      expectedOutputText: 'legacy output'
+    })
+
+    const savedTestCases = replaceAssignmentTestCases(assignment.uuid, [
+      {
+        caseOrder: 1,
+        inputFileName: 'input1.txt',
+        inputFilePath: '/tests/input1.txt',
+        inputText: '2 3',
+        expectedOutputFileName: 'output1.txt',
+        expectedOutputFilePath: '/tests/output1.txt',
+        expectedOutputText: '5'
+      },
+      {
+        caseOrder: 2,
+        inputFileName: null,
+        inputFilePath: null,
+        inputText: null,
+        expectedOutputFileName: 'output2.txt',
+        expectedOutputFilePath: '/tests/output2.txt',
+        expectedOutputText: 'done'
+      }
+    ])
+
+    expect(savedTestCases).toHaveLength(2)
+
+    const result = getAssignmentTestCases(assignment.uuid)
+
+    expect(result).toHaveLength(2)
+    expect(result[0].caseOrder).toBe(1)
+    expect(result[0].inputText).toBe('2 3')
+    expect(result[0].expectedOutputText).toBe('5')
+    expect(result[1].caseOrder).toBe(2)
+    expect(result[1].inputText).toBeNull()
+    expect(result[1].expectedOutputText).toBe('done')
+
+    replaceAssignmentTestCases(assignment.uuid, [])
+
+    expect(getAssignmentTestCases(assignment.uuid)).toHaveLength(0)
   })
 })
