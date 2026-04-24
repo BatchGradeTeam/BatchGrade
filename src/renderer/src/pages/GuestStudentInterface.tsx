@@ -58,8 +58,6 @@ export function GuestStudentInterface(): React.JSX.Element {
           // onCompileResultChange={setCompileResult}
         />
 
-        
-
         {/* <SubmitPanel
           compileResult={compileResult}
           selectedFiles={selectedFiles}

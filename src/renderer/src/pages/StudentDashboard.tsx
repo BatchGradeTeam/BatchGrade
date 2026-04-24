@@ -19,10 +19,7 @@ import { NavBar } from '../components/Navbar'
 import { Footer } from '../components/Footer'
 import { useAuth } from '../components/AuthContext'
 import { CppWorkflowPanel } from '../components/compiler/CppWorkflowPanel'
-import {
-  OutputDiffPanel,
-  type OutputComparisonCase
-} from '../components/OutputDiffPanel'
+import { OutputDiffPanel, type OutputComparisonCase } from '../components/OutputDiffPanel'
 import { SubmitPanel } from '../components/submission/SubmitPanel'
 import { AboutPanel } from '../components/AboutPanel'
 import { StudentScoresPanel } from '../components/grading/StudentScoresPanel'
