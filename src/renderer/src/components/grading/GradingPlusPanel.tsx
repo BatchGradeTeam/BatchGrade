@@ -115,6 +115,7 @@ export function GradingPlusPanel({
   const isServerMode = dataSourceMode === 'server'
   const gradebookDestinationLabel =
     gradebookMode === 'local' ? 'offline gradebook on this device' : 'online gradebook'
+  const activeAssignmentId = selectedAssignmentId || 'guest-batchgrade'
 
   const useSavedTestCases = testCaseMode === 'saved' && assignmentTestCases.length > 0
   const judgeFilePairPreview = useSavedTestCases
@@ -538,7 +539,7 @@ export function GradingPlusPanel({
       })
 
       if (!compileResult.compileSuccess || !compileResult.executablePath) {
-        const failedRecord = buildGradebookRecord(student, selectedAssignmentId, 0, 0, 'failed')
+        const failedRecord = buildGradebookRecord(student, activeAssignmentId, 0, 0, 'failed')
         await saveGradebookRecord(failedRecord, gradebookMode)
 
         updateStudent(index, {
@@ -584,7 +585,7 @@ export function GradingPlusPanel({
       const totalCount = judgeResults.length
       const savedRecord = buildGradebookRecord(
         student,
-        selectedAssignmentId,
+        activeAssignmentId,
         passedCount,
         totalCount,
         'done'
@@ -601,7 +602,7 @@ export function GradingPlusPanel({
     } catch (error) {
       console.error('Error grading student:', error)
 
-      const failedRecord = buildGradebookRecord(student, selectedAssignmentId, 0, 0, 'failed')
+      const failedRecord = buildGradebookRecord(student, activeAssignmentId, 0, 0, 'failed')
       await saveGradebookRecord(failedRecord, gradebookMode)
 
       updateStudent(index, {
@@ -613,7 +614,7 @@ export function GradingPlusPanel({
   }
 
   async function handleGradeStudent(index: number): Promise<void> {
-    if (!selectedAssignmentId) {
+    if (isServerMode && !selectedAssignmentId) {
       setBatchError('Select an assignment before grading.')
       return
     }
@@ -653,7 +654,7 @@ export function GradingPlusPanel({
       return
     }
 
-    if (!selectedAssignmentId) {
+    if (isServerMode && !selectedAssignmentId) {
       setBatchError('Select an assignment before grading.')
       return
     }
