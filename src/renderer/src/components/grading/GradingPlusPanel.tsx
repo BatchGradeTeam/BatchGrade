@@ -133,11 +133,25 @@ export function GradingPlusPanel({
 
     async function loadAssignmentsForMode(): Promise<void> {
       try {
-        const result = isServerMode
-          ? await loadServerAssignments().then(async (serverAssignments) =>
-              serverAssignments.length > 0 ? serverAssignments : window.api.assignments.getAll()
+        let result: Assignment[]
+
+        if (isServerMode) {
+          try {
+            const serverAssignments = await loadServerAssignments()
+            result =
+              serverAssignments.length > 0
+                ? serverAssignments
+                : await window.api.assignments.getAll()
+          } catch (serverError) {
+            console.error(
+              'Error loading server assignments for batch grading, using local assignments:',
+              serverError
             )
-          : await window.api.assignments.getAll()
+            result = await window.api.assignments.getAll()
+          }
+        } else {
+          result = await window.api.assignments.getAll()
+        }
 
         if (!isMounted) {
           return
@@ -145,6 +159,7 @@ export function GradingPlusPanel({
 
         setAssignments(result)
         setSelectedAssignmentId((current) => current || result[0]?.uuid || '')
+        setBatchError(null)
       } catch (error) {
         console.error('Error loading assignments for batch grading:', error)
         if (isMounted) {

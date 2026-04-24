@@ -1,6 +1,7 @@
 import type { Assignment, AssignmentTestCase } from '../../../shared/types'
 import type { GradebookRecord } from '../../../shared/gradebookTypes'
 import type { SubmissionCompileSnapshot, SubmitCppResult } from '../../../shared/submission'
+import type { User as SupabaseUser } from '@supabase/supabase-js'
 import { supabase } from './supabase'
 import { getProfile, type Profile } from './profiles'
 
@@ -102,7 +103,7 @@ const ASSIGNMENT_COLUMNS =
   'assignments_id, section_id, assignment_name, due_date, grading_criteria, solution_type, solution_file_name, solution_file_path, expected_output, created_by, created_at'
 const ASSIGNMENT_TEST_CASE_COLUMNS =
   'test_case_id, assignment_id, case_order, input_file_name, input_storage_path, input_text, expected_output_file_name, expected_output_storage_path, expected_output_text, created_at'
-const ASSIGNMENTS_TABLE = 'instructors_assignments'
+const ASSIGNMENTS_TABLE = 'instructor_assignments'
 const ASSIGNMENT_TEST_CASES_TABLE = 'assignment_test_cases'
 const SUBMISSIONS_BUCKET = 'Submissions'
 const ASSIGNMENT_TESTS_BUCKET = 'AssignmentTests'
@@ -159,13 +160,72 @@ function toAssignment(row: InstructorAssignmentRow): Assignment {
   }
 }
 
-async function getCurrentProfile(): Promise<Profile | null> {
-  try {
-    return await getProfile()
-  } catch (error) {
-    console.error('Could not load Supabase profile:', error)
+function toProfileRole(candidate: unknown): Profile['role'] | null {
+  return candidate === 'student' || candidate === 'instructor' ? candidate : null
+}
+
+function buildFallbackProfile(user: SupabaseUser): Profile | null {
+  const role = toProfileRole(user.app_metadata?.role ?? user.user_metadata?.role)
+
+  if (!role) {
     return null
   }
+
+  return {
+    id: user.id,
+    email: user.email ?? `${user.id}@unknown.local`,
+    role,
+    created_at: new Date().toISOString()
+  }
+}
+
+async function getCurrentProfile(): Promise<Profile | null> {
+  const {
+    data: { user },
+    error: authError
+  } = await supabase.auth.getUser()
+
+  if (authError) {
+    throw authError
+  }
+
+  if (!user) {
+    return null
+  }
+
+  try {
+    const profile = await getProfile()
+
+    if (profile) {
+      return profile
+    }
+  } catch (error) {
+    console.error('Could not load Supabase profile:', error)
+  }
+
+  const fallbackProfile = buildFallbackProfile(user)
+
+  if (!fallbackProfile) {
+    return null
+  }
+
+  try {
+    await ensureServerProfile(fallbackProfile.id, fallbackProfile.email, fallbackProfile.role)
+
+    try {
+      const syncedProfile = await getProfile()
+
+      if (syncedProfile) {
+        return syncedProfile
+      }
+    } catch (error) {
+      console.warn('Could not reload synchronized Supabase profile:', error)
+    }
+  } catch (error) {
+    console.warn('Could not synchronize fallback Supabase profile:', error)
+  }
+
+  return fallbackProfile
 }
 
 async function requireCurrentProfile(role?: Profile['role']): Promise<Profile> {
@@ -386,7 +446,7 @@ export async function publishServerAssignment(assignment: Assignment): Promise<A
     .single()
 
   if (error) {
-    throw error
+    throw new Error(`Could not publish assignment to Supabase: ${getErrorMessage(error)}`)
   }
 
   return toAssignment(data as InstructorAssignmentRow)
@@ -406,7 +466,7 @@ export async function updateServerAssignment(assignment: Assignment): Promise<As
     .single()
 
   if (error) {
-    throw error
+    throw new Error(`Could not update assignment in Supabase: ${getErrorMessage(error)}`)
   }
 
   return toAssignment(data as InstructorAssignmentRow)
@@ -422,7 +482,7 @@ export async function deleteServerAssignment(assignmentId: string): Promise<void
     .eq('created_by', authUser.id)
 
   if (error) {
-    throw error
+    throw new Error(`Could not delete assignment from Supabase: ${getErrorMessage(error)}`)
   }
 }
 

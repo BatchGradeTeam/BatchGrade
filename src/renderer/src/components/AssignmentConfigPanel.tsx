@@ -49,6 +49,8 @@ type TestCaseSaveInput = {
   expectedOutputText: string
 }
 
+type AssignmentListSource = 'local' | 'server'
+
 /**
  * @brief Empty/default form values for a new assignment.
  *
@@ -110,6 +112,7 @@ function toTestCaseForm(testCase: AssignmentTestCase): TestCaseFormState {
 export function AssignmentConfigPanel(): React.JSX.Element {
   const { user } = useAuth()
   const [assignments, setAssignments] = useState<Assignment[]>([])
+  const [assignmentListSource, setAssignmentListSource] = useState<AssignmentListSource>('local')
   const [form, setForm] = useState<FormState>(emptyForm)
   const [testCases, setTestCases] = useState<TestCaseFormState[]>([])
   const [editingUuid, setEditingUuid] = useState<string | null>(null)
@@ -168,11 +171,13 @@ export function AssignmentConfigPanel(): React.JSX.Element {
     try {
       const result = user ? await loadServerAssignments() : await window.api.assignments.getAll()
       setAssignments(result)
+      setAssignmentListSource(user ? 'server' : 'local')
     } catch (e: unknown) {
       console.error('Failed to load server assignments, using local assignments:', e)
       try {
         const fallback = await window.api.assignments.getAll()
         setAssignments(fallback)
+        setAssignmentListSource('local')
       } catch (fallbackError: unknown) {
         setError(
           fallbackError instanceof Error ? fallbackError.message : 'Failed to load assignments.'
@@ -548,10 +553,13 @@ export function AssignmentConfigPanel(): React.JSX.Element {
    */
   async function handleDelete(uuid: string): Promise<void> {
     try {
+      setError(null)
+      setStatusMessage(null)
       await window.api.assignments.delete(uuid)
-      if (user) {
+      if (user && assignmentListSource === 'server') {
         try {
           await deleteServerAssignment(uuid)
+          setStatusMessage('Assignment deleted locally and from Supabase.')
         } catch (deleteError) {
           console.error('Assignment was deleted locally but not from Supabase:', deleteError)
           setError(
@@ -559,10 +567,12 @@ export function AssignmentConfigPanel(): React.JSX.Element {
               ? `Could not delete from Supabase: ${deleteError.message}`
               : 'Could not delete from Supabase.'
           )
+          setStatusMessage('Assignment deleted locally.')
         }
+      } else {
+        setStatusMessage('Assignment deleted locally.')
       }
       setDeleteConfirm(null)
-      setStatusMessage('Assignment deleted locally.')
       await loadAssignments()
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : 'Failed to delete assignment.')
