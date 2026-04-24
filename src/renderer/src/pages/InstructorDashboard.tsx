@@ -25,7 +25,14 @@ import { GradebookPanel } from '../components/grading/GradebookPanel'
 import { GradingPanel } from '../components/grading/GradingPanel'
 import { GradingPlusPanel } from '../components/grading/GradingPlusPanel'
 
-type InstructorWorkspace = 'none' | 'assignment' | 'gradebook' | 'grading' | 'gradingPlus' | 'about'
+type InstructorWorkspace =
+  | 'none'
+  | 'assignment'
+  | 'onlineGradebook'
+  | 'offlineGradebook'
+  | 'grading'
+  | 'gradingPlus'
+  | 'about'
 
 /**
  * InstructorDashboard component
@@ -67,8 +74,12 @@ export function InstructorDashboard(): React.JSX.Element {
     setActiveWorkspace('none')
   }
 
-  function openGradebook(): void {
-    setActiveWorkspace('gradebook')
+  function openOnlineGradebook(): void {
+    setActiveWorkspace('onlineGradebook')
+  }
+
+  function openOfflineGradebook(): void {
+    setActiveWorkspace('offlineGradebook')
   }
 
   function openGrading(): void {
@@ -129,8 +140,17 @@ export function InstructorDashboard(): React.JSX.Element {
             >
               Assignment Creation
             </button>
-            <button className={getWorkspaceButtonClass('gradebook')} onClick={openGradebook}>
-              Gradebook
+            <button
+              className={getWorkspaceButtonClass('onlineGradebook')}
+              onClick={openOnlineGradebook}
+            >
+              Online Gradebook
+            </button>
+            <button
+              className={getWorkspaceButtonClass('offlineGradebook')}
+              onClick={openOfflineGradebook}
+            >
+              Offline Gradebook
             </button>
             <button className={getWorkspaceButtonClass('grading')} onClick={openGrading}>
               Grading
@@ -144,12 +164,23 @@ export function InstructorDashboard(): React.JSX.Element {
           </div>
           {activeWorkspace === 'assignment' ? (
             <AssignmentConfigPanel />
-          ) : activeWorkspace === 'gradebook' ? (
-            <GradebookPanel />
+          ) : activeWorkspace === 'onlineGradebook' ? (
+            <GradebookPanel
+              dataMode="server"
+              title="Online Gradebook"
+              description="Shows shared Supabase-backed scores. Student-submitted online scores will appear here."
+              allowClear={false}
+            />
+          ) : activeWorkspace === 'offlineGradebook' ? (
+            <GradebookPanel
+              dataMode="local"
+              title="Offline Gradebook"
+              description="Shows local batch grading results saved on this device."
+            />
           ) : activeWorkspace === 'grading' ? (
             <GradingPanel />
           ) : activeWorkspace === 'gradingPlus' ? (
-            <GradingPlusPanel />
+            <GradingPlusPanel dataSourceMode="server" gradebookMode="local" />
           ) : activeWorkspace === 'about' ? (
             <AboutPanel />
           ) : (
@@ -157,8 +188,8 @@ export function InstructorDashboard(): React.JSX.Element {
               <h2>Get started</h2>
               <p>
                 Select an instructor tool above to open it inside this dashboard workspace. You can
-                switch between assignment creation, gradebook, single grading, and batch grading
-                without leaving this page.
+                switch between assignment creation, online and offline gradebooks, single grading,
+                and batch grading without leaving this page.
               </p>
             </div>
           )}

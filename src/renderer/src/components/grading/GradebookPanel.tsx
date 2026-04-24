@@ -148,13 +148,22 @@ const cellStyle: CSSProperties = {
 
 interface GradebookPanelProps {
   dataMode?: GradebookStorageMode
+  title?: string
+  description?: string
+  allowClear?: boolean
 }
 
-export function GradebookPanel({ dataMode = 'server' }: GradebookPanelProps): React.JSX.Element {
+export function GradebookPanel({
+  dataMode = 'server',
+  title = 'Assignment Gradebook',
+  description,
+  allowClear
+}: GradebookPanelProps): React.JSX.Element {
   const [selectedAssignment, setSelectedAssignment] = useState('')
   const [gradebookRecords, setGradebookRecords] = useState<GradebookRecord[]>([])
   const [searchTerm, setSearchTerm] = useState('')
   const [sortOption, setSortOption] = useState('name-asc')
+  const canClearRecords = allowClear ?? dataMode === 'local'
 
   useEffect(() => {
     async function fetchGradebookRecords(): Promise<void> {
@@ -211,7 +220,8 @@ export function GradebookPanel({ dataMode = 'server' }: GradebookPanelProps): Re
     <div className="panel-shell">
       <div style={{ color: 'var(--ev-c-gray-1)' }}>
         <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '0 24px' }}>
-          <h1>Assignment Gradebook</h1>
+          <h1>{title}</h1>
+          {description && <p style={{ marginTop: '8px', color: '#cbd5e1' }}>{description}</p>}
 
           <div style={{ margin: '16px 0' }}>
             <label htmlFor="assignment-select">Select Assignment: </label>
@@ -314,18 +324,20 @@ export function GradebookPanel({ dataMode = 'server' }: GradebookPanelProps): Re
           <div
             style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '8px' }}
           >
-            <button
-              onClick={() => void handleClearRecentlyGraded()}
-              disabled={!hasAssignments}
-              style={{
-                fontSize: '12px',
-                padding: '4px 8px',
-                opacity: hasAssignments ? 0.8 : 0.5,
-                cursor: hasAssignments ? 'pointer' : 'not-allowed'
-              }}
-            >
-              Clear Recently Graded
-            </button>
+            {canClearRecords && (
+              <button
+                onClick={() => void handleClearRecentlyGraded()}
+                disabled={!hasAssignments}
+                style={{
+                  fontSize: '12px',
+                  padding: '4px 8px',
+                  opacity: hasAssignments ? 0.8 : 0.5,
+                  cursor: hasAssignments ? 'pointer' : 'not-allowed'
+                }}
+              >
+                Clear Recently Graded
+              </button>
+            )}
             <button
               onClick={handleExportCSV}
               disabled={sortedStudents.length === 0}

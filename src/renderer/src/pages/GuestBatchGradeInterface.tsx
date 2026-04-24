@@ -15,7 +15,7 @@ export function GuestBatchGradeInterface(): React.JSX.Element {
       </div>
 
       <div className="dashboard-container">
-        <GradingPlusPanel dataMode="local" />
+        <GradingPlusPanel dataSourceMode="local" gradebookMode="local" />
       </div>
 
       <div className="button-container">

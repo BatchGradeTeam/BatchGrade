@@ -11,7 +11,8 @@ import {
 import { StudentGradingCard } from './StudentGradingCard'
 
 interface GradingPlusPanelProps {
-  dataMode?: GradebookStorageMode
+  dataSourceMode?: GradebookStorageMode
+  gradebookMode?: GradebookStorageMode
   showHomeButton?: boolean
   onGoHome?: () => void
 }
@@ -82,7 +83,8 @@ function buildGradebookRecord(
 }
 
 export function GradingPlusPanel({
-  dataMode = 'server',
+  dataSourceMode = 'server',
+  gradebookMode = 'server',
   showHomeButton = false,
   onGoHome
 }: GradingPlusPanelProps): React.JSX.Element {
@@ -102,7 +104,9 @@ export function GradingPlusPanel({
   const [assignmentTestCases, setAssignmentTestCases] = useState<AssignmentTestCase[]>([])
   const [isLoadingAssignmentTestCases, setIsLoadingAssignmentTestCases] = useState(false)
   const [testCaseMode, setTestCaseMode] = useState<TestCaseMode>('saved')
-  const isServerMode = dataMode === 'server'
+  const isServerMode = dataSourceMode === 'server'
+  const gradebookDestinationLabel =
+    gradebookMode === 'local' ? 'offline gradebook on this device' : 'online gradebook'
 
   const useSavedTestCases = testCaseMode === 'saved' && assignmentTestCases.length > 0
   const judgeFilePairPreview = useSavedTestCases
@@ -519,7 +523,7 @@ export function GradingPlusPanel({
 
       if (!compileResult.compileSuccess || !compileResult.executablePath) {
         const failedRecord = buildGradebookRecord(student, selectedAssignmentId, 0, 0, 'failed')
-        await saveGradebookRecord(failedRecord, dataMode)
+        await saveGradebookRecord(failedRecord, gradebookMode)
 
         updateStudent(index, {
           status: 'failed',
@@ -561,7 +565,7 @@ export function GradingPlusPanel({
         totalCount,
         'done'
       )
-      await saveGradebookRecord(savedRecord, dataMode)
+      await saveGradebookRecord(savedRecord, gradebookMode)
 
       updateStudent(index, {
         status: 'done',
@@ -574,7 +578,7 @@ export function GradingPlusPanel({
       console.error('Error grading student:', error)
 
       const failedRecord = buildGradebookRecord(student, selectedAssignmentId, 0, 0, 'failed')
-      await saveGradebookRecord(failedRecord, dataMode)
+      await saveGradebookRecord(failedRecord, gradebookMode)
 
       updateStudent(index, {
         status: 'failed',
@@ -685,6 +689,9 @@ export function GradingPlusPanel({
       <h1>Grading+ Page</h1>
       <p>
         Instructor batch grading workflow for compiling and judging multiple student submissions.
+      </p>
+      <p style={{ color: '#cbd5e1', marginBottom: '1rem' }}>
+        Completed batch grading runs save to the {gradebookDestinationLabel}.
       </p>
 
       {batchError && (
