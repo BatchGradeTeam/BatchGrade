@@ -168,7 +168,7 @@ export function InstructorDashboard(): React.JSX.Element {
             <GradebookPanel
               dataMode="server"
               title="Online Gradebook"
-              description="Shows shared Supabase-backed scores. Student-submitted online scores will appear here."
+              description="Shows student submission self-check scores saved to Supabase at submit time."
               allowClear={false}
             />
           ) : activeWorkspace === 'offlineGradebook' ? (

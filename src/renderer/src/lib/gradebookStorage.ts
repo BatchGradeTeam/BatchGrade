@@ -1,11 +1,11 @@
 /**
  * @file gradebookStorage.ts
  * @description Stores and loads Gradebook records for the temporary
- * localStorage-based Gradebook integration.
+ * localStorage-based offline Gradebook integration.
  */
 
 import type { GradebookRecord } from '../../../shared/gradebookTypes'
-import { loadServerGradebookRecords, saveServerGradebookRecord } from './serverData'
+import { loadServerGradebookRecords } from './serverData'
 
 const GRADEBOOK_STORAGE_KEY = 'gradebookRecords'
 
@@ -54,16 +54,9 @@ export async function loadGradebookRecords(
  */
 export async function saveGradebookRecord(
   record: GradebookRecord,
-  mode: GradebookStorageMode = 'server'
+  mode: GradebookStorageMode = 'local'
 ): Promise<void> {
-  if (mode === 'server') {
-    try {
-      await saveServerGradebookRecord(record)
-    } catch (error) {
-      console.error('Failed to save server Gradebook record, using local cache:', error)
-    }
-  }
-
+  void mode
   await saveLocalGradebookRecord(record)
 }
 

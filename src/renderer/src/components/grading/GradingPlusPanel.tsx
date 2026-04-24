@@ -84,7 +84,7 @@ function buildGradebookRecord(
 
 export function GradingPlusPanel({
   dataSourceMode = 'server',
-  gradebookMode = 'server',
+  gradebookMode = 'local',
   showHomeButton = false,
   onGoHome
 }: GradingPlusPanelProps): React.JSX.Element {

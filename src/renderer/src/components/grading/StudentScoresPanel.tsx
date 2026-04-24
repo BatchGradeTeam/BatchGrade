@@ -77,7 +77,10 @@ export function StudentScoresPanel(): React.JSX.Element {
         backgroundColor: '#2b2b2b'
       }}
     >
-      <h2 style={{ marginBottom: '0.5rem' }}>Scores & Feedback</h2>
+      <h2 style={{ marginBottom: '0.5rem' }}>Submission Scores & Feedback</h2>
+      <p style={{ marginTop: 0, marginBottom: '1rem', color: '#cbd5e1' }}>
+        These scores come from the self-check that runs when you submit your assignment.
+      </p>
 
       {isLoading ? (
         <p>Loading scores...</p>
@@ -92,7 +95,7 @@ export function StudentScoresPanel(): React.JSX.Element {
           <p>{errorMessage}</p>
         </div>
       ) : records.length === 0 ? (
-        <p>No scores are available yet.</p>
+        <p>No submission scores are available yet.</p>
       ) : (
         <div style={{ display: 'grid', gap: '12px' }}>
           <div>
@@ -114,7 +117,7 @@ export function StudentScoresPanel(): React.JSX.Element {
           </div>
 
           {selectedAssignmentRecords.length === 0 ? (
-            <p>No score is available for this assignment yet.</p>
+            <p>No submission score is available for this assignment yet.</p>
           ) : (
             selectedAssignmentRecords.map((record) => (
               <div
