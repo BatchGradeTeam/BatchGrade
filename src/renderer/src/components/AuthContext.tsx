@@ -291,15 +291,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     // Insert the first name & last name into the correct Supabase
     // table: students or instructors, based on the foreign key id
     const table = role === 'student' ? 'students' : 'instructors'
-    const { error: roleError } = await supabase
-      .from(table)
-      .insert({
-        id: data.user.id,
-        first_name: firstName,
-        last_name: lastName,
-        // For the students table, student-id will be different from id
-        ...(role === 'student' ? { student_id: crypto.randomUUID() } : {})
-      })
+    const { error: roleError } = await supabase.from(table).insert({
+      id: data.user.id,
+      first_name: firstName,
+      last_name: lastName,
+      // For the students table, student-id will be different from id
+      ...(role === 'student' ? { student_id: crypto.randomUUID() } : {})
+    })
 
     if (roleError) {
       console.error(`Error creating ${role} record:`, roleError)
