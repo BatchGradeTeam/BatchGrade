@@ -78,7 +78,8 @@ function buildGradebookRecord(
     passedCount,
     totalCount,
     status,
-    submittedAt: Date.now()
+    submittedAt: Date.now(),
+    scoreSource: 'offline-batch-grade'
   }
 }
 

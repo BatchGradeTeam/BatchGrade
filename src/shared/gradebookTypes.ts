@@ -8,6 +8,8 @@
  *
  * Represents one saved grading result for a student.
  */
+export type GradebookScoreSource = 'submission-self-check' | 'offline-batch-grade'
+
 export type GradebookRecord = {
   studentId: string
   studentName: string
@@ -21,4 +23,5 @@ export type GradebookRecord = {
   feedback?: string
   gradedAt?: string
   submissionId?: string
+  scoreSource?: GradebookScoreSource
 }

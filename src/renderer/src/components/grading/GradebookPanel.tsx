@@ -1,5 +1,5 @@
 import { useEffect, useState, type CSSProperties } from 'react'
-import type { GradebookRecord } from '../../../../shared/gradebookTypes'
+import type { GradebookRecord, GradebookScoreSource } from '../../../../shared/gradebookTypes'
 import {
   clearGradebookRecords,
   loadGradebookRecords,
@@ -13,6 +13,7 @@ type StudentRecord = {
   id: string
   name: string
   score: string
+  scoreSource: string
   lastSubmitted: string
   status: string
 }
@@ -91,9 +92,14 @@ const calculateStats = (students: StudentRecord[]): GradeStats => {
  * Builds CSV-formatted string content for gradebook export.
  */
 const buildCSVContent = (students: StudentRecord[]): string => {
-  const headers = ['Student ID', 'Student Name', 'Highest Score']
+  const headers = ['Student ID', 'Student Name', 'Highest Score', 'Score Source']
 
-  const rows = students.map((student) => [student.id, student.name, student.score])
+  const rows = students.map((student) => [
+    student.id,
+    student.name,
+    student.score,
+    student.scoreSource
+  ])
 
   return [headers, ...rows].map((row) => row.join(',')).join('\n')
 }
@@ -105,12 +111,29 @@ const formatSubmittedTime = (timestamp: number): string => {
   return new Date(timestamp).toLocaleString()
 }
 
+function formatScoreSource(scoreSource?: GradebookScoreSource): string {
+  if (scoreSource === 'offline-batch-grade') {
+    return 'Offline batch grade'
+  }
+
+  return 'Submission self-check'
+}
+
+function formatStudentStatus(record: GradebookRecord): string {
+  if (record.status === 'failed') {
+    return 'Failed'
+  }
+
+  return record.scoreSource === 'offline-batch-grade' ? 'Graded' : 'Submitted'
+}
+
 /**
  * Builds Gradebook table rows from saved Gradebook records.
  */
 const buildStudentRecordsFromGradebook = (
   records: GradebookRecord[],
-  assignmentId: string
+  assignmentId: string,
+  defaultScoreSource: GradebookScoreSource
 ): StudentRecord[] => {
   const assignmentRecords = records.filter((record) => record.assignmentId === assignmentId)
 
@@ -129,13 +152,15 @@ const buildStudentRecordsFromGradebook = (
     const latestRecord = studentRecords.reduce((latest, current) =>
       current.submittedAt > latest.submittedAt ? current : latest
     )
+    const effectiveScoreSource = latestRecord.scoreSource ?? defaultScoreSource
 
     return {
       id: latestRecord.studentId,
       name: latestRecord.studentName,
       score: `${highestRecord.score}%`,
+      scoreSource: formatScoreSource(effectiveScoreSource),
       lastSubmitted: formatSubmittedTime(latestRecord.submittedAt),
-      status: latestRecord.status === 'failed' ? 'Failed' : 'Submitted'
+      status: formatStudentStatus({ ...latestRecord, scoreSource: effectiveScoreSource })
     }
   })
 }
@@ -144,6 +169,16 @@ const cellStyle: CSSProperties = {
   border: '1px solid #555',
   padding: '10px',
   textAlign: 'left'
+}
+
+const sourceTagStyle: CSSProperties = {
+  display: 'inline-block',
+  padding: '2px 8px',
+  borderRadius: '999px',
+  backgroundColor: '#334155',
+  color: '#e2e8f0',
+  fontSize: '12px',
+  fontWeight: 600
 }
 
 interface GradebookPanelProps {
@@ -188,8 +223,14 @@ export function GradebookPanel({
   const effectiveSelectedAssignment = assignmentIds.includes(selectedAssignment)
     ? selectedAssignment
     : (assignmentOptions[0]?.[0] ?? '')
+  const defaultScoreSource: GradebookScoreSource =
+    dataMode === 'local' ? 'offline-batch-grade' : 'submission-self-check'
 
-  const students = buildStudentRecordsFromGradebook(gradebookRecords, effectiveSelectedAssignment)
+  const students = buildStudentRecordsFromGradebook(
+    gradebookRecords,
+    effectiveSelectedAssignment,
+    defaultScoreSource
+  )
   const filteredStudents = filterStudents(students, searchTerm)
   const sortedStudents = sortStudents(filteredStudents, sortOption)
   const { averageScore, highestScore, lowestScore } = calculateStats(students)
@@ -289,6 +330,7 @@ export function GradebookPanel({
                   <th style={cellStyle}>Student ID</th>
                   <th style={cellStyle}>Student Name</th>
                   <th style={cellStyle}>Highest Score</th>
+                  <th style={cellStyle}>Score Source</th>
                   <th style={cellStyle}>Last Submission Time</th>
                   <th style={cellStyle}>Status</th>
                 </tr>
@@ -296,13 +338,13 @@ export function GradebookPanel({
               <tbody>
                 {!hasAssignments ? (
                   <tr>
-                    <td style={cellStyle} colSpan={5}>
+                    <td style={cellStyle} colSpan={6}>
                       No graded assignments available.
                     </td>
                   </tr>
                 ) : sortedStudents.length === 0 ? (
                   <tr>
-                    <td style={cellStyle} colSpan={5}>
+                    <td style={cellStyle} colSpan={6}>
                       No records for this assignment.
                     </td>
                   </tr>
@@ -312,6 +354,9 @@ export function GradebookPanel({
                       <td style={cellStyle}>{student.id}</td>
                       <td style={cellStyle}>{student.name}</td>
                       <td style={cellStyle}>{student.score}</td>
+                      <td style={cellStyle}>
+                        <span style={sourceTagStyle}>{student.scoreSource}</span>
+                      </td>
                       <td style={cellStyle}>{student.lastSubmitted}</td>
                       <td style={cellStyle}>{student.status}</td>
                     </tr>

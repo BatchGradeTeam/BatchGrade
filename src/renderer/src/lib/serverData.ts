@@ -1151,7 +1151,8 @@ async function loadSubmissionSelfCheckRecords(
           : Date.parse(selfCheck.completedAt),
         feedback: buildSubmissionSelfCheckFeedback(selfCheck),
         gradedAt: selfCheck.completedAt,
-        submissionId: submission.submission_id
+        submissionId: submission.submission_id,
+        scoreSource: 'submission-self-check'
       })
     } catch (error) {
       console.warn(`Could not load submission self-check for ${submission.submission_id}:`, error)

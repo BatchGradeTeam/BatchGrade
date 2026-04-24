@@ -1,9 +1,17 @@
 import { useEffect, useMemo, useState } from 'react'
-import type { GradebookRecord } from '../../../../shared/gradebookTypes'
+import type { GradebookRecord, GradebookScoreSource } from '../../../../shared/gradebookTypes'
 import { loadServerStudentGradebookRecords } from '../../lib/serverData'
 
 function formatSubmittedTime(timestamp: number): string {
   return new Date(timestamp).toLocaleString()
+}
+
+function formatScoreSource(scoreSource?: GradebookScoreSource): string {
+  if (scoreSource === 'offline-batch-grade') {
+    return 'Offline batch grade'
+  }
+
+  return 'Submission self-check'
 }
 
 export function StudentScoresPanel(): React.JSX.Element {
@@ -128,6 +136,7 @@ export function StudentScoresPanel(): React.JSX.Element {
                   <strong>{record.assignmentName ?? record.assignmentId}</strong>
                 </p>
                 <p>Score: {record.score}%</p>
+                <p>Source: {formatScoreSource(record.scoreSource)}</p>
                 <p>Status: {record.status === 'failed' ? 'Failed' : 'Submitted'}</p>
                 <p>Last Updated: {formatSubmittedTime(record.submittedAt)}</p>
                 {record.feedback && <p>Feedback: {record.feedback}</p>}
