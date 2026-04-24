@@ -13,7 +13,18 @@ import type {
   DockerJudgeResult
 } from '../shared/compiler'
 import type { SubmitCppRequest, SubmitCppResult } from '../shared/submission'
-import type { Assignment, NewAssignment, UpdateAssignment } from '../shared/types'
+import type {
+  Assignment,
+  AssignmentTestCase,
+  NewAssignment,
+  NewAssignmentTestCase,
+  UpdateAssignment
+} from '../shared/types'
+
+export type AssignmentTestCaseInput = Omit<
+  NewAssignmentTestCase,
+  'uuid' | 'assignmentUuid' | 'createdAt'
+>
 
 export type UsersAPI = {
   getAll: () => Promise<User[]>
@@ -59,12 +70,33 @@ export type AssignmentsAPI = {
    * @return Promise resolving to the deleted assignment.
    */
   delete: (uuid: string) => Promise<Assignment>
+  getTestCases: (assignmentUuid: string) => Promise<AssignmentTestCase[]>
+  replaceTestCases: (
+    assignmentUuid: string,
+    testCases: AssignmentTestCaseInput[]
+  ) => Promise<AssignmentTestCase[]>
 }
 
 export type SubmissionFolderGroup = {
   folderName: string
   folderPath: string
   cppFiles: string[]
+  studentId?: string
+  studentName?: string
+  serverSubmissionId?: string
+}
+
+export type ServerSubmissionFile = {
+  relativePath: string
+  fileName: string
+  content: string
+}
+
+export type ServerSubmissionBundle = {
+  submissionId: string
+  studentId: string
+  studentName: string
+  files: ServerSubmissionFile[]
 }
 
 export type FileAPI = {
@@ -73,6 +105,9 @@ export type FileAPI = {
   stringify: (filePath: string) => Promise<string>
   selectSubmissionFolder: () => Promise<SubmissionFolderGroup[]>
   selectFilesFromFolder: () => Promise<string[]>
+  materializeServerSubmissions: (
+    bundles: ServerSubmissionBundle[]
+  ) => Promise<SubmissionFolderGroup[]>
 }
 
 export type SubmissionsAPI = {

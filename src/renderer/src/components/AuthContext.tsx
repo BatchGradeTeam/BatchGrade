@@ -57,6 +57,8 @@ interface AuthContextType {
   user: AuthUser | null // Stores information about the logged-in user
   login: (email: string, password: string) => Promise<AuthUser> // Function used to authenticate a user
   signup: (
+    firstName: string,
+    lastName: string,
     email: string,
     password: string,
     role: (typeof VALID_ROLES)[number]
@@ -90,7 +92,7 @@ interface AuthProviderProps {
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [isLoggedIn, setIsLoggedIn] = useState(false) // tracks whether a user is currently logged in
   const [isAuthLoading, setIsAuthLoading] = useState(true) // tracks whether authentication state is still being initialized
-  const [user, setUser] = useState<AuthUser | null>(null) // stores the current user's email and role (or null if no user is logged in)
+  const [user, setUser] = useState<AuthUser | null>(null) // stores the current user's name, email, and role (or null if no user is logged in)
 
   // Ensures the user role is always one of the allowed roles.
   const toRole = (candidate: unknown): (typeof VALID_ROLES)[number] | null => {
@@ -107,7 +109,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       return null
     }
 
-    const roleCandidate = userRecord?.app_metadata?.role ?? userRecord?.user_metadata?.role
+    const metadata = userRecord.user_metadata
+    const roleCandidate = userRecord?.app_metadata?.role ?? metadata?.role
     const role = toRole(roleCandidate)
 
     if (!role) {
@@ -115,8 +118,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
 
     return {
-      uuid: userRecord?.id,
-      email: userRecord?.email,
+      uuid: userRecord.id,
+      email: userRecord.email,
       role
     }
   }
@@ -229,7 +232,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       isMounted = false
       subscription.unsubscribe()
     }
-  }, [])
+  })
 
   // Handles user login with Supabase then refreshes the user's profile to update authentication state and user information
   const login = async (email: string, password: string): Promise<AuthUser> => {
@@ -253,16 +256,21 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   // This returns as soon as auth confirms the user record was created so the UI
   // can show a stable success state without waiting on profile restoration.
   const signup = async (
+    firstName: string,
+    lastName: string,
     email: string,
     password: string,
     role: (typeof VALID_ROLES)[number]
   ): Promise<SignupResult> => {
+    // Create Auth User
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
         data: {
-          role
+          role,
+          first_name: firstName, // store in metadata
+          last_name: lastName
         }
       }
     })
@@ -274,6 +282,28 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     if (!data.user) {
       return { user: null, hasSession: false }
     }
+
+    // ai-gen start (Gemini-3, 1)
+
+    // Supabase now has a Database Trigger that automatically
+    // inserts a profiles row whenever a user signs up in auth.users
+
+    // Insert the first name & last name into the correct Supabase
+    // table: students or instructors, based on the foreign key id
+    const table = role === 'student' ? 'students' : 'instructors'
+    const { error: roleError } = await supabase.from(table).insert({
+      id: data.user.id,
+      first_name: firstName,
+      last_name: lastName,
+      // For the students table, student-id will be different from id
+      ...(role === 'student' ? { student_id: crypto.randomUUID() } : {})
+    })
+
+    if (roleError) {
+      console.error(`Error creating ${role} record:`, roleError)
+      throw new Error(`Auth created, but failed to set up ${role} profile.`)
+    }
+    // ai-gen end
 
     return {
       user: mapSupabaseUser(data.user) ?? {

@@ -34,6 +34,8 @@ export function SignUp(): React.JSX.Element {
   const { signup } = useAuth()
 
   const [role, setRole] = useState<typeof STUDENT_ROLE | typeof INSTRUCTOR_ROLE>(STUDENT_ROLE)
+  const [firstName, setFirstName] = useState('')
+  const [lastName, setLastName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
@@ -48,6 +50,16 @@ export function SignUp(): React.JSX.Element {
 
     setError(null)
     setIsSignupSuccessful(false)
+
+    if (!firstName.trim()) {
+      setError('First name is required.')
+      return
+    }
+
+    if (!lastName.trim()) {
+      setError('Last name is required.')
+      return
+    }
 
     if (!email.trim()) {
       setError('Email is required.')
@@ -67,7 +79,7 @@ export function SignUp(): React.JSX.Element {
     setIsSubmitting(true)
 
     try {
-      const result = await signup(email.trim(), password, role)
+      const result = await signup(firstName.trim(), lastName.trim(), email.trim(), password, role)
 
       if (!result.user) {
         setError('Could not confirm account creation. Please try again.')
@@ -153,6 +165,24 @@ export function SignUp(): React.JSX.Element {
                   <option value={STUDENT_ROLE}>Student</option>
                   <option value={INSTRUCTOR_ROLE}>Instructor</option>
                 </select>
+
+                <input
+                  type="text"
+                  placeholder="First Name"
+                  className="login-input"
+                  value={firstName}
+                  disabled={isSubmitting}
+                  onChange={(e) => setFirstName(e.target.value)}
+                />
+
+                <input
+                  type="text"
+                  placeholder="Last Name"
+                  className="login-input"
+                  value={lastName}
+                  disabled={isSubmitting}
+                  onChange={(e) => setLastName(e.target.value)}
+                />
 
                 <input
                   type="text"

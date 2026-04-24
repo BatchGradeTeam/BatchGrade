@@ -24,6 +24,8 @@ export function GuestBatchGradeInterface(): React.JSX.Element {
         <GradingPlusPanel
           title="Guest BatchGrade"
           description="Batch grade multiple submissions locally."
+          dataSourceMode="local"
+          gradebookMode="local"
           showHomeButton
           onGoHome={() => navigate('/guestDashboard')}
         />

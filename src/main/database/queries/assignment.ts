@@ -1,8 +1,19 @@
-import { eq } from 'drizzle-orm'
+import { asc, eq } from 'drizzle-orm'
 import { getDb } from '../index'
-import { assignmentsInstrc } from '../schema'
-import type { Assignment as DbAssignment, NewAssignment, UpdateAssignment } from '../schema'
+import { assignmentsInstrc, assignmentTestCases } from '../schema'
+import type {
+  Assignment as DbAssignment,
+  AssignmentTestCase,
+  NewAssignment,
+  NewAssignmentTestCase,
+  UpdateAssignment
+} from '../schema'
 import type { Assignment } from '../../../shared/types'
+
+export type AssignmentTestCaseInput = Omit<
+  NewAssignmentTestCase,
+  'uuid' | 'assignmentUuid' | 'createdAt'
+>
 
 // convert DbAssignment to Assignment for IPC communications between main and renderer processes
 function toIpcAssignment(assignment: DbAssignment): Assignment {
@@ -128,4 +139,40 @@ export function deleteAssignment(uuid: string): Assignment {
   }
 
   return toIpcAssignment(deleted)
+}
+
+export function getAssignmentTestCases(assignmentUuid: string): AssignmentTestCase[] {
+  return getDb()
+    .select()
+    .from(assignmentTestCases)
+    .where(eq(assignmentTestCases.assignmentUuid, assignmentUuid))
+    .orderBy(asc(assignmentTestCases.caseOrder))
+    .all()
+}
+
+export function replaceAssignmentTestCases(
+  assignmentUuid: string,
+  testCases: AssignmentTestCaseInput[]
+): AssignmentTestCase[] {
+  return getDb().transaction((tx) => {
+    tx.delete(assignmentTestCases)
+      .where(eq(assignmentTestCases.assignmentUuid, assignmentUuid))
+      .run()
+
+    if (testCases.length === 0) {
+      return []
+    }
+
+    return tx
+      .insert(assignmentTestCases)
+      .values(
+        testCases.map((testCase, index) => ({
+          ...testCase,
+          assignmentUuid,
+          caseOrder: testCase.caseOrder ?? index + 1
+        }))
+      )
+      .returning()
+      .all()
+  })
 }

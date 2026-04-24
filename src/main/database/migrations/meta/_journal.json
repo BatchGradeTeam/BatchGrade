@@ -15,6 +15,13 @@
       "when": 1774169563838,
       "tag": "0001_assignment_schema_fix",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1776855600000,
+      "tag": "0002_assignment_test_cases",
+      "breakpoints": true
     }
   ]
 }
