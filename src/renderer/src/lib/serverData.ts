@@ -1,6 +1,10 @@
 import type { Assignment, AssignmentTestCase } from '../../../shared/types'
 import type { GradebookRecord } from '../../../shared/gradebookTypes'
-import type { SubmissionCompileSnapshot, SubmitCppResult } from '../../../shared/submission'
+import type {
+  SubmissionCompileSnapshot,
+  SubmissionSelfCheckSummary,
+  SubmitCppResult
+} from '../../../shared/submission'
 import type { User as SupabaseUser } from '@supabase/supabase-js'
 import { supabase } from './supabase'
 import { getProfile, type Profile } from './profiles'
@@ -81,6 +85,7 @@ type UploadedSubmissionManifest = {
     fileName?: string
     storagePath?: string
   }[]
+  selfCheck?: SubmissionSelfCheckSummary | null
 }
 
 type GradeRow = {
@@ -706,6 +711,7 @@ function hasUploadedSubmissionManifest(
 async function uploadSubmissionBundle(
   result: SubmitCppResult,
   compileSnapshot: SubmissionCompileSnapshot | null,
+  selfCheckSummary: SubmissionSelfCheckSummary | null,
   storageOwnerId: string,
   serverStudentId: string
 ): Promise<string> {
@@ -743,7 +749,8 @@ async function uploadSubmissionBundle(
     studentId: serverStudentId,
     submittedAt: result.submittedAt,
     submittedFiles: uploadedFiles,
-    compileSnapshot
+    compileSnapshot,
+    selfCheck: selfCheckSummary
   }
 
   await uploadTextToSubmissionBucket(
@@ -848,7 +855,8 @@ async function requireServerAssignment(assignmentId: string): Promise<void> {
 
 export async function publishServerSubmission(
   result: SubmitCppResult,
-  compileSnapshot: SubmissionCompileSnapshot | null
+  compileSnapshot: SubmissionCompileSnapshot | null,
+  selfCheckSummary: SubmissionSelfCheckSummary | null
 ): Promise<void> {
   if (!result.submissionSuccess || !result.submissionId) {
     return
@@ -868,6 +876,7 @@ export async function publishServerSubmission(
     storagePath = await uploadSubmissionBundle(
       result,
       compileSnapshot,
+      selfCheckSummary,
       authUser.id,
       serverStudentId
     )
@@ -989,6 +998,45 @@ function buildBatchFeedback(record: GradebookRecord): string {
   return record.status === 'failed'
     ? 'Batch grading failed before test cases completed.'
     : `${record.passedCount} / ${record.totalCount} test cases passed.`
+}
+
+function toSubmissionSelfCheckSummary(candidate: unknown): SubmissionSelfCheckSummary | null {
+  if (typeof candidate !== 'object' || candidate === null) {
+    return null
+  }
+
+  const maybeSummary = candidate as {
+    score?: unknown
+    passedCount?: unknown
+    totalCount?: unknown
+    feedback?: unknown
+    completedAt?: unknown
+  }
+
+  if (
+    typeof maybeSummary.score !== 'number' ||
+    typeof maybeSummary.passedCount !== 'number' ||
+    typeof maybeSummary.totalCount !== 'number' ||
+    typeof maybeSummary.completedAt !== 'string'
+  ) {
+    return null
+  }
+
+  return {
+    score: maybeSummary.score,
+    passedCount: maybeSummary.passedCount,
+    totalCount: maybeSummary.totalCount,
+    feedback: typeof maybeSummary.feedback === 'string' ? maybeSummary.feedback : undefined,
+    completedAt: maybeSummary.completedAt
+  }
+}
+
+function buildSubmissionSelfCheckFeedback(summary: SubmissionSelfCheckSummary): string {
+  if (summary.feedback) {
+    return summary.feedback
+  }
+
+  return `${summary.passedCount} / ${summary.totalCount} test cases passed during submission self-check.`
 }
 
 async function findServerStudentIdByIdentifier(identifier: string): Promise<string | null> {
@@ -1118,8 +1166,60 @@ function mapGradebookRecords(
   return records
 }
 
+async function loadSubmissionSelfCheckRecords(
+  submissions: SubmissionRow[],
+  assignments: Assignment[],
+  studentNames: Map<string, string>
+): Promise<{ records: GradebookRecord[]; submissionIdsWithSelfCheck: Set<string> }> {
+  const assignmentsById = new Map(assignments.map((assignment) => [assignment.uuid, assignment]))
+  const records: GradebookRecord[] = []
+  const submissionIdsWithSelfCheck = new Set<string>()
+
+  for (const submission of submissions.filter(hasUploadedSubmissionManifest)) {
+    try {
+      const manifestText = await downloadSubmissionText(
+        submission.storage_path,
+        `manifest for submission ${submission.submission_id}`
+      )
+      const manifest = JSON.parse(manifestText) as UploadedSubmissionManifest
+      const selfCheck = toSubmissionSelfCheckSummary(manifest.selfCheck)
+
+      if (!selfCheck) {
+        continue
+      }
+
+      submissionIdsWithSelfCheck.add(submission.submission_id)
+
+      records.push({
+        studentId: submission.student_id,
+        studentName:
+          studentNames.get(submission.student_id) ?? submission.file_name ?? submission.student_id,
+        assignmentId: submission.assignment_id,
+        assignmentName: assignmentsById.get(submission.assignment_id)?.name,
+        score: selfCheck.score,
+        passedCount: selfCheck.passedCount,
+        totalCount: selfCheck.totalCount,
+        status: submission.status === 'failed' ? 'failed' : 'done',
+        submittedAt: submission.submitted_at
+          ? Date.parse(submission.submitted_at)
+          : Date.parse(selfCheck.completedAt),
+        feedback: buildSubmissionSelfCheckFeedback(selfCheck),
+        gradedAt: selfCheck.completedAt,
+        submissionId: submission.submission_id
+      })
+    } catch (error) {
+      console.warn(`Could not load submission self-check for ${submission.submission_id}:`, error)
+    }
+  }
+
+  return {
+    records,
+    submissionIdsWithSelfCheck
+  }
+}
+
 export async function loadServerGradebookRecords(): Promise<GradebookRecord[]> {
-  const profile = await requireCurrentProfile('instructor')
+  await requireCurrentProfile('instructor')
   const assignments = await loadServerAssignments()
   const assignmentIds = assignments.map((assignment) => assignment.uuid)
 
@@ -1145,26 +1245,32 @@ export async function loadServerGradebookRecords(): Promise<GradebookRecord[]> {
     return []
   }
 
+  const studentNames = await loadStudentNames([
+    ...new Set(submissions.map((submission) => submission.student_id))
+  ])
+  const { records: selfCheckRecords, submissionIdsWithSelfCheck } =
+    await loadSubmissionSelfCheckRecords(submissions, assignments, studentNames)
+  const fallbackSubmissionIds = submissionIds.filter(
+    (submissionId) => !submissionIdsWithSelfCheck.has(submissionId)
+  )
+
+  if (fallbackSubmissionIds.length === 0) {
+    return selfCheckRecords
+  }
+
   const { data: gradesData, error: gradesError } = await supabase
     .from('grades')
     .select('grade_id, submission_id, score, feedback, graded_by, graded_at')
-    .in('submission_id', submissionIds)
-    .eq('graded_by', profile.id)
+    .in('submission_id', fallbackSubmissionIds)
 
   if (gradesError) {
     throw gradesError
   }
 
-  const studentNames = await loadStudentNames([
-    ...new Set(submissions.map((submission) => submission.student_id))
-  ])
-
-  return mapGradebookRecords(
-    submissions,
-    (gradesData ?? []) as GradeRow[],
-    assignments,
-    studentNames
-  )
+  return [
+    ...selfCheckRecords,
+    ...mapGradebookRecords(submissions, (gradesData ?? []) as GradeRow[], assignments, studentNames)
+  ]
 }
 
 export async function loadServerStudentGradebookRecords(): Promise<GradebookRecord[]> {
@@ -1190,19 +1296,28 @@ export async function loadServerStudentGradebookRecords(): Promise<GradebookReco
     return []
   }
 
+  const studentNames = new Map([[serverStudentId, authUser.email ?? serverStudentId]])
+  const { records: selfCheckRecords, submissionIdsWithSelfCheck } =
+    await loadSubmissionSelfCheckRecords(submissions, assignments, studentNames)
+  const fallbackSubmissionIds = submissionIds.filter(
+    (submissionId) => !submissionIdsWithSelfCheck.has(submissionId)
+  )
+
+  if (fallbackSubmissionIds.length === 0) {
+    return selfCheckRecords
+  }
+
   const { data: gradesData, error: gradesError } = await supabase
     .from('grades')
     .select('grade_id, submission_id, score, feedback, graded_by, graded_at')
-    .in('submission_id', submissionIds)
+    .in('submission_id', fallbackSubmissionIds)
 
   if (gradesError) {
     throw gradesError
   }
 
-  return mapGradebookRecords(
-    submissions,
-    (gradesData ?? []) as GradeRow[],
-    assignments,
-    new Map([[serverStudentId, authUser.email ?? serverStudentId]])
-  )
+  return [
+    ...selfCheckRecords,
+    ...mapGradebookRecords(submissions, (gradesData ?? []) as GradeRow[], assignments, studentNames)
+  ]
 }

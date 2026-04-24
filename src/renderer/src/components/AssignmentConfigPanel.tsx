@@ -90,6 +90,10 @@ function toTestCaseForm(testCase: AssignmentTestCase): TestCaseFormState {
   }
 }
 
+function isAssignmentNotFoundError(error: unknown): boolean {
+  return error instanceof Error && error.message.includes('Assignment not found:')
+}
+
 /**
  * @brief Assignment configuration panel for instructor workflows.
  *
@@ -555,21 +559,36 @@ export function AssignmentConfigPanel(): React.JSX.Element {
     try {
       setError(null)
       setStatusMessage(null)
-      await window.api.assignments.delete(uuid)
+
       if (user && assignmentListSource === 'server') {
         try {
           await deleteServerAssignment(uuid)
-          setStatusMessage('Assignment deleted locally and from Supabase.')
         } catch (deleteError) {
-          console.error('Assignment was deleted locally but not from Supabase:', deleteError)
+          console.error('Could not delete assignment from Supabase:', deleteError)
           setError(
             deleteError instanceof Error
               ? `Could not delete from Supabase: ${deleteError.message}`
               : 'Could not delete from Supabase.'
           )
-          setStatusMessage('Assignment deleted locally.')
+          return
         }
+
+        try {
+          await window.api.assignments.delete(uuid)
+        } catch (localDeleteError) {
+          if (!isAssignmentNotFoundError(localDeleteError)) {
+            throw localDeleteError
+          }
+
+          console.info(
+            'Assignment existed on Supabase but not in local storage during delete:',
+            uuid
+          )
+        }
+
+        setStatusMessage('Assignment deleted from Supabase.')
       } else {
+        await window.api.assignments.delete(uuid)
         setStatusMessage('Assignment deleted locally.')
       }
       setDeleteConfirm(null)

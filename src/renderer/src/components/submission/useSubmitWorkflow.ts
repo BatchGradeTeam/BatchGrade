@@ -8,7 +8,11 @@
  */
 import { useEffect, useMemo, useState } from 'react'
 import type { CompileCppResult } from '../../../../shared/compiler'
-import type { SubmissionCompileSnapshot, SubmitCppResult } from '../../../../shared/submission'
+import type {
+  SubmissionCompileSnapshot,
+  SubmissionSelfCheckSummary,
+  SubmitCppResult
+} from '../../../../shared/submission'
 import type { Assignment } from '../../../../shared/types'
 import { loadServerAssignments, publishServerSubmission } from '../../lib/serverData'
 
@@ -18,6 +22,7 @@ type UseSubmitWorkflowProps = {
   selectedFiles: string[]
   userId: string | undefined
   selectedAssignmentId: string
+  selfCheckSummary: SubmissionSelfCheckSummary | null
   onAssignmentsLoaded?: (assignments: Assignment[]) => void
 }
 
@@ -70,6 +75,7 @@ export function useSubmitWorkflow({
   selectedFiles,
   userId,
   selectedAssignmentId,
+  selfCheckSummary,
   onAssignmentsLoaded
 }: UseSubmitWorkflowProps): UseSubmitWorkflowReturn {
   const [assignments, setAssignments] = useState<Assignment[]>([])
@@ -182,8 +188,12 @@ export function useSubmitWorkflow({
       }
 
       try {
-        await publishServerSubmission(result, compileSnapshot)
-        setStatusMessage('Submission uploaded and published.')
+        await publishServerSubmission(result, compileSnapshot, selfCheckSummary)
+        setStatusMessage(
+          selfCheckSummary
+            ? `Submission uploaded with self-check score ${selfCheckSummary.score}%.`
+            : 'Submission uploaded and published.'
+        )
       } catch (publishError) {
         console.error('Submission saved locally but could not be published:', publishError)
         setStatusMessage('Submission saved locally.')

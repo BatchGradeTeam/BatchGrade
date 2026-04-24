@@ -13,16 +13,20 @@
  *  - Viewing automated grading feedback
  *  - Accessing submission history
  */
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { NavBar } from '../components/Navbar'
 import { Footer } from '../components/Footer'
 import { useAuth } from '../components/AuthContext'
 import { CppWorkflowPanel } from '../components/compiler/CppWorkflowPanel'
-import { OutputDiffPanel, type OutputComparisonCase } from '../components/OutputDiffPanel'
+import {
+  OutputDiffPanel,
+  type OutputComparisonCase
+} from '../components/OutputDiffPanel'
 import { SubmitPanel } from '../components/submission/SubmitPanel'
 import { AboutPanel } from '../components/AboutPanel'
 import { StudentScoresPanel } from '../components/grading/StudentScoresPanel'
+import { summarizeComparisonCases } from '../lib/submissionSelfCheck'
 import type { CompileCppResult, RunCppResult } from 'src/shared/compiler'
 import type { Assignment, AssignmentTestCase } from '../../../shared/types'
 import { loadAssignmentTestCases } from '../lib/serverData'
@@ -53,6 +57,11 @@ export function StudentDashboard(): React.JSX.Element {
   const [comparisonCases, setComparisonCases] = useState<OutputComparisonCase[]>([])
   const [isRunningTestCases, setIsRunningTestCases] = useState(false)
   const [testCaseError, setTestCaseError] = useState<string | null>(null)
+  const selfCheckSummary = useMemo(
+    () => summarizeComparisonCases(comparisonCases),
+    [comparisonCases]
+  )
+  const requiresCompletedSelfCheck = assignmentTestCases.length > 0
 
   function openCompileWorkspace(): void {
     setActiveWorkspace('compile')
@@ -277,6 +286,9 @@ export function StudentDashboard(): React.JSX.Element {
                 selectedFiles={selectedFiles}
                 userId={user?.uuid}
                 selectedAssignmentId={selectedAssignmentId}
+                selfCheckSummary={selfCheckSummary}
+                isRunningSelfCheck={isRunningTestCases}
+                requiresCompletedSelfCheck={requiresCompletedSelfCheck}
                 onAssignmentsLoaded={handleAssignmentsLoaded}
                 onExpectedOutputChange={setExpectedOutput}
               />

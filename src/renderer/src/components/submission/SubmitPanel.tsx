@@ -17,6 +17,7 @@
  */
 import type { Assignment } from '../../../../shared/types'
 import type { CompileCppResult } from '../../../../shared/compiler'
+import type { SubmissionSelfCheckSummary } from '../../../../shared/submission'
 import { useEffect } from 'react'
 import { useSubmitWorkflow } from './useSubmitWorkflow'
 
@@ -25,6 +26,9 @@ type SubmitPanelProps = {
   selectedFiles: string[]
   userId: string | undefined
   selectedAssignmentId: string
+  selfCheckSummary: SubmissionSelfCheckSummary | null
+  isRunningSelfCheck?: boolean
+  requiresCompletedSelfCheck?: boolean
   onAssignmentsLoaded?: (assignments: Assignment[]) => void
   onExpectedOutputChange?: (expectedOutput: string | null) => void
 }
@@ -43,6 +47,9 @@ export function SubmitPanel({
   selectedFiles,
   userId,
   selectedAssignmentId,
+  selfCheckSummary,
+  isRunningSelfCheck = false,
+  requiresCompletedSelfCheck = false,
   onAssignmentsLoaded,
   onExpectedOutputChange
 }: SubmitPanelProps): React.JSX.Element {
@@ -59,6 +66,7 @@ export function SubmitPanel({
       selectedFiles,
       userId,
       selectedAssignmentId,
+      selfCheckSummary,
       onAssignmentsLoaded
     })
 
@@ -128,11 +136,31 @@ export function SubmitPanel({
         </div>
       )}
 
+      {requiresCompletedSelfCheck && (
+        <p style={{ marginBottom: '1rem', fontSize: '14px', color: '#cbd5e1' }}>
+          {isRunningSelfCheck
+            ? 'Saved test cases are still running. Submit will unlock when the self-check finishes.'
+            : selfCheckSummary
+              ? `Self-check ready: ${selfCheckSummary.score}% (${selfCheckSummary.passedCount}/${selfCheckSummary.totalCount} passed).`
+              : 'Run the saved assignment test cases before submitting so your online score is included.'}
+        </p>
+      )}
+
       <button
         onClick={() => void handleSubmit()}
-        disabled={isSubmitting || !compileResult?.compileSuccess || selectedFiles.length === 0}
+        disabled={
+          isSubmitting ||
+          !compileResult?.compileSuccess ||
+          selectedFiles.length === 0 ||
+          isRunningSelfCheck ||
+          (requiresCompletedSelfCheck && !selfCheckSummary)
+        }
         className={
-          isSubmitting || !compileResult?.compileSuccess || selectedFiles.length === 0
+          isSubmitting ||
+          !compileResult?.compileSuccess ||
+          selectedFiles.length === 0 ||
+          isRunningSelfCheck ||
+          (requiresCompletedSelfCheck && !selfCheckSummary)
             ? 'cancel-button'
             : 'primary-button'
         }
