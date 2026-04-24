@@ -84,7 +84,8 @@ function getSupportedPlatform(): SupportedPlatform {
     - bad student code
 */
 function isCompilerNotFoundError(stderr: string, message: string): boolean {
-  // TODO: properly cite AI: https://chatgpt.com/share/69bb0b9d-e314-800e-8e15-cacc4b61f4e5
+  // ai-gen start (GPT-5.4, 1)
+  // Prompt: https://chatgpt.com/share/69bb0b9d-e314-800e-8e15-cacc4b61f4e5
   const text = `${stderr}\n${message}`.toLowerCase()
 
   return (
@@ -95,6 +96,8 @@ function isCompilerNotFoundError(stderr: string, message: string): boolean {
     text.includes('spawn') ||
     text.includes('enoent')
   )
+
+  // ai-gen end
 }
 
 function createWindow(): void {
