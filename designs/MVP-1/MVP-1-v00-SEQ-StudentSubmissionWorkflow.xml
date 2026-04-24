@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36 OPR/127.0.0.0" version="29.6.1">
+  <diagram name="Page-1" id="fJ_UHrbpI-Y4Rj--hmJV">
+    <mxGraphModel dx="1384" dy="797" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="850" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="node-student" parent="1" style="html=1;whiteSpace=wrap;" value="Student" vertex="1">
+          <mxGeometry height="50" width="110" x="40" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="node-react" parent="1" style="whiteSpace=wrap;html=1;" value="React UI" vertex="1">
+          <mxGeometry height="60" width="120" x="225" y="75" as="geometry" />
+        </mxCell>
+        <mxCell id="node-main" parent="1" style="whiteSpace=wrap;html=1;" value="Main Process" vertex="1">
+          <mxGeometry height="60" width="120" x="425" y="75" as="geometry" />
+        </mxCell>
+        <mxCell id="node-service" parent="1" style="whiteSpace=wrap;html=1;" value="Submission Service" vertex="1">
+          <mxGeometry height="60" width="120" x="625" y="75" as="geometry" />
+        </mxCell>
+        <mxCell id="node-drizzle" parent="1" style="whiteSpace=wrap;html=1;" value="Drizzle" vertex="1">
+          <mxGeometry height="60" width="120" x="825" y="75" as="geometry" />
+        </mxCell>
+        <mxCell id="node-sqlite" parent="1" style="whiteSpace=wrap;html=1;" value="SQLite" vertex="1">
+          <mxGeometry height="60" width="120" x="1025" y="75" as="geometry" />
+        </mxCell>
+        <mxCell id="node-compile" parent="1" style="whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontColor=#333333;" value="Compilation&#xa;Service&#xa;(MVP-2)" vertex="1">
+          <mxGeometry height="60" width="120" x="1225" y="75" as="geometry" />
+        </mxCell>
+        <mxCell id="ll-student" edge="1" parent="1" style="dashed=1;endArrow=none;endFill=0;" value="">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="94" y="135" as="sourcePoint" />
+            <mxPoint x="94" y="720" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ll-react" edge="1" parent="1" style="dashed=1;endArrow=none;endFill=0;" value="">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="284" y="135" as="sourcePoint" />
+            <mxPoint x="284" y="720" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ll-main" edge="1" parent="1" style="dashed=1;endArrow=none;endFill=0;" value="">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="484" y="135" as="sourcePoint" />
+            <mxPoint x="484" y="720" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ll-service" edge="1" parent="1" style="dashed=1;endArrow=none;endFill=0;" value="">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="684" y="135" as="sourcePoint" />
+            <mxPoint x="684" y="720" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ll-drizzle" edge="1" parent="1" style="dashed=1;endArrow=none;endFill=0;" value="">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="884" y="135" as="sourcePoint" />
+            <mxPoint x="884" y="720" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ll-sqlite" edge="1" parent="1" style="dashed=1;endArrow=none;endFill=0;" value="">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1084" y="135" as="sourcePoint" />
+            <mxPoint x="1084" y="720" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ll-compile" edge="1" parent="1" style="dashed=1;endArrow=none;endFill=0;" value="">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1284" y="135" as="sourcePoint" />
+            <mxPoint x="1284" y="720" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="step1" edge="1" parent="1" style="html=1;verticalAlign=bottom;endArrow=block;curved=0;rounded=0;" value="File Upload (FR1)&lt;div&gt;selectFile()&lt;/div&gt;">
+          <mxGeometry relative="1" width="80" as="geometry">
+            <mxPoint x="100" y="200" as="sourcePoint" />
+            <mxPoint x="280" y="200" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="step1b" edge="1" parent="1" style="html=1;verticalAlign=bottom;endArrow=block;curved=0;rounded=0;" value="dialog.showOpenDialog() → filePath">
+          <mxGeometry relative="1" width="80" as="geometry">
+            <mxPoint x="290" y="240" as="sourcePoint" />
+            <mxPoint x="480" y="240" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="step1c" edge="1" parent="1" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;curved=0;rounded=0;" value="return filePath&amp;nbsp;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="480" y="280" as="sourcePoint" />
+            <mxPoint x="290" y="280" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="step2" edge="1" parent="1" style="html=1;verticalAlign=bottom;endArrow=block;curved=0;rounded=0;" value="File Submission (FR2)&lt;div&gt;clickSubmit()&lt;/div&gt;">
+          <mxGeometry relative="1" width="80" as="geometry">
+            <mxPoint x="100" y="340" as="sourcePoint" />
+            <mxPoint x="280" y="340" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="step3" edge="1" parent="1" style="html=1;verticalAlign=bottom;endArrow=block;curved=0;rounded=0;" value="submit(filepath, studentID, assignmentID)">
+          <mxGeometry relative="1" width="80" as="geometry">
+            <mxPoint x="290" y="380" as="sourcePoint" />
+            <mxPoint x="480" y="380" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="step4" edge="1" parent="1" style="html=1;verticalAlign=bottom;endArrow=block;curved=0;rounded=0;" value="createSubmission()">
+          <mxGeometry relative="1" width="80" as="geometry">
+            <mxPoint x="490" y="420" as="sourcePoint" />
+            <mxPoint x="680" y="420" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="step5" edge="1" parent="1" style="html=1;verticalAlign=bottom;endArrow=block;curved=0;rounded=0;" value="insert(submission)">
+          <mxGeometry relative="1" width="80" as="geometry">
+            <mxPoint x="690" y="460" as="sourcePoint" />
+            <mxPoint x="880" y="460" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="step6" edge="1" parent="1" style="html=1;verticalAlign=bottom;endArrow=block;curved=0;rounded=0;" value="&amp;nbsp;persist()">
+          <mxGeometry relative="1" width="80" as="geometry">
+            <mxPoint x="890" y="500" as="sourcePoint" />
+            <mxPoint x="1080" y="500" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ret1" edge="1" parent="1" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;curved=0;rounded=0;" value="success">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1080" y="540" as="sourcePoint" />
+            <mxPoint x="890" y="540" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ret2" edge="1" parent="1" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;curved=0;rounded=0;" value="success">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="880" y="575" as="sourcePoint" />
+            <mxPoint x="690" y="575" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ret3" edge="1" parent="1" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;curved=0;rounded=0;" value="return submission record">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="680" y="610" as="sourcePoint" />
+            <mxPoint x="490" y="610" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ret4" edge="1" parent="1" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;curved=0;rounded=0;" value="{ submissionId, fileName, fileSize, status: PENDING }">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="480" y="645" as="sourcePoint" />
+            <mxPoint x="290" y="645" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="step7" edge="1" parent="1" style="html=1;verticalAlign=bottom;endArrow=block;curved=0;rounded=0;dashed=1;strokeColor=#999999;fontColor=#999999;" value="&amp;nbsp;[MVP-2] compile(submissionId)">
+          <mxGeometry relative="1" width="80" as="geometry">
+            <mxPoint x="490" y="690" as="sourcePoint" />
+            <mxPoint x="1280" y="690" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
