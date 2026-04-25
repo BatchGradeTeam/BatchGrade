@@ -771,9 +771,7 @@ export function GradingPlusPanel({
         )}
 
         {isServerMode && (
-          <div
-            style={{ marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '14px' }}
-          >
+          <div style={{ marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '14px' }}>
             <span style={{ fontSize: '14px' }}>Test cases:</span>
 
             <label style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
