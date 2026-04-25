@@ -295,8 +295,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       id: data.user.id,
       first_name: firstName,
       last_name: lastName,
-      // For the students table, student-id will be different from id
-      ...(role === 'student' ? { student_id: crypto.randomUUID() } : {})
+      // For the students table, student-id will be the same as id
+      ...(role === 'student' ? { student_id: data.user.id } : {})
     })
 
     if (roleError) {
