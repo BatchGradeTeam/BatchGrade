@@ -60,15 +60,14 @@ export function SubmitPanel({
     statusMessage,
     isSubmitting,
     handleSubmit
-  } =
-    useSubmitWorkflow({
-      compileResult,
-      selectedFiles,
-      userId,
-      selectedAssignmentId,
-      selfCheckSummary,
-      onAssignmentsLoaded
-    })
+  } = useSubmitWorkflow({
+    compileResult,
+    selectedFiles,
+    userId,
+    selectedAssignmentId,
+    selfCheckSummary,
+    onAssignmentsLoaded
+  })
 
   /**
    * @brief FR-5: Notify parent of the initial assignment's expected output.

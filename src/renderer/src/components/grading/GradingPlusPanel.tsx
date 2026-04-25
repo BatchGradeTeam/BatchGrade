@@ -11,6 +11,8 @@ import {
 import { StudentGradingCard } from './StudentGradingCard'
 
 interface GradingPlusPanelProps {
+  title?: string
+  description?: string
   dataSourceMode?: GradebookStorageMode
   gradebookMode?: GradebookStorageMode
   showHomeButton?: boolean
@@ -34,6 +36,7 @@ type JudgeFilePairPreview = {
   outputFile: string
 }
 
+type GradingMode = 'local' | 'docker'
 type JudgeCaseData = {
   testNumber: number
   inputLabel: string | null
@@ -84,6 +87,8 @@ function buildGradebookRecord(
 }
 
 export function GradingPlusPanel({
+  title = 'Grading+ Page',
+  description = 'Batch grading workflow for compiling and judging multiple student submissions.',
   dataSourceMode = 'server',
   gradebookMode = 'local',
   showHomeButton = false,
@@ -99,6 +104,8 @@ export function GradingPlusPanel({
   const [expandedStudentIndex, setExpandedStudentIndex] = useState<number | null>(null)
   const [showInputMenu, setShowInputMenu] = useState(false)
   const [showOutputMenu, setShowOutputMenu] = useState(false)
+  const [gradingMode, setGradingMode] = useState<GradingMode>('local')
+  const [showModeMenu, setShowModeMenu] = useState(false)
   const [assignments, setAssignments] = useState<Assignment[]>([])
   const [selectedAssignmentId, setSelectedAssignmentId] = useState('')
   const [isLoadingServerSubmissions, setIsLoadingServerSubmissions] = useState(false)
@@ -108,6 +115,7 @@ export function GradingPlusPanel({
   const isServerMode = dataSourceMode === 'server'
   const gradebookDestinationLabel =
     gradebookMode === 'local' ? 'offline gradebook on this device' : 'online gradebook'
+  const activeAssignmentId = selectedAssignmentId || 'guest-batchgrade'
 
   const useSavedTestCases = testCaseMode === 'saved' && assignmentTestCases.length > 0
   const judgeFilePairPreview = useSavedTestCases
@@ -122,6 +130,7 @@ export function GradingPlusPanel({
 
   useEffect(() => {
     function handleClickOutside(): void {
+      setShowModeMenu(false)
       setShowInputMenu(false)
       setShowOutputMenu(false)
     }
@@ -506,16 +515,23 @@ export function GradingPlusPanel({
     })
 
     try {
-      const dockerResult = await window.api.compiler.dockerCompileCpp(student.filePaths)
+      let compileResult
+      if (gradingMode === 'docker') {
+        const dockerResult = await window.api.compiler.dockerCompileCpp(student.filePaths)
 
-      const compileResult = {
-        compileSuccess: dockerResult.success,
-        compilerPath: 'docker',
-        executablePath: dockerResult.executablePath,
-        sourceFiles: student.filePaths,
-        stdout: dockerResult.stdout,
-        stderr: dockerResult.stderr,
-        message: dockerResult.message
+        compileResult = {
+          compileSuccess: dockerResult.success,
+          compilerPath: 'docker',
+          executablePath: dockerResult.executablePath,
+          sourceFiles: student.filePaths,
+          stdout: dockerResult.stdout,
+          stderr: dockerResult.stderr,
+          message: dockerResult.message
+        }
+      } else {
+        compileResult = await window.api.compiler.compileCpp({
+          sourceFiles: student.filePaths
+        })
       }
 
       updateStudent(index, {
@@ -523,7 +539,7 @@ export function GradingPlusPanel({
       })
 
       if (!compileResult.compileSuccess || !compileResult.executablePath) {
-        const failedRecord = buildGradebookRecord(student, selectedAssignmentId, 0, 0, 'failed')
+        const failedRecord = buildGradebookRecord(student, activeAssignmentId, 0, 0, 'failed')
         await saveGradebookRecord(failedRecord, gradebookMode)
 
         updateStudent(index, {
@@ -542,12 +558,20 @@ export function GradingPlusPanel({
       const judgeResults: BatchJudgeCaseResult[] = []
 
       for (const judgeCase of judgeCases) {
-        const result = await window.api.compiler.dockerJudgeCpp({
-          executablePath: compileResult.executablePath,
-          stdin: judgeCase.stdin,
-          expectedOutput: judgeCase.expectedOutput,
-          timeoutMs: 5000
-        })
+        const result =
+          gradingMode === 'docker'
+            ? await window.api.compiler.dockerJudgeCpp({
+                executablePath: compileResult.executablePath,
+                stdin: judgeCase.stdin,
+                expectedOutput: judgeCase.expectedOutput,
+                timeoutMs: 5000
+              })
+            : await window.api.compiler.judgeCpp({
+                executablePath: compileResult.executablePath,
+                stdin: judgeCase.stdin,
+                expectedOutput: judgeCase.expectedOutput,
+                timeoutMs: 5000
+              })
 
         judgeResults.push({
           testNumber: judgeCase.testNumber,
@@ -561,7 +585,7 @@ export function GradingPlusPanel({
       const totalCount = judgeResults.length
       const savedRecord = buildGradebookRecord(
         student,
-        selectedAssignmentId,
+        activeAssignmentId,
         passedCount,
         totalCount,
         'done'
@@ -578,7 +602,7 @@ export function GradingPlusPanel({
     } catch (error) {
       console.error('Error grading student:', error)
 
-      const failedRecord = buildGradebookRecord(student, selectedAssignmentId, 0, 0, 'failed')
+      const failedRecord = buildGradebookRecord(student, activeAssignmentId, 0, 0, 'failed')
       await saveGradebookRecord(failedRecord, gradebookMode)
 
       updateStudent(index, {
@@ -590,7 +614,7 @@ export function GradingPlusPanel({
   }
 
   async function handleGradeStudent(index: number): Promise<void> {
-    if (!selectedAssignmentId) {
+    if (isServerMode && !selectedAssignmentId) {
       setBatchError('Select an assignment before grading.')
       return
     }
@@ -630,7 +654,7 @@ export function GradingPlusPanel({
       return
     }
 
-    if (!selectedAssignmentId) {
+    if (isServerMode && !selectedAssignmentId) {
       setBatchError('Select an assignment before grading.')
       return
     }
@@ -687,10 +711,8 @@ export function GradingPlusPanel({
 
   return (
     <div className="panel-shell">
-      <h1>Grading+ Page</h1>
-      <p>
-        Instructor batch grading workflow for compiling and judging multiple student submissions.
-      </p>
+      <h1>{title}</h1>
+      <p>{description}</p>
       <p style={{ color: '#cbd5e1', marginBottom: '1rem' }}>
         Completed batch grading runs save to the {gradebookDestinationLabel}.
       </p>
@@ -771,9 +793,7 @@ export function GradingPlusPanel({
         )}
 
         {isServerMode && (
-          <div
-            style={{ marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '14px' }}
-          >
+          <div style={{ marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '14px' }}>
             <span style={{ fontSize: '14px' }}>Test cases:</span>
 
             <label style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
@@ -801,6 +821,56 @@ export function GradingPlusPanel({
         )}
 
         <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+          <div style={{ position: 'relative' }}>
+            <button
+              onClick={(e) => {
+                e.stopPropagation()
+                setShowModeMenu((prev) => !prev)
+              }}
+              className="primary-button"
+            >
+              Mode: {gradingMode === 'local' ? 'Local' : 'Docker'} ▼
+            </button>
+
+            {showModeMenu && (
+              <div
+                style={{
+                  position: 'absolute',
+                  backgroundColor: '#1f1f1f',
+                  border: '1px solid gray',
+                  marginTop: '4px',
+                  zIndex: 10,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '6px',
+                  padding: '6px'
+                }}
+              >
+                <button
+                  onClick={() => {
+                    setGradingMode('local')
+                    setShowModeMenu(false)
+                  }}
+                  className="secondary-button"
+                  style={{ display: 'block', width: '100%' }}
+                >
+                  Local Compiler
+                </button>
+
+                <button
+                  onClick={() => {
+                    setGradingMode('docker')
+                    setShowModeMenu(false)
+                  }}
+                  className="secondary-button"
+                  style={{ display: 'block', width: '100%' }}
+                >
+                  Docker
+                </button>
+              </div>
+            )}
+          </div>
+
           <button onClick={() => void handleImportSubmissionFolder()} className="primary-button">
             Import Submission Folder
           </button>
@@ -1004,21 +1074,11 @@ export function GradingPlusPanel({
       </div>
 
       {showHomeButton && onGoHome && (
-        <button
-          onClick={onGoHome}
-          style={{
-            padding: '9px 14px',
-            backgroundColor: '#2563eb',
-            color: 'white',
-            border: '2px solid #93c5fd',
-            borderRadius: '6px',
-            fontWeight: 'bold',
-            cursor: 'pointer',
-            marginTop: '16px'
-          }}
-        >
-          Go to home
-        </button>
+        <div className="button-container">
+          <button className="secondary-button" onClick={onGoHome}>
+            Back to Dashboard
+          </button>
+        </div>
       )}
     </div>
   )

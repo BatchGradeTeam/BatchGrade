@@ -197,7 +197,9 @@ export function useSubmitWorkflow({
       } catch (publishError) {
         console.error('Submission saved locally but could not be published:', publishError)
         setStatusMessage('Submission saved locally.')
-        setErrorMessage(`Could not publish submission to Supabase: ${getErrorMessage(publishError)}`)
+        setErrorMessage(
+          `Could not publish submission to Supabase: ${getErrorMessage(publishError)}`
+        )
       }
       // Catch and handle any errors that occur during the submission process
     } catch (error) {
