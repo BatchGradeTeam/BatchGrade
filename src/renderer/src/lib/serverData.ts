@@ -915,7 +915,7 @@ export async function loadServerSubmissionsForGrading(
   const submissions = ((submissionsData ?? []) as SubmissionRow[]).filter(
     hasUploadedSubmissionManifest
   )
-  const studentNames = await loadStudentNames([
+  const studentNames = await loadSubmittedStudentNames([
     ...new Set(submissions.map((submission) => submission.student_id))
   ])
   const bundles: ServerSubmissionBundle[] = []
@@ -1092,7 +1092,25 @@ export async function saveServerGradebookRecord(record: GradebookRecord): Promis
   }
 }
 
-async function loadStudentNames(studentIds: string[]): Promise<Map<string, string>> {
+// Function gets the id & name of all students in the students table
+// Does not take different class sections into account
+export async function loadAllStudents(): Promise<{ id: string; name: string }[]> {
+  const { data, error } = await supabase
+    .from('students')
+    .select('id, student_id, first_name, last_name')
+
+  if (error) {
+    console.error('Could not load student names:', error)
+    return []
+  }
+
+  return (data ?? []).map((student) => {
+    const name = [student.first_name, student.last_name].filter(Boolean).join(' ').trim()
+    return { id: student.student_id, name: name || student.student_id || student.id }
+  })
+}
+
+async function loadSubmittedStudentNames(studentIds: string[]): Promise<Map<string, string>> {
   if (studentIds.length === 0) {
     return new Map()
   }
@@ -1152,10 +1170,10 @@ async function loadSubmissionSelfCheckRecords(
         feedback: buildSubmissionSelfCheckFeedback(selfCheck),
         gradedAt: selfCheck.completedAt,
         submissionId: submission.submission_id,
-        scoreSource: 'submission-self-check'
+        scoreSource: 'assignment-submission'
       })
     } catch (error) {
-      console.warn(`Could not load submission self-check for ${submission.submission_id}:`, error)
+      console.warn(`Could not load submission score for ${submission.submission_id}:`, error)
     }
   }
 
@@ -1188,7 +1206,7 @@ export async function loadServerGradebookRecords(): Promise<GradebookRecord[]> {
     return []
   }
 
-  const studentNames = await loadStudentNames([
+  const studentNames = await loadSubmittedStudentNames([
     ...new Set(submissions.map((submission) => submission.student_id))
   ])
   return loadSubmissionSelfCheckRecords(submissions, assignments, studentNames)

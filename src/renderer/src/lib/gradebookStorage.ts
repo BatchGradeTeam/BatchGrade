@@ -1,7 +1,7 @@
 /**
  * @file gradebookStorage.ts
- * @description Stores and loads Gradebook records for the temporary
- * localStorage-based offline Gradebook integration.
+ * @description Stores and/or loads Gradebook records for the offline
+ * and server gradebook integrations.
  */
 
 import type { GradebookRecord } from '../../../shared/gradebookTypes'
@@ -27,7 +27,7 @@ export async function loadLocalGradebookRecords(): Promise<GradebookRecord[]> {
 }
 
 /**
- * Loads all saved Gradebook records from localStorage.
+ * Loads all saved Gradebook records from localStorage or serverRecords.
  *
  * @returns Promise resolving to all saved Gradebook records
  */
