@@ -2,7 +2,11 @@ import { useEffect, useRef, useState } from 'react'
 import type { BatchJudgeCaseResult, BatchStudentSubmission } from '../../../../shared/batchGrading'
 import type { GradebookRecord } from '../../../../shared/gradebookTypes'
 import type { Assignment, AssignmentTestCase } from '../../../../shared/types'
-import { saveGradebookRecord, type GradebookStorageMode } from '../../lib/gradebookStorage'
+import {
+  clearGradebookRecords,
+  saveGradebookRecord,
+  type GradebookStorageMode
+} from '../../lib/gradebookStorage'
 import {
   loadAssignmentTestCases,
   loadServerAssignments,
@@ -46,6 +50,8 @@ type JudgeCaseData = {
 }
 
 type TestCaseMode = 'saved' | 'manual'
+
+const GUEST_BATCHGRADE_STUDENTS_KEY = 'guestBatchGradeStudents'
 
 function buildJudgeFilePairPreview(
   inputFiles: string[],
@@ -94,7 +100,20 @@ export function GradingPlusPanel({
   showHomeButton = false,
   onGoHome
 }: GradingPlusPanelProps): React.JSX.Element {
-  const [students, setStudents] = useState<BatchStudentSubmission[]>([])
+  const [students, setStudents] = useState<BatchStudentSubmission[]>(() => {
+    if (gradebookMode !== 'guest') {
+      return []
+    }
+
+    try {
+      const savedStudents = localStorage.getItem(GUEST_BATCHGRADE_STUDENTS_KEY)
+
+      return savedStudents ? (JSON.parse(savedStudents) as BatchStudentSubmission[]) : []
+    } catch (error) {
+      console.error('Failed to load Guest BatchGrade results:', error)
+      return []
+    }
+  })
   const [selectedInputFiles, setSelectedInputFiles] = useState<string[]>([])
   const [selectedOutputFiles, setSelectedOutputFiles] = useState<string[]>([])
   const [currentStudentIndex, setCurrentStudentIndex] = useState<number | null>(null)
@@ -127,6 +146,18 @@ export function GradingPlusPanel({
       }))
     : buildJudgeFilePairPreview(selectedInputFiles, selectedOutputFiles)
   const studentCardRefs = useRef<(HTMLDivElement | null)[]>([])
+
+  useEffect(() => {
+    if (gradebookMode !== 'guest') {
+      return
+    }
+
+    try {
+      localStorage.setItem(GUEST_BATCHGRADE_STUDENTS_KEY, JSON.stringify(students))
+    } catch (error) {
+      console.error('Failed to save Guest BatchGrade results:', error)
+    }
+  }, [gradebookMode, students])
 
   useEffect(() => {
     function handleClickOutside(): void {
@@ -701,6 +732,26 @@ export function GradingPlusPanel({
     }
   }
 
+  async function handleClearGuestResults(): Promise<void> {
+    if (gradebookMode !== 'guest') {
+      return
+    }
+
+    try {
+      localStorage.removeItem(GUEST_BATCHGRADE_STUDENTS_KEY)
+      await clearGradebookRecords('guest')
+
+      setStudents([])
+      setCurrentStudentIndex(null)
+      setExpandedStudentIndex(null)
+      setBatchError(null)
+      setBatchMessage('Guest BatchGrade results have been cleared.')
+    } catch (error) {
+      console.error('Error clearing Guest BatchGrade results:', error)
+      setBatchError('Could not clear Guest BatchGrade results.')
+    }
+  }
+
   function handleToggleStudentDetails(index: number): void {
     setExpandedStudentIndex((currentIndex) => (currentIndex === index ? null : index))
   }
@@ -998,6 +1049,18 @@ export function GradingPlusPanel({
           >
             Grade All Students
           </button>
+
+          {gradebookMode === 'guest' && (
+            <button
+              onClick={() => void handleClearGuestResults()}
+              disabled={isBatchGrading || students.length === 0}
+              className={
+                isBatchGrading || students.length === 0 ? 'cancel-button' : 'secondary-button'
+              }
+            >
+              Clear Guest Results
+            </button>
+          )}
         </div>
 
         <p style={{ marginTop: '10px', fontSize: '13px', color: '#facc15' }}>
