@@ -13,6 +13,14 @@ import { getCommonWorkingDirectory } from '../utils/sourceFiles'
 import { getLanguage } from './languages'
 import type { Language } from './languages'
 
+const DOCKER_SANDBOX_ARGS = [
+  '--network', 'none', // Disable network access
+  '--cap-drop', 'ALL', // Default to no capabilities
+  '--security-opt', 'no-new-privileges', // Help prevent privilege escalation
+  '--pids-limit', '5' // Prevent fork bombs. For simple programs this is ok. For more complex programs, this may need to be increased.
+  // More arguments will be added as needed
+]
+
 // This is used when requesting a file to be compiled.
 interface DockerCompileRequest {
   sourceFiles: string[]
@@ -76,21 +84,34 @@ async function dockerCompile(request: DockerCompileRequest): Promise<DockerCompi
     let stdout = ''
     let stderr = ''
 
-    // Build docker run command
-    const dockerArgs = [
+    const dockerRunArgs = [
       'run',
-      '--rm',
+      '--rm' // Remove the compile container after it exits
+    ]
+
+    const dockerMountArgs = [
       '-v',
-      `${workingDir}:/src`,
+      `${workingDir}:/src:ro`, // Mount source files read-only
       '-v',
-      `${tempDirectory}:/out`,
+      `${tempDirectory}:/out`, // Keep compiled output in a temporary host folder
       '-w',
-      '/src',
+      '/src' // Compile from the mounted source directory
+    ]
+
+    const compilerArgs = [
       config.dockerImage,
       config.compiler,
       ...relativeFiles,
       '-o',
       `/out/${executableName}`
+    ]
+
+    // Build docker run command
+    const dockerArgs = [
+      ...dockerRunArgs,
+      ...DOCKER_SANDBOX_ARGS,
+      ...dockerMountArgs,
+      ...compilerArgs
     ]
 
     // Spawn the Docker process
