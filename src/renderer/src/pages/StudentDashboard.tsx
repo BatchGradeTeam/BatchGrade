@@ -19,10 +19,7 @@ import { NavBar } from '../components/Navbar'
 import { Footer } from '../components/Footer'
 import { useAuth } from '../components/AuthContext'
 import { CppWorkflowPanel } from '../components/compiler/CppWorkflowPanel'
-import {
-  OutputDiffPanel,
-  type OutputComparisonCase
-} from '../components/OutputDiffPanel'
+import { OutputDiffPanel, type OutputComparisonCase } from '../components/OutputDiffPanel'
 import { SubmitPanel } from '../components/submission/SubmitPanel'
 import { AboutPanel } from '../components/AboutPanel'
 import { StudentScoresPanel } from '../components/grading/StudentScoresPanel'
@@ -180,23 +177,42 @@ export function StudentDashboard(): React.JSX.Element {
 
       try {
         const results = await Promise.all(
-          assignmentTestCases.map(async (testCase) => {
-            const run = await window.api.compiler.runCompiledProgram({
-              executablePath: compileResult.executablePath as string,
-              stdin: testCase.inputText ?? '',
-              timeoutMs: 5000
-            })
+          assignmentTestCases.map(async (testCase): Promise<OutputComparisonCase> => {
+            let nextResult: OutputComparisonCase
 
-            return {
-              id: testCase.uuid,
-              label: `Test ${testCase.caseOrder}`,
-              inputLabel: testCase.inputFileName ?? (testCase.inputText ? 'Text input' : null),
-              actualOutput: run.stdout,
-              expectedOutput: testCase.expectedOutputText,
-              executionMessage: run.message,
-              executionSuccess: run.executionSuccess,
-              timedOut: run.timedOut
-            } satisfies OutputComparisonCase
+            try {
+              const run = await window.api.compiler.runCompiledProgram({
+                executablePath: compileResult.executablePath as string,
+                stdin: testCase.inputText ?? '',
+                timeoutMs: 5000
+              })
+
+              nextResult = {
+                id: testCase.uuid,
+                label: `Test ${testCase.caseOrder}`,
+                inputLabel: testCase.inputFileName ?? (testCase.inputText ? 'Text input' : null),
+                actualOutput: run.stdout,
+                expectedOutput: testCase.expectedOutputText,
+                executionMessage: run.message,
+                executionSuccess: run.executionSuccess,
+                timedOut: run.timedOut
+              } satisfies OutputComparisonCase
+            } catch (error) {
+              console.error(`Could not run assignment test case ${testCase.caseOrder}:`, error)
+
+              nextResult = {
+                id: testCase.uuid,
+                label: `Test ${testCase.caseOrder}`,
+                inputLabel: testCase.inputFileName ?? (testCase.inputText ? 'Text input' : null),
+                actualOutput: '',
+                expectedOutput: testCase.expectedOutputText,
+                executionMessage: 'Could not run this assignment test case.',
+                executionSuccess: false,
+                timedOut: false
+              } satisfies OutputComparisonCase
+            }
+
+            return nextResult
           })
         )
 
