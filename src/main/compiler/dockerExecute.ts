@@ -11,6 +11,14 @@ import { dirname, basename } from 'path'
 import type { Language } from './languages'
 import { getLanguage } from './languages'
 
+const DOCKER_SANDBOX_ARGS = [
+  '--network', 'none', // Disable network access
+  '--cap-drop', 'ALL', // Default to no capabilities
+  '--security-opt', 'no-new-privileges', // Help prevent privilege escalation
+  '--pids-limit', '5' // Prevent fork bombs. For simple programs this is ok.
+  // More arguments will be added as needed
+]
+
 // This is used when requesting a compiled program to be executed.
 interface DockerExecuteRequest {
   executablePath: string
@@ -44,17 +52,27 @@ async function dockerExecute(request: DockerExecuteRequest): Promise<DockerExecu
   const execName = basename(executablePath)
 
   return new Promise((resolve) => {
+    const dockerRunArgs = [
+      'run',
+      '--rm' // Remove the execution container after it exits
+    ]
+
+    const dockerMountArgs = [
+      '-v',
+      `${execDir}:/app:ro`, // Mount compiled program read-only
+      '-w',
+      '/app', // Execute from the mounted program directory
+      '-i' // Keep stdin open so test input can be passed through
+    ]
+
+    const programArgs = [config.dockerImage, `/app/${execName}`]
+
     // Build docker run command
     const dockerArgs = [
-      'run',
-      '--rm',
-      '-v',
-      `${execDir}:/app`,
-      '-w',
-      '/app',
-      '-i',
-      config.dockerImage,
-      `/app/${execName}`
+      ...dockerRunArgs,
+      ...DOCKER_SANDBOX_ARGS,
+      ...dockerMountArgs,
+      ...programArgs
     ]
     // Spawn the Docker process with the specified command and arguments
     const child = spawn('docker', dockerArgs, { windowsHide: true })
