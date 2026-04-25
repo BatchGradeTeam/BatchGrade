@@ -9,17 +9,10 @@ import { spawn } from 'child_process'
 import { mkdtemp } from 'fs/promises'
 import { tmpdir } from 'os'
 import { join, basename } from 'path'
+import { DOCKER_RUN_ARGS, DOCKER_SANDBOX_ARGS } from '../../shared/compiler'
 import { getCommonWorkingDirectory } from '../utils/sourceFiles'
 import { getLanguage } from './languages'
 import type { Language } from './languages'
-
-const DOCKER_SANDBOX_ARGS = [
-  '--network', 'none', // Disable network access
-  '--cap-drop', 'ALL', // Default to no capabilities
-  '--security-opt', 'no-new-privileges', // Help prevent privilege escalation
-  '--pids-limit', '5' // Prevent fork bombs. For simple programs this is ok. For more complex programs, this may need to be increased.
-  // More arguments will be added as needed
-]
 
 // This is used when requesting a file to be compiled.
 interface DockerCompileRequest {
@@ -84,11 +77,6 @@ async function dockerCompile(request: DockerCompileRequest): Promise<DockerCompi
     let stdout = ''
     let stderr = ''
 
-    const dockerRunArgs = [
-      'run',
-      '--rm' // Remove the compile container after it exits
-    ]
-
     const dockerMountArgs = [
       '-v',
       `${workingDir}:/src:ro`, // Mount source files read-only
@@ -108,7 +96,7 @@ async function dockerCompile(request: DockerCompileRequest): Promise<DockerCompi
 
     // Build docker run command
     const dockerArgs = [
-      ...dockerRunArgs,
+      ...DOCKER_RUN_ARGS,
       ...DOCKER_SANDBOX_ARGS,
       ...dockerMountArgs,
       ...compilerArgs

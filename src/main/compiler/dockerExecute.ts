@@ -8,16 +8,9 @@
 import { spawn } from 'child_process'
 import { dirname, basename } from 'path'
 
+import { DOCKER_RUN_ARGS, DOCKER_SANDBOX_ARGS } from '../../shared/compiler'
 import type { Language } from './languages'
 import { getLanguage } from './languages'
-
-const DOCKER_SANDBOX_ARGS = [
-  '--network', 'none', // Disable network access
-  '--cap-drop', 'ALL', // Default to no capabilities
-  '--security-opt', 'no-new-privileges', // Help prevent privilege escalation
-  '--pids-limit', '5' // Prevent fork bombs. For simple programs this is ok.
-  // More arguments will be added as needed
-]
 
 // This is used when requesting a compiled program to be executed.
 interface DockerExecuteRequest {
@@ -52,11 +45,6 @@ async function dockerExecute(request: DockerExecuteRequest): Promise<DockerExecu
   const execName = basename(executablePath)
 
   return new Promise((resolve) => {
-    const dockerRunArgs = [
-      'run',
-      '--rm' // Remove the execution container after it exits
-    ]
-
     const dockerMountArgs = [
       '-v',
       `${execDir}:/app:ro`, // Mount compiled program read-only
@@ -69,7 +57,7 @@ async function dockerExecute(request: DockerExecuteRequest): Promise<DockerExecu
 
     // Build docker run command
     const dockerArgs = [
-      ...dockerRunArgs,
+      ...DOCKER_RUN_ARGS,
       ...DOCKER_SANDBOX_ARGS,
       ...dockerMountArgs,
       ...programArgs
