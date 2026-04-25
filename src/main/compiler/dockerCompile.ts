@@ -8,25 +8,27 @@
 import { spawn } from 'child_process'
 import { mkdtemp } from 'fs/promises'
 import { tmpdir } from 'os'
-import { join, basename } from 'path'
+import { join, basename, extname } from 'path'
 import { DOCKER_RUN_ARGS, DOCKER_SANDBOX_ARGS } from '../../shared/compiler'
+import type { DockerCompileRequest, DockerCompileResult } from '../../shared/compiler'
 import { getCommonWorkingDirectory } from '../utils/sourceFiles'
 import { getLanguage } from './languages'
 import type { Language } from './languages'
 
-// This is used when requesting a file to be compiled.
-interface DockerCompileRequest {
-  sourceFiles: string[]
-  language: Language
+type DockerCompileOptions = DockerCompileRequest & {
+  language?: Language
 }
 
-// This is the result of a compilation request.
-interface DockerCompileResult {
-  success: boolean
-  executablePath: string | null
-  stdout: string
-  stderr: string
-  message: string
+function buildDockerCompileResult(
+  result: Omit<DockerCompileResult, 'compileSuccess' | 'compilerPath' | 'sourceFiles'>,
+  sourceFiles: string[]
+): DockerCompileResult {
+  return {
+    ...result,
+    compileSuccess: result.success,
+    compilerPath: 'docker',
+    sourceFiles
+  }
 }
 
 /**
@@ -34,26 +36,33 @@ interface DockerCompileResult {
  * @param request - The compilation request containing source files and language.
  * @returns A promise that resolves to the compilation result.
  */
-async function dockerCompile(request: DockerCompileRequest): Promise<DockerCompileResult> {
-  const { sourceFiles, language } = request
+async function dockerCompile(request: DockerCompileOptions): Promise<DockerCompileResult> {
+  const { sourceFiles, language = 'cpp' } = request
   const config = getLanguage(language)
-  const compileExtensions = language === 'cpp' ? ['.cpp', '.cc', '.cxx', '.cp'] : config.extensions
 
-  // Filter files by language extensions
-  const sourceFilesForLang = sourceFiles.filter((file) => {
-    const ext = file.substring(file.lastIndexOf('.'))
-    return compileExtensions.includes(ext.toLowerCase())
-  })
+  const sourceFilesForLang =
+    language === 'cpp'
+      ? sourceFiles.filter((file) => ['.cpp', '.cc', '.cxx'].includes(extname(file).toLowerCase()))
+      : sourceFiles.filter((file) => {
+          const ext = file.substring(file.lastIndexOf('.'))
+          return config.extensions.includes(ext.toLowerCase())
+        })
 
   // If there are no source files error
   if (sourceFilesForLang.length === 0) {
-    return {
-      success: false,
-      executablePath: null,
-      stdout: '',
-      stderr: '',
-      message: `No ${config.name} source files found.`
-    }
+    return buildDockerCompileResult(
+      {
+        success: false,
+        executablePath: null,
+        stdout: '',
+        stderr: '',
+        message:
+          language === 'cpp'
+            ? 'No C++ source files found. Select at least one C++ source file.'
+            : `No ${config.name} source files found.`
+      },
+      sourceFiles
+    )
   }
 
   // No need to store it long term so use a temp directory
@@ -132,41 +141,61 @@ async function dockerCompile(request: DockerCompileRequest): Promise<DockerCompi
       clearTimeout(timeout)
       // Determine compilation result timed out, success, or failed
       if (timedOut) {
-        resolve({
-          success: false,
-          executablePath: null,
-          stdout,
-          stderr,
-          message: 'Compilation timed out.'
-        })
+        resolve(
+          buildDockerCompileResult(
+            {
+              success: false,
+              executablePath: null,
+              stdout,
+              stderr,
+              message: 'Compilation timed out.'
+            },
+            sourceFiles
+          )
+        )
       } else if (code === 0) {
-        resolve({
-          success: true,
-          executablePath,
-          stdout,
-          stderr,
-          message: 'Compilation success.'
-        })
+        resolve(
+          buildDockerCompileResult(
+            {
+              success: true,
+              executablePath,
+              stdout,
+              stderr,
+              message: 'Compilation success.'
+            },
+            sourceFiles
+          )
+        )
       } else {
-        resolve({
-          success: false,
-          executablePath: null,
-          stdout,
-          stderr: stderr || 'Compilation failed.',
-          message: 'Compilation failed.'
-        })
+        resolve(
+          buildDockerCompileResult(
+            {
+              success: false,
+              executablePath: null,
+              stdout,
+              stderr: stderr || 'Compilation failed.',
+              message: 'Compilation failed.'
+            },
+            sourceFiles
+          )
+        )
       }
     })
 
     child.on('error', (error) => {
       clearTimeout(timeout)
-      resolve({
-        success: false,
-        executablePath: null,
-        stdout,
-        stderr: error.message,
-        message: 'Compilation failed to start.'
-      })
+      resolve(
+        buildDockerCompileResult(
+          {
+            success: false,
+            executablePath: null,
+            stdout,
+            stderr: error.message,
+            message: 'Compilation failed to start.'
+          },
+          sourceFiles
+        )
+      )
     })
   })
 }

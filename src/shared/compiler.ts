@@ -93,12 +93,8 @@ export type DockerCompileRequest = {
   sourceFiles: string[]
 }
 
-export type DockerCompileResult = {
+export type DockerCompileResult = CompileCppResult & {
   success: boolean
-  executablePath: string | null
-  stdout: string
-  stderr: string
-  message: string
 }
 
 // ***********************************************************************
