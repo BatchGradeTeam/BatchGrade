@@ -1,5 +1,6 @@
 import { useEffect, useState, type CSSProperties } from 'react'
 import type { GradebookRecord, GradebookScoreSource } from '../../../../shared/gradebookTypes'
+import { loadAllStudents, loadServerAssignments} from '../../lib/serverData'
 import {
   clearGradebookRecords,
   loadGradebookRecords,
@@ -38,8 +39,7 @@ const filterStudents = (students: StudentRecord[], searchTerm: string): StudentR
   const normalizedSearch = searchTerm.toLowerCase()
 
   return students.filter(
-    (student) =>
-      student.name.toLowerCase().includes(normalizedSearch) || student.id.includes(searchTerm)
+    (student) => student.name.toLowerCase().includes(normalizedSearch) //|| student.id.includes(searchTerm)
   )
 }
 
@@ -92,13 +92,11 @@ const calculateStats = (students: StudentRecord[]): GradeStats => {
  * Builds CSV-formatted string content for gradebook export.
  */
 const buildCSVContent = (students: StudentRecord[]): string => {
-  const headers = ['Student ID', 'Student Name', 'Highest Score', 'Score Source']
+  const headers = ['Student Name', 'Score']
 
   const rows = students.map((student) => [
-    student.id,
     student.name,
-    student.score,
-    student.scoreSource
+    student.score // highest score or - if not submitted
   ])
 
   return [headers, ...rows].map((row) => row.join(',')).join('\n')
@@ -113,10 +111,10 @@ const formatSubmittedTime = (timestamp: number): string => {
 
 function formatScoreSource(scoreSource?: GradebookScoreSource): string {
   if (scoreSource === 'offline-batch-grade') {
-    return 'Offline batch grade'
+    return 'Batch Grading'
   }
 
-  return 'Submission self-check'
+  return 'Assignment Submission'
 }
 
 function formatStudentStatus(record: GradebookRecord): string {
@@ -133,9 +131,12 @@ function formatStudentStatus(record: GradebookRecord): string {
 const buildStudentRecordsFromGradebook = (
   records: GradebookRecord[],
   assignmentId: string,
-  defaultScoreSource: GradebookScoreSource
+  defaultScoreSource: GradebookScoreSource,
+  dataMode: GradebookStorageMode,
+  allStudents: { id: string; name: string }[]
 ): StudentRecord[] => {
-  const assignmentRecords = records.filter((record) => record.assignmentId === assignmentId)
+  
+  const assignmentRecords = assignmentId ? records.filter((record) => record.assignmentId === assignmentId) : []
 
   const groupedRecords = new Map<string, GradebookRecord[]>()
 
@@ -144,6 +145,37 @@ const buildStudentRecordsFromGradebook = (
     groupedRecords.set(record.studentId, [...existing, record])
   })
 
+  // For server mode, show all students in Student Name column
+  if (dataMode === 'server' && allStudents.length > 0) {
+    return allStudents.map((student) => {
+      const attempts = groupedRecords.get(student.id)
+
+      // If the student hasn't made a submission, show Missing status
+      if (!assignmentId || !attempts || attempts.length === 0) {
+        return {
+          id: student.id,
+          name: student.name,
+          score: '-',
+          scoreSource: '-',
+          lastSubmitted: '-',
+          status: assignmentId ? 'Missing' : 'Select Assignment'
+        }
+      }
+
+      const highestRecord = attempts.reduce((best, curr) => (curr.score > best.score ? curr : best))
+
+      return {
+        id: student.id,
+        name: student.name,
+        score: `${highestRecord.score}%`,
+        scoreSource: formatScoreSource(defaultScoreSource),
+        lastSubmitted: formatSubmittedTime(highestRecord.submittedAt),
+        status: formatStudentStatus(highestRecord)
+      }
+    })
+  }
+
+  // For local mode
   return Array.from(groupedRecords.values()).map((studentRecords) => {
     const highestRecord = studentRecords.reduce((best, current) =>
       current.score > best.score ? current : best
@@ -195,41 +227,69 @@ export function GradebookPanel({
   allowClear
 }: GradebookPanelProps): React.JSX.Element {
   const [selectedAssignment, setSelectedAssignment] = useState('')
+  const [allStudents, setAllStudents] = useState<{ id: string; name: string }[]>([])
   const [gradebookRecords, setGradebookRecords] = useState<GradebookRecord[]>([])
+  const [allAssignments, setAllAssignments] = useState<{ id: string; name: string }[]>([])
   const [searchTerm, setSearchTerm] = useState('')
   const [sortOption, setSortOption] = useState('name-asc')
   const canClearRecords = allowClear ?? dataMode === 'local'
 
   useEffect(() => {
     async function fetchGradebookRecords(): Promise<void> {
+
+      // Load grades
       const records = await loadGradebookRecords(dataMode)
       setGradebookRecords(records)
+
+      // For server mode,
+      if (dataMode === 'server') {
+        try {
+          // Load all students
+          const students = await loadAllStudents()
+          setAllStudents(students)
+        } catch (error) {
+          console.error('Failed to load all students', error)
+        }
+
+        try {
+          // Load all assignments made by instructor
+          const assignments = await loadServerAssignments()
+          setAllAssignments(assignments.map(a => ({ id: a.uuid, name: a.name })))
+        } catch (error) {
+          console.error('Failed to load all assignments', error)
+        }
+      } else {
+        setAllStudents([])
+        setAllAssignments([])
+      }
     }
 
     void fetchGradebookRecords()
   }, [dataMode])
 
-  const assignmentOptions = Array.from(
-    new Map(
-      gradebookRecords.map((record) => [
-        record.assignmentId,
-        record.assignmentName ?? record.assignmentId
-      ])
-    ).entries()
-  )
+  // For server mode, show all assignments as options
+  const assignmentOptions = dataMode === 'server' ? allAssignments :
+    Array.from(
+      new Map(
+        gradebookRecords.map((record) => [
+          record.assignmentId,
+          record.assignmentName ?? record.assignmentId
+        ]))
+    ).map(([id, name]) => ({ id, name }))
+  
   const hasAssignments = assignmentOptions.length > 0
 
-  const assignmentIds = assignmentOptions.map(([assignmentId]) => assignmentId)
-  const effectiveSelectedAssignment = assignmentIds.includes(selectedAssignment)
-    ? selectedAssignment
-    : (assignmentOptions[0]?.[0] ?? '')
+  const effectiveSelectedAssignment = selectedAssignment || (assignmentOptions[0]?.id ?? '')
+
   const defaultScoreSource: GradebookScoreSource =
-    dataMode === 'local' ? 'offline-batch-grade' : 'submission-self-check'
+    dataMode === 'local' ? 'offline-batch-grade' : 'assignment-submission'
 
   const students = buildStudentRecordsFromGradebook(
     gradebookRecords,
     effectiveSelectedAssignment,
-    defaultScoreSource
+    defaultScoreSource,
+    dataMode,
+    allStudents
   )
   const filteredStudents = filterStudents(students, searchTerm)
   const sortedStudents = sortStudents(filteredStudents, sortOption)
@@ -273,9 +333,9 @@ export function GradebookPanel({
               disabled={!hasAssignments}
             >
               {hasAssignments ? (
-                assignmentOptions.map(([assignmentId, assignmentName]) => (
-                  <option key={assignmentId} value={assignmentId}>
-                    {assignmentName}
+                assignmentOptions.map((option) => (
+                  <option key={option.id} value={option.id}>
+                    {option.name}
                   </option>
                 ))
               ) : (
@@ -286,7 +346,7 @@ export function GradebookPanel({
 
           <div style={{ display: 'flex', gap: '24px', margin: '20px 0', fontWeight: 'bold' }}>
             <div>
-              <span>Class Average: {averageScore === '--' ? '--' : `${averageScore}%`}</span>
+              <span>Average Score: {averageScore === '--' ? '--' : `${averageScore}%`}</span>
               <span style={{ marginLeft: '24px' }}>
                 Highest Score: {highestScore === '--' ? '--' : `${highestScore}%`}
               </span>
@@ -301,7 +361,7 @@ export function GradebookPanel({
             <input
               id="student-search"
               type="text"
-              placeholder="Enter student name or ID"
+              placeholder="Enter student name"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               style={{ marginLeft: '8px', padding: '6px', width: '260px' }}
@@ -327,31 +387,35 @@ export function GradebookPanel({
             <table style={{ borderCollapse: 'collapse', width: '100%' }}>
               <thead>
                 <tr>
-                  <th style={cellStyle}>Student ID</th>
                   <th style={cellStyle}>Student Name</th>
-                  <th style={cellStyle}>Highest Score</th>
+                  <th style={cellStyle}>Score</th>
                   <th style={cellStyle}>Score Source</th>
                   <th style={cellStyle}>Last Submission Time</th>
                   <th style={cellStyle}>Status</th>
                 </tr>
               </thead>
               <tbody>
-                {!hasAssignments ? (
+                {dataMode === 'local' && !hasAssignments ? (
                   <tr>
                     <td style={cellStyle} colSpan={6}>
                       No graded assignments available.
                     </td>
                   </tr>
-                ) : sortedStudents.length === 0 ? (
+                ) : dataMode === 'local' && sortedStudents.length === 0 ? (
                   <tr>
                     <td style={cellStyle} colSpan={6}>
                       No records for this assignment.
                     </td>
                   </tr>
-                ) : (
+                ) : dataMode === 'server' && sortedStudents.length === 0 ? (
+                  <tr>
+                    <td style={cellStyle} colSpan={6}>
+                      Loading all students...
+                    </td>
+                  </tr>
+                ): (
                   sortedStudents.map((student) => (
                     <tr key={student.id}>
-                      <td style={cellStyle}>{student.id}</td>
                       <td style={cellStyle}>{student.name}</td>
                       <td style={cellStyle}>{student.score}</td>
                       <td style={cellStyle}>
