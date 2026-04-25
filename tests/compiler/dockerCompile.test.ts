@@ -76,6 +76,13 @@ describe('dockerCompile', () => {
     expect(result.success).toBe(true)
     expect(result.executablePath).toContain('batchgrade-docker-')
     expect(result.message).toBe('Compilation success.')
+    if (typeof process.getuid === 'function' && typeof process.getgid === 'function') {
+      expect(spawnMock).toHaveBeenCalledWith(
+        'docker',
+        expect.arrayContaining(['--user', `${process.getuid()}:${process.getgid()}`]),
+        expect.any(Object)
+      )
+    }
   })
 
   it('Should handle compilation errors', async () => {

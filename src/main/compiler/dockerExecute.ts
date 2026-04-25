@@ -55,10 +55,16 @@ async function dockerExecute(request: DockerExecuteRequest): Promise<DockerExecu
 
     const programArgs = [config.dockerImage, `/app/${execName}`]
 
+    // On macOS/Linux, run as the host user so Docker can read the temp executable.
+    // Windows does not use POSIX uid/gid values, so skip this Docker option there.
+    const hostUserArgs =
+      process.platform === 'win32' ? [] : ['--user', `${process.getuid!()}:${process.getgid!()}`]
+
     // Build docker run command
     const dockerArgs = [
       ...DOCKER_RUN_ARGS,
       ...DOCKER_SANDBOX_ARGS,
+      ...hostUserArgs,
       ...dockerMountArgs,
       ...programArgs
     ]
