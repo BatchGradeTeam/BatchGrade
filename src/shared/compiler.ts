@@ -77,7 +77,7 @@ export type DockerInstallationInfo = {
 export const DOCKER_RUN_ARGS = [
   'run',
   '--rm' // Remove the container after it exits
-]
+] as const
 
 export const DOCKER_SANDBOX_ARGS = [
   '--network',
@@ -89,7 +89,7 @@ export const DOCKER_SANDBOX_ARGS = [
   '--pids-limit',
   '5' // Prevent fork bombs. For simple programs this is ok. For more complex programs, this may need to be increased.
   // More arguments will be added as needed
-]
+] as const
 
 // ***********************************************************************
 // Docker Compilation
