@@ -180,7 +180,12 @@ export function InstructorDashboard(): React.JSX.Element {
           ) : activeWorkspace === 'grading' ? (
             <GradingPanel />
           ) : activeWorkspace === 'gradingPlus' ? (
-            <GradingPlusPanel dataSourceMode="server" gradebookMode="local" />
+            <GradingPlusPanel
+              title="Grading+ Page"
+              description="Instructor batch grading workflow for compiling and judging multiple student submissions."
+              dataSourceMode="server"
+              gradebookMode="local"
+            />
           ) : activeWorkspace === 'about' ? (
             <AboutPanel />
           ) : (
