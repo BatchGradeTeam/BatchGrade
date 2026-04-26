@@ -114,6 +114,8 @@ export function DockerCppGradePanel({ sourceFiles }: DockerCppGradePanelProps): 
       return
     }
 
+    const executablePath = compileResult.executablePath
+
     setIsJudging(true)
     setJudgeResults([])
     setErrorMessage(null)
@@ -129,25 +131,38 @@ export function DockerCppGradePanel({ sourceFiles }: DockerCppGradePanelProps): 
               selectedInputFiles.map((filePath) => window.api.file.stringify(filePath))
             )
 
-      const nextResults: JudgeCaseResult[] = []
+      const nextResults = await Promise.all(
+        selectedOutputFiles.map(async (outputFile, index): Promise<JudgeCaseResult> => {
+          const inputFile = selectedInputFiles[index] ?? null
+          const expectedOutput = expectedOutputs[index] ?? ''
+          let result: DockerJudgeResult
 
-      for (const [index, outputFile] of selectedOutputFiles.entries()) {
-        const inputFile = selectedInputFiles[index] ?? null
-        const result = await window.api.compiler.dockerJudgeCpp({
-          executablePath: compileResult.executablePath,
-          stdin: stdinValues[index] ?? '',
-          expectedOutput: expectedOutputs[index] ?? '',
-          timeoutMs: 5000
-        })
+          try {
+            result = await window.api.compiler.dockerJudgeCpp({
+              executablePath,
+              stdin: stdinValues[index] ?? '',
+              expectedOutput,
+              timeoutMs: 5000
+            })
+          } catch (error) {
+            console.error(`Error running Docker judge test ${index + 1}:`, error)
+            result = {
+              passed: false,
+              timedOut: false,
+              expectedOutput,
+              actualOutput: 'Could not run this Docker judge test.'
+            }
+          }
 
-        nextResults.push({
-          id: `${outputFile}-${index}`,
-          label: `Test ${index + 1}`,
-          inputFile,
-          outputFile,
-          result
+          return {
+            id: `${outputFile}-${index}`,
+            label: `Test ${index + 1}`,
+            inputFile,
+            outputFile,
+            result
+          }
         })
-      }
+      )
 
       setJudgeResults(nextResults)
     } catch (error) {
