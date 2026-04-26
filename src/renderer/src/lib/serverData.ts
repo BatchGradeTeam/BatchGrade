@@ -892,6 +892,22 @@ export async function publishServerSubmission(
   if (error) {
     throw new Error(`Could not create Supabase submission row: ${error.message}`)
   }
+
+  if (!selfCheckSummary) {
+    return
+  }
+
+  try {
+    await insertServerGradeRow({
+      submissionId: result.submissionId,
+      score: selfCheckSummary.score,
+      feedback: buildSubmissionSelfCheckFeedback(selfCheckSummary),
+      gradedBy: authUser.id,
+      gradedAt: selfCheckSummary.completedAt
+    })
+  } catch (gradeError) {
+    throw new Error(`Could not create Supabase grade row: ${getErrorMessage(gradeError)}`)
+  }
 }
 
 export async function loadServerSubmissionsForGrading(
@@ -1030,6 +1046,27 @@ function buildSubmissionSelfCheckFeedback(summary: SubmissionSelfCheckSummary): 
   return `${summary.passedCount} / ${summary.totalCount} test cases passed during submission self-check.`
 }
 
+async function insertServerGradeRow(params: {
+  submissionId: string
+  score: number
+  feedback: string
+  gradedBy: string
+  gradedAt: string
+}): Promise<void> {
+  const { error } = await supabase.from('grades').insert({
+    grade_id: crypto.randomUUID(),
+    submission_id: params.submissionId,
+    score: params.score,
+    feedback: params.feedback,
+    graded_by: params.gradedBy,
+    graded_at: params.gradedAt
+  })
+
+  if (error) {
+    throw error
+  }
+}
+
 async function findServerStudentIdByIdentifier(identifier: string): Promise<string | null> {
   const { data, error } = await supabase
     .from('students')
@@ -1078,18 +1115,13 @@ export async function saveServerGradebookRecord(record: GradebookRecord): Promis
     }
   }
 
-  const { error: gradeError } = await supabase.from('grades').insert({
-    grade_id: crypto.randomUUID(),
-    submission_id: submissionId,
+  await insertServerGradeRow({
+    submissionId,
     score: record.score,
     feedback: buildBatchFeedback(record),
-    graded_by: authUser.id,
-    graded_at: new Date().toISOString()
+    gradedBy: authUser.id,
+    gradedAt: new Date().toISOString()
   })
-
-  if (gradeError) {
-    throw gradeError
-  }
 }
 
 async function loadStudentNames(studentIds: string[]): Promise<Map<string, string>> {
