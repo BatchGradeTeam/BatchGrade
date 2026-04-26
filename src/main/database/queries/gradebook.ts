@@ -1,12 +1,27 @@
 import { eq } from 'drizzle-orm'
 import { getDb } from '../index'
-import { grades, submissions } from '../schema'
+import { grades, submissions, assignments } from '../schema'
 import type { GradebookRecord } from '../../../shared/gradebookTypes'
 
 export function createGradebookRecord(record: GradebookRecord): GradebookRecord {
   const db = getDb()
 
   const submissionId = record.submissionId ?? crypto.randomUUID()
+
+  const existingAssignment = db
+    .select()
+    .from(assignments)
+    .where(eq(assignments.uuid, record.assignmentId))
+    .get()
+
+  if (!existingAssignment) {
+    db.insert(assignments)
+      .values({
+        uuid: record.assignmentId,
+        title: record.assignmentName ?? record.assignmentId
+      })
+      .run()
+  }
 
   db.insert(submissions)
     .values({
