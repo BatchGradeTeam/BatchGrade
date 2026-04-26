@@ -1,6 +1,10 @@
 import { useEffect, useState, type CSSProperties } from 'react'
-import type { GradebookRecord } from '../../../../shared/gradebookTypes'
-import { clearGradebookRecords, loadGradebookRecords } from '../../lib/gradebookStorage'
+import type { GradebookRecord, GradebookScoreSource } from '../../../../shared/gradebookTypes'
+import {
+  clearGradebookRecords,
+  loadGradebookRecords,
+  type GradebookStorageMode
+} from '../../lib/gradebookStorage'
 
 // =============================================================================
 // Helper Types
@@ -9,6 +13,7 @@ type StudentRecord = {
   id: string
   name: string
   score: string
+  scoreSource: string
   lastSubmitted: string
   status: string
 }
@@ -87,9 +92,14 @@ const calculateStats = (students: StudentRecord[]): GradeStats => {
  * Builds CSV-formatted string content for gradebook export.
  */
 const buildCSVContent = (students: StudentRecord[]): string => {
-  const headers = ['Student ID', 'Student Name', 'Highest Score']
+  const headers = ['Student ID', 'Student Name', 'Highest Score', 'Score Source']
 
-  const rows = students.map((student) => [student.id, student.name, student.score])
+  const rows = students.map((student) => [
+    student.id,
+    student.name,
+    student.score,
+    student.scoreSource
+  ])
 
   return [headers, ...rows].map((row) => row.join(',')).join('\n')
 }
@@ -101,12 +111,29 @@ const formatSubmittedTime = (timestamp: number): string => {
   return new Date(timestamp).toLocaleString()
 }
 
+function formatScoreSource(scoreSource?: GradebookScoreSource): string {
+  if (scoreSource === 'offline-batch-grade') {
+    return 'Offline batch grade'
+  }
+
+  return 'Submission self-check'
+}
+
+function formatStudentStatus(record: GradebookRecord): string {
+  if (record.status === 'failed') {
+    return 'Failed'
+  }
+
+  return record.scoreSource === 'offline-batch-grade' ? 'Graded' : 'Submitted'
+}
+
 /**
  * Builds Gradebook table rows from saved Gradebook records.
  */
 const buildStudentRecordsFromGradebook = (
   records: GradebookRecord[],
-  assignmentId: string
+  assignmentId: string,
+  defaultScoreSource: GradebookScoreSource
 ): StudentRecord[] => {
   const assignmentRecords = records.filter((record) => record.assignmentId === assignmentId)
 
@@ -125,13 +152,15 @@ const buildStudentRecordsFromGradebook = (
     const latestRecord = studentRecords.reduce((latest, current) =>
       current.submittedAt > latest.submittedAt ? current : latest
     )
+    const effectiveScoreSource = latestRecord.scoreSource ?? defaultScoreSource
 
     return {
       id: latestRecord.studentId,
       name: latestRecord.studentName,
       score: `${highestRecord.score}%`,
+      scoreSource: formatScoreSource(effectiveScoreSource),
       lastSubmitted: formatSubmittedTime(latestRecord.submittedAt),
-      status: latestRecord.status === 'failed' ? 'Failed' : 'Submitted'
+      status: formatStudentStatus({ ...latestRecord, scoreSource: effectiveScoreSource })
     }
   })
 }
@@ -142,31 +171,66 @@ const cellStyle: CSSProperties = {
   textAlign: 'left'
 }
 
-export function GradebookPanel(): React.JSX.Element {
+const sourceTagStyle: CSSProperties = {
+  display: 'inline-block',
+  padding: '2px 8px',
+  borderRadius: '999px',
+  backgroundColor: '#334155',
+  color: '#e2e8f0',
+  fontSize: '12px',
+  fontWeight: 600
+}
+
+interface GradebookPanelProps {
+  dataMode?: GradebookStorageMode
+  title?: string
+  description?: string
+  allowClear?: boolean
+}
+
+export function GradebookPanel({
+  dataMode = 'server',
+  title = 'Assignment Gradebook',
+  description,
+  allowClear
+}: GradebookPanelProps): React.JSX.Element {
   const [selectedAssignment, setSelectedAssignment] = useState('')
   const [gradebookRecords, setGradebookRecords] = useState<GradebookRecord[]>([])
   const [searchTerm, setSearchTerm] = useState('')
   const [sortOption, setSortOption] = useState('name-asc')
+  const canClearRecords = allowClear ?? dataMode === 'local'
 
   useEffect(() => {
     async function fetchGradebookRecords(): Promise<void> {
-      const records = await loadGradebookRecords()
+      const records = await loadGradebookRecords(dataMode)
       setGradebookRecords(records)
     }
 
     void fetchGradebookRecords()
-  }, [])
+  }, [dataMode])
 
   const assignmentOptions = Array.from(
-    new Set(gradebookRecords.map((record) => record.assignmentId))
+    new Map(
+      gradebookRecords.map((record) => [
+        record.assignmentId,
+        record.assignmentName ?? record.assignmentId
+      ])
+    ).entries()
   )
   const hasAssignments = assignmentOptions.length > 0
 
-  const effectiveSelectedAssignment = assignmentOptions.includes(selectedAssignment)
+  const assignmentIds = assignmentOptions.map(([assignmentId]) => assignmentId)
+  const effectiveSelectedAssignment = assignmentIds.includes(selectedAssignment)
     ? selectedAssignment
-    : (assignmentOptions[0] ?? '')
+    : (assignmentOptions[0]?.[0] ?? '')
+  const defaultScoreSource: GradebookScoreSource =
+    dataMode === 'local' ? 'offline-batch-grade' : 'submission-self-check'
 
-  const students = buildStudentRecordsFromGradebook(gradebookRecords, effectiveSelectedAssignment)
+  const students = buildStudentRecordsFromGradebook(
+    gradebookRecords,
+    effectiveSelectedAssignment,
+    defaultScoreSource
+  )
   const filteredStudents = filterStudents(students, searchTerm)
   const sortedStudents = sortStudents(filteredStudents, sortOption)
   const { averageScore, highestScore, lowestScore } = calculateStats(students)
@@ -197,7 +261,8 @@ export function GradebookPanel(): React.JSX.Element {
     <div className="panel-shell">
       <div style={{ color: 'var(--ev-c-gray-1)' }}>
         <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '0 24px' }}>
-          <h1>Assignment Gradebook</h1>
+          <h1>{title}</h1>
+          {description && <p style={{ marginTop: '8px', color: '#cbd5e1' }}>{description}</p>}
 
           <div style={{ margin: '16px 0' }}>
             <label htmlFor="assignment-select">Select Assignment: </label>
@@ -208,9 +273,9 @@ export function GradebookPanel(): React.JSX.Element {
               disabled={!hasAssignments}
             >
               {hasAssignments ? (
-                assignmentOptions.map((assignmentId) => (
+                assignmentOptions.map(([assignmentId, assignmentName]) => (
                   <option key={assignmentId} value={assignmentId}>
-                    Recently Graded
+                    {assignmentName}
                   </option>
                 ))
               ) : (
@@ -265,6 +330,7 @@ export function GradebookPanel(): React.JSX.Element {
                   <th style={cellStyle}>Student ID</th>
                   <th style={cellStyle}>Student Name</th>
                   <th style={cellStyle}>Highest Score</th>
+                  <th style={cellStyle}>Score Source</th>
                   <th style={cellStyle}>Last Submission Time</th>
                   <th style={cellStyle}>Status</th>
                 </tr>
@@ -272,13 +338,13 @@ export function GradebookPanel(): React.JSX.Element {
               <tbody>
                 {!hasAssignments ? (
                   <tr>
-                    <td style={cellStyle} colSpan={5}>
+                    <td style={cellStyle} colSpan={6}>
                       No graded assignments available.
                     </td>
                   </tr>
                 ) : sortedStudents.length === 0 ? (
                   <tr>
-                    <td style={cellStyle} colSpan={5}>
+                    <td style={cellStyle} colSpan={6}>
                       No records for this assignment.
                     </td>
                   </tr>
@@ -288,6 +354,9 @@ export function GradebookPanel(): React.JSX.Element {
                       <td style={cellStyle}>{student.id}</td>
                       <td style={cellStyle}>{student.name}</td>
                       <td style={cellStyle}>{student.score}</td>
+                      <td style={cellStyle}>
+                        <span style={sourceTagStyle}>{student.scoreSource}</span>
+                      </td>
                       <td style={cellStyle}>{student.lastSubmitted}</td>
                       <td style={cellStyle}>{student.status}</td>
                     </tr>
@@ -300,18 +369,20 @@ export function GradebookPanel(): React.JSX.Element {
           <div
             style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '8px' }}
           >
-            <button
-              onClick={() => void handleClearRecentlyGraded()}
-              disabled={!hasAssignments}
-              style={{
-                fontSize: '12px',
-                padding: '4px 8px',
-                opacity: hasAssignments ? 0.8 : 0.5,
-                cursor: hasAssignments ? 'pointer' : 'not-allowed'
-              }}
-            >
-              Clear Recently Graded
-            </button>
+            {canClearRecords && (
+              <button
+                onClick={() => void handleClearRecentlyGraded()}
+                disabled={!hasAssignments}
+                style={{
+                  fontSize: '12px',
+                  padding: '4px 8px',
+                  opacity: hasAssignments ? 0.8 : 0.5,
+                  cursor: hasAssignments ? 'pointer' : 'not-allowed'
+                }}
+              >
+                Clear Recently Graded
+              </button>
+            )}
             <button
               onClick={handleExportCSV}
               disabled={sortedStudents.length === 0}

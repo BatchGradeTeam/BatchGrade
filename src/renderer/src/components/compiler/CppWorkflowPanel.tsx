@@ -103,9 +103,7 @@ export function CppWorkflowPanel({
                   </div>
                 ))
               ) : (
-                <div className="cpp-file-list-empty">
-                  No files selected yet
-                </div>
+                <div className="cpp-file-list-empty">No files selected yet</div>
               )}
             </div>
           </div>
@@ -126,15 +124,11 @@ export function CppWorkflowPanel({
               <p className="cpp-summary-label">Compilation Status</p>
               <h2 className="cpp-summary-title">{compileStatus}</h2>
               <p className="cpp-summary-subtitle">
-                {compileResult
-                  ? compileResult.message
-                  : 'Choose files and compile to see results'}
+                {compileResult ? compileResult.message : 'Choose files and compile to see results'}
               </p>
             </div>
 
-            <span className={`cpp-status-pill ${compileStatusClass}`}>
-              {compileStatus}
-            </span>
+            <span className={`cpp-status-pill ${compileStatusClass}`}>{compileStatus}</span>
           </div>
 
           {compileResult && (
@@ -145,9 +139,7 @@ export function CppWorkflowPanel({
 
               <div className="cpp-terminal-window">
                 <pre className="cpp-terminal-content">
-                  {compileResult.stderr ||
-                    compileResult.stdout ||
-                    'No compiler output'}
+                  {compileResult.stderr || compileResult.stdout || 'No compiler output'}
                 </pre>
               </div>
 
@@ -214,18 +206,14 @@ export function CppWorkflowPanel({
 
                     <div className="cpp-terminal-window cpp-run-output-window">
                       <pre className="cpp-terminal-content cpp-run-output-content">
-                        {runResult.stdout ||
-                          runResult.stderr ||
-                          'No program output'}
+                        {runResult.stdout || runResult.stderr || 'No program output'}
                       </pre>
                     </div>
                   </div>
 
                   <div className="cpp-result-meta">
                     <div className="cpp-result-meta-item">
-                      <span className="cpp-result-meta-label">
-                        Execution Success
-                      </span>
+                      <span className="cpp-result-meta-label">Execution Success</span>
                       <span className="cpp-result-meta-value">
                         {runResult.executionSuccess ? 'Yes' : 'No'}
                       </span>
@@ -240,9 +228,7 @@ export function CppWorkflowPanel({
 
                     <div className="cpp-result-meta-item cpp-result-meta-item-full">
                       <span className="cpp-result-meta-label">Message</span>
-                      <span className="cpp-result-meta-value">
-                        {runResult.message}
-                      </span>
+                      <span className="cpp-result-meta-value">{runResult.message}</span>
                     </div>
                   </div>
                 </>

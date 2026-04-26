@@ -19,7 +19,7 @@
  * Students cannot supply their own expected output only instructors define it
  * via FR-9/FR-11.
  */
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import type { Assignment } from '../../../shared/types'
 
 type DiffLineType = 'match' | 'missing' | 'extra'
@@ -28,6 +28,8 @@ type DiffLine = {
   type: DiffLineType
   value: string
 }
+
+type TestCaseStatus = 'pending' | 'passed' | 'failed'
 
 type OutputDiffPanelProps = {
   /** FR-4: The student's actual program stdout from running their compiled code. */
@@ -40,6 +42,23 @@ type OutputDiffPanelProps = {
   selectedAssignmentId: string
   /** Called when the student changes the assignment dropdown. */
   onAssignmentChange: (uuid: string) => void
+  /** One or more assignment test-case runs to display as tabs. */
+  comparisonCases?: OutputComparisonCase[]
+  /** Whether saved test cases are currently being executed. */
+  isRunningTestCases?: boolean
+  /** Error from loading or running test cases. */
+  testCaseError?: string | null
+}
+
+export type OutputComparisonCase = {
+  id: string
+  label: string
+  inputLabel: string | null
+  actualOutput: string | null
+  expectedOutput: string | null
+  executionMessage?: string
+  executionSuccess?: boolean
+  timedOut?: boolean
 }
 
 /**
@@ -147,6 +166,49 @@ function linePrefix(type: DiffLineType): string {
   }
 }
 
+function getComparisonCaseStatus(testCase: OutputComparisonCase): TestCaseStatus {
+  if (testCase.actualOutput === null || testCase.expectedOutput === null) {
+    return 'pending'
+  }
+
+  const diff = computeDiff(toLines(testCase.expectedOutput), toLines(testCase.actualOutput))
+  return diff.every((line) => line.type === 'match') ? 'passed' : 'failed'
+}
+
+function testCaseTabStyle(status: TestCaseStatus, isActive: boolean): React.CSSProperties {
+  const palette: Record<
+    TestCaseStatus,
+    {
+      backgroundColor: string
+      borderColor: string
+      color: string
+    }
+  > = {
+    passed: {
+      backgroundColor: '#15803d',
+      borderColor: '#22c55e',
+      color: '#f0fdf4'
+    },
+    failed: {
+      backgroundColor: '#991b1b',
+      borderColor: '#ef4444',
+      color: '#fef2f2'
+    },
+    pending: {
+      backgroundColor: '#374151',
+      borderColor: '#6b7280',
+      color: '#f9fafb'
+    }
+  }
+
+  return {
+    ...palette[status],
+    border: `1px solid ${palette[status].borderColor}`,
+    opacity: isActive ? 1 : 0.78,
+    boxShadow: isActive ? `0 0 0 2px ${palette[status].borderColor}55` : 'none'
+  }
+}
+
 /**
  * @brief Side by side diff of instructor expected output vs student actual output.
  *
@@ -167,22 +229,34 @@ export function OutputDiffPanel({
   expectedOutput,
   assignments,
   selectedAssignmentId,
-  onAssignmentChange
+  onAssignmentChange,
+  comparisonCases = [],
+  isRunningTestCases = false,
+  testCaseError = null
 }: OutputDiffPanelProps): React.JSX.Element {
+  const [activeCaseId, setActiveCaseId] = useState<string | null>(null)
+  const activeCaseIndex = Math.max(
+    0,
+    comparisonCases.findIndex((testCase) => testCase.id === activeCaseId)
+  )
+  const activeCase = comparisonCases[activeCaseIndex] ?? null
+  const displayedActualOutput = activeCase ? activeCase.actualOutput : actualOutput
+  const displayedExpectedOutput = activeCase ? activeCase.expectedOutput : expectedOutput
+
   /**
    * @brief Memoized diff, recomputed only when inputs change.
    */
   const diffLines = useMemo<DiffLine[]>(() => {
-    if (!expectedOutput || !actualOutput) return []
-    return computeDiff(toLines(expectedOutput), toLines(actualOutput))
-  }, [expectedOutput, actualOutput])
+    if (!displayedExpectedOutput || !displayedActualOutput) return []
+    return computeDiff(toLines(displayedExpectedOutput), toLines(displayedActualOutput))
+  }, [displayedExpectedOutput, displayedActualOutput])
 
   const matchCount = diffLines.filter((l) => l.type === 'match').length
   const missingCount = diffLines.filter((l) => l.type === 'missing').length
   const extraCount = diffLines.filter((l) => l.type === 'extra').length
   const totalExpected = diffLines.filter((l) => l.type !== 'extra').length
 
-  const isReady = expectedOutput !== null && actualOutput !== null
+  const isReady = displayedExpectedOutput !== null && displayedActualOutput !== null
 
   return (
     <div
@@ -195,7 +269,7 @@ export function OutputDiffPanel({
     >
       <h2 style={{ marginBottom: '0.5rem' }}>Output Comparison</h2>
       <p style={{ marginBottom: '1rem', fontSize: '14px', color: '#ccc' }}>
-        Your output is compared line-by-line against the instructor&apos;s expected output.
+        Your code is run against the assignment&apos;s test cases and compared line-by-line.
         Whitespace differences are ignored.
       </p>
 
@@ -219,6 +293,74 @@ export function OutputDiffPanel({
           ))}
         </select>
       </div>
+
+      {comparisonCases.length > 0 && (
+        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '1rem' }}>
+          {comparisonCases.map((testCase, index) => {
+            const isActive = index === activeCaseIndex
+            const status = getComparisonCaseStatus(testCase)
+
+            return (
+              <button
+                key={testCase.id}
+                type="button"
+                onClick={() => setActiveCaseId(testCase.id)}
+                className="compact-button output-case-tab"
+                style={testCaseTabStyle(status, isActive)}
+                title={`${testCase.label}: ${status}`}
+              >
+                {testCase.label}
+              </button>
+            )
+          })}
+        </div>
+      )}
+
+      {activeCase && (
+        <div
+          style={{
+            border: '1px solid #444',
+            padding: '10px',
+            marginBottom: '1rem',
+            backgroundColor: '#1f1f1f',
+            fontSize: '13px'
+          }}
+        >
+          <p>Input: {activeCase.inputLabel ?? 'No input'}</p>
+          {activeCase.executionMessage && <p>Run result: {activeCase.executionMessage}</p>}
+          {activeCase.timedOut && <p style={{ color: '#ff6b6b' }}>Timed out.</p>}
+        </div>
+      )}
+
+      {isRunningTestCases && (
+        <div
+          style={{
+            border: '1px solid #2f6690',
+            padding: '10px',
+            marginBottom: '1rem',
+            backgroundColor: '#102536',
+            color: '#81c3d7',
+            fontSize: '14px'
+          }}
+        >
+          Running assignment test cases...
+        </div>
+      )}
+
+      {testCaseError && (
+        <div
+          style={{
+            border: '1px solid #ff4444',
+            padding: '10px',
+            marginBottom: '1rem',
+            backgroundColor: '#3b0000',
+            color: '#ff6b6b',
+            fontSize: '14px'
+          }}
+        >
+          {testCaseError}
+        </div>
+      )}
 
       <div
         style={{
@@ -282,13 +424,13 @@ export function OutputDiffPanel({
             fontSize: '14px'
           }}
         >
-          {actualOutput === null && expectedOutput === null && (
+          {displayedActualOutput === null && displayedExpectedOutput === null && (
             <p>Select an assignment and run your program to see the output comparison.</p>
           )}
-          {actualOutput === null && expectedOutput !== null && (
-            <p>Run your compiled program to compare your output against the expected output.</p>
+          {displayedActualOutput === null && displayedExpectedOutput !== null && (
+            <p>Compile your code to run the assignment test cases.</p>
           )}
-          {actualOutput !== null && expectedOutput === null && (
+          {displayedActualOutput !== null && displayedExpectedOutput === null && (
             <p>Select an assignment above to load the expected output for comparison.</p>
           )}
         </div>

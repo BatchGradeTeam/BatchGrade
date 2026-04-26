@@ -27,13 +27,21 @@ import { VALID_ROLES, STUDENT_ROLE, INSTRUCTOR_ROLE } from '../../../shared/type
  * Contains the current values of form inputs.
  */
 type FormState = {
+  firstName: string
+  lastName: string
   email: string
   password: string
   role: typeof STUDENT_ROLE | typeof INSTRUCTOR_ROLE
 }
 
 /** Default empty form state */
-const emptyForm: FormState = { email: '', password: '', role: STUDENT_ROLE }
+const emptyForm: FormState = {
+  firstName: '',
+  lastName: '',
+  email: '',
+  password: '',
+  role: STUDENT_ROLE
+}
 
 /**
  * UserPanel Component
@@ -99,6 +107,8 @@ export function UserPanel(): React.JSX.Element {
     setShowUsers(false)
     setEditingUuid(user.uuid)
     setForm({
+      firstName: user.firstName,
+      lastName: user.lastName,
       email: user.email,
       password: '',
       role: VALID_ROLES.includes(user.role as typeof STUDENT_ROLE | typeof INSTRUCTOR_ROLE)
@@ -128,8 +138,20 @@ export function UserPanel(): React.JSX.Element {
    * and refreshes the user list on success.
    */
   async function handleSubmit(): Promise<void> {
+    const trimmedFirstName = form.firstName.trim()
+    const trimmedLastName = form.lastName.trim()
     const trimmedEmail = form.email.trim()
     const trimmedPassword = form.password.trim()
+
+    if (!trimmedFirstName) {
+      setError('First name is required.')
+      return
+    }
+
+    if (!trimmedLastName) {
+      setError('Last name is required.')
+      return
+    }
 
     if (!trimmedEmail) {
       setError('Email is required.')
@@ -153,6 +175,8 @@ export function UserPanel(): React.JSX.Element {
         })
       } else {
         await window.api.users.create({
+          firstName: trimmedFirstName,
+          lastName: trimmedLastName,
           email: trimmedEmail,
           password: trimmedPassword,
           role: form.role
@@ -187,6 +211,22 @@ export function UserPanel(): React.JSX.Element {
 
       {/* Form section for adding/editing users */}
       <div className="userpanel-form">
+        <input
+          type="firstName"
+          placeholder="first name"
+          value={form.firstName}
+          onChange={(e) => setForm((f) => ({ ...f, firstName: e.target.value }))}
+          onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}
+          className="userpanel-input"
+        />
+        <input
+          type="lastName"
+          placeholder="last name"
+          value={form.lastName}
+          onChange={(e) => setForm((f) => ({ ...f, lastName: e.target.value }))}
+          onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}
+          className="userpanel-input"
+        />
         <input
           type="email"
           placeholder="email"

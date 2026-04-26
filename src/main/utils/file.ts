@@ -2,7 +2,20 @@
 /* TEST ONLY DELETE WHEN DONE */
 // This info was more or less copied from: https://www.electronjs.org/docs/latest/tutorial/ipc
 // Fitted to our project needs
-import { dialog } from 'electron'
+import { app, dialog } from 'electron'
+
+type ServerSubmissionFile = {
+  relativePath: string
+  fileName: string
+  content: string
+}
+
+type ServerSubmissionBundle = {
+  submissionId: string
+  studentId: string
+  studentName: string
+  files: ServerSubmissionFile[]
+}
 
 async function selectFile(): Promise<string | undefined> {
   const { canceled, filePaths } = await dialog.showOpenDialog({
@@ -47,6 +60,23 @@ type SubmissionFolderGroup = {
   folderName: string
   folderPath: string
   cppFiles: string[]
+  studentId?: string
+  studentName?: string
+  serverSubmissionId?: string
+}
+
+function sanitizeFileSegment(segment: string): string {
+  return segment.replace(/[^a-zA-Z0-9._-]/g, '_') || 'file'
+}
+
+function buildSafeRelativePath(relativePath: string, fallbackFileName: string): string[] {
+  const parts = relativePath
+    .replace(/\\/g, '/')
+    .split('/')
+    .filter((part) => part && part !== '.' && part !== '..')
+    .map(sanitizeFileSegment)
+
+  return parts.length > 0 ? parts : [sanitizeFileSegment(fallbackFileName)]
 }
 
 /**
@@ -143,4 +173,50 @@ async function selectFilesFromFolder(): Promise<string[]> {
   return files
 }
 
-export { selectFile, stringifyFile, selectCppFiles, selectSubmissionFolder, selectFilesFromFolder }
+async function materializeServerSubmissions(
+  bundles: ServerSubmissionBundle[]
+): Promise<SubmissionFolderGroup[]> {
+  const fs = await import('fs/promises')
+  const path = await import('path')
+  const rootFolderPath = path.join(app.getPath('temp'), 'batchgrade-server-submissions')
+
+  await fs.mkdir(rootFolderPath, { recursive: true })
+
+  return Promise.all(
+    bundles.map(async (bundle) => {
+      const displayName = bundle.studentName || bundle.studentId || bundle.submissionId
+      const folderName = sanitizeFileSegment(`${displayName}-${bundle.submissionId}`)
+      const folderPath = path.join(rootFolderPath, folderName)
+      const cppFiles: string[] = []
+
+      await fs.mkdir(folderPath, { recursive: true })
+
+      for (const file of bundle.files) {
+        const safeRelativeParts = buildSafeRelativePath(file.relativePath, file.fileName)
+        const filePath = path.join(folderPath, ...safeRelativeParts)
+
+        await fs.mkdir(path.dirname(filePath), { recursive: true })
+        await fs.writeFile(filePath, file.content, 'utf8')
+        cppFiles.push(filePath)
+      }
+
+      return {
+        folderName,
+        folderPath,
+        cppFiles,
+        studentId: bundle.studentId,
+        studentName: bundle.studentName,
+        serverSubmissionId: bundle.submissionId
+      }
+    })
+  )
+}
+
+export {
+  selectFile,
+  stringifyFile,
+  selectCppFiles,
+  selectSubmissionFolder,
+  selectFilesFromFolder,
+  materializeServerSubmissions
+}

@@ -10,32 +10,32 @@ beforeEach(async () => {
 
 describe('User Queries', () => {
   it('Creates a user', () => {
-    const user = createUser({ email: 'test@test.com', password: 'hashed_pw' })
+    const user = createUser({ firstName: 'John', lastName: 'Doe', email: 'test@test.com', password: 'hashed_pw' })
     expect(user.email).toBe('test@test.com')
     expect(user.uuid).toBeTruthy()
   })
 
   it('Gets all users', () => {
-    createUser({ email: 'a@test.com', password: 'pw' })
-    createUser({ email: 'b@test.com', password: 'pw' })
+    createUser({ firstName: 'John', lastName: 'Doe', email: 'a@test.com', password: 'pw' })
+    createUser({ firstName: 'Mary', lastName: 'Sue', email: 'b@test.com', password: 'pw' })
     expect(getAllUsers()).toHaveLength(2)
   })
 
   it('Updates a user email', () => {
-    const user = createUser({ email: 'old@test.com', password: 'pw' })
+    const user = createUser({ firstName: 'Al', lastName: 'Yank',email: 'old@test.com', password: 'pw' })
     const updated = updateUser({ uuid: user.uuid, email: 'new@test.com', password: 'pw' })
     expect(updated.email).toBe('new@test.com')
   })
 
   it('Updates only one field when partial payload is provided', () => {
-    const user = createUser({ email: 'keep@test.com', password: 'secret' })
+    const user = createUser({ firstName: 'John', lastName: 'Doe', email: 'keep@test.com', password: 'secret' })
     const updated = updateUser({ uuid: user.uuid, email: 'changed@test.com' })
     expect(updated.email).toBe('changed@test.com')
     expect(updated.password).toBe('secret')
   })
 
   it('Deletes a user', () => {
-    const user = createUser({ email: 'gone@test.com', password: 'pw' })
+    const user = createUser({ firstName: 'John', lastName: 'Doe', email: 'gone@test.com', password: 'pw' })
     deleteUser(user.uuid)
     expect(getAllUsers()).toHaveLength(0)
   })
@@ -51,13 +51,13 @@ describe('User Queries', () => {
   })
 
   it('Throws when updating without any fields', () => {
-    const user = createUser({ email: 'blank@test.com', password: 'pw' })
+    const user = createUser({ firstName: 'Sam', lastName: 'Doe', email: 'blank@test.com', password: 'pw' })
     expect(() => updateUser({ uuid: user.uuid })).toThrow('No fields provided to update')
   })
 
   it('Throws when creating a duplicate email', () => {
-    createUser({ email: 'dupe@test.com', password: 'pw' })
-    expect(() => createUser({ email: 'dupe@test.com', password: 'pw2' })).toThrow(
+    createUser({ firstName: 'John', lastName: 'Doe', email: 'dupe@test.com', password: 'pw' })
+    expect(() => createUser({ firstName: 'John', lastName: 'Doe', email: 'dupe@test.com', password: 'pw2' })).toThrow(
       /UNIQUE constraint failed/i
     )
   })
@@ -70,14 +70,14 @@ it('userWithInvalidRole_getAllUsers_throwsInvalidRole', async () => {
     const { users } = await import('../../src/main/database/schema')
     getDb()
       .insert(users)
-      .values({ email: 'badrole@test.com', password: 'pw', role: 'superadmin' })
+      .values({ firstName: 'John', lastName: 'Doe', email: 'badrole@test.com', password: 'pw', role: 'superadmin' })
       .run()
  
     expect(() => getAllUsers()).toThrow('Invalid role')
   })
  
   it('userWithValidInstructorRole_updateRole_reflectsNewRole', () => {
-    const user = createUser({ email: 'rolechange@test.com', password: 'pw' })
+    const user = createUser({ firstName: 'John', lastName: 'Doe', email: 'rolechange@test.com', password: 'pw' })
     const updated = updateUser({ uuid: user.uuid, role: 'instructor' })
     expect(updated.role).toBe('instructor')
   })

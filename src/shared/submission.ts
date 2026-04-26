@@ -1,5 +1,13 @@
 import type { CompileCppResult } from './compiler'
 
+export type SubmissionSelfCheckSummary = {
+  score: number
+  passedCount: number
+  totalCount: number
+  feedback?: string
+  completedAt: string
+}
+
 export type SubmissionCompileSnapshot = Pick<
   CompileCppResult,
   'compileSuccess' | 'compilerPath' | 'sourceFiles' | 'stdout' | 'stderr' | 'message'

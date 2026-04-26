@@ -33,7 +33,9 @@ const fileApi: FileAPI = {
   selectCppFiles: () => ipcRenderer.invoke('file:selectCppFiles'),
   stringify: (filePath: string) => ipcRenderer.invoke('file:stringify', filePath),
   selectSubmissionFolder: () => ipcRenderer.invoke('file:selectSubmissionFolder'),
-  selectFilesFromFolder: () => ipcRenderer.invoke('file:selectFilesFromFolder')
+  selectFilesFromFolder: () => ipcRenderer.invoke('file:selectFilesFromFolder'),
+  materializeServerSubmissions: (bundles) =>
+    ipcRenderer.invoke('file:materializeServerSubmissions', bundles)
 }
 
 const submissionsApi: SubmissionsAPI = {
@@ -44,7 +46,10 @@ const assignmentsApi: AssignmentsAPI = {
   getAll: () => ipcRenderer.invoke('assignments:getAll'),
   create: (data) => ipcRenderer.invoke('assignments:create', data),
   update: (data) => ipcRenderer.invoke('assignments:update', data),
-  delete: (uuid) => ipcRenderer.invoke('assignments:delete', uuid)
+  delete: (uuid) => ipcRenderer.invoke('assignments:delete', uuid),
+  getTestCases: (assignmentUuid) => ipcRenderer.invoke('assignments:getTestCases', assignmentUuid),
+  replaceTestCases: (assignmentUuid, testCases) =>
+    ipcRenderer.invoke('assignments:replaceTestCases', assignmentUuid, testCases)
 }
 
 // Custom APIs for renderer
