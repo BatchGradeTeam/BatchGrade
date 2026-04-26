@@ -17,6 +17,12 @@ import {
 } from './database/queries'
 import { deleteAssignment } from './database/queries'
 
+import {
+  createGradebookRecord,
+  getGradebookRecords,
+  clearGradebookRecords
+} from './database/queries'
+
 /* TEST ONLY DELETE WHEN DONE */
 import {
   selectFile,
@@ -185,6 +191,13 @@ app.whenReady().then(() => {
         }
       ) => createSubmission(data)
     )
+
+    // Gradebook (Local SQLite)
+    ipcMain.handle('gradebook:getAll', () => getGradebookRecords())
+
+    ipcMain.handle('gradebook:create', (_event, record) => createGradebookRecord(record))
+
+    ipcMain.handle('gradebook:clear', () => clearGradebookRecords())
 
     ipcMain.handle('submissions:getById', (_e, submissionId: string) =>
       getSubmissionById(submissionId)
