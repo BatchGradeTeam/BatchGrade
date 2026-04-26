@@ -1,6 +1,6 @@
 import { eq } from 'drizzle-orm'
 import { getDb } from '../index'
-import { grades, submissions, assignments } from '../schema'
+import { grades, submissions } from '../schema'
 import type { GradebookRecord } from '../../../shared/gradebookTypes'
 
 export function createGradebookRecord(record: GradebookRecord): GradebookRecord {
