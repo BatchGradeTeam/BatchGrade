@@ -19,6 +19,11 @@ type DockerCompileOptions = DockerCompileRequest & {
   language?: Language
 }
 
+function joinWithExistingSeparator(directory: string, filename: string): string {
+  const separator = directory.includes('\\') ? '\\' : '/'
+  return `${directory.replace(/[\\/]+$/, '')}${separator}${filename}`
+}
+
 function buildDockerCompileResult(
   result: Omit<DockerCompileResult, 'compileSuccess' | 'compilerPath' | 'sourceFiles'>,
   sourceFiles: string[]
@@ -71,7 +76,7 @@ async function dockerCompile(request: DockerCompileOptions): Promise<DockerCompi
   if (config.exeExtension) {
     executableName += config.exeExtension
   }
-  const executablePath = join(tempDirectory, executableName)
+  const executablePath = joinWithExistingSeparator(tempDirectory, executableName)
   const workingDir = getCommonWorkingDirectory(sourceFilesForLang)
 
   // Get relative paths for compilation
