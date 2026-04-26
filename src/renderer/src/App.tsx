@@ -88,9 +88,9 @@ export function App(): React.JSX.Element {
           {/* Guest DashBoard */}
           <Route path="/guestDashboard" element={<GuestDashboard />} />
           {/* Guest Batch Interface */}
-          
+
           {/* Guest Student Interface */}
-          
+
           {/* Student Interface */}
           <Route
             path="/studentdashboard"

@@ -960,8 +960,8 @@ export function GradingPlusPanel({
 
         <div className="mt-5 grid gap-3">
           <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-            If the program requires user input, add input files before grading. Otherwise, test cases
-            may fail due to missing input.
+            If the program requires user input, add input files before grading. Otherwise, test
+            cases may fail due to missing input.
           </div>
 
           <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
