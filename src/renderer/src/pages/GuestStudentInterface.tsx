@@ -70,7 +70,7 @@ export function GuestStudentInterface(): React.JSX.Element {
 
       <div className="button-container">
         <button className="secondary-button" onClick={() => navigate('/guestDashboard')}>
-          Go Home
+          Back to Dashboard
         </button>
       </div>
 
