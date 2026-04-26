@@ -72,7 +72,12 @@ export function GuestDashboard(): React.JSX.Element {
           {activeWorkspace === 'grading' ? (
             <GradingPanel />
           ) : activeWorkspace === 'gradingPlus' ? (
-            <GradingPlusPanel />
+            <GradingPlusPanel
+              title="Grading+"
+              description="Batch grade multiple local submissions"
+              dataSourceMode="local"
+              gradebookMode="guest"
+            />
           ) : activeWorkspace === 'about' ? (
             <AboutPanel />
           ) : (

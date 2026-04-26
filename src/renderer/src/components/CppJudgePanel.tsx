@@ -221,7 +221,8 @@ export function CppJudgePanel({ compileResult }: CppJudgePanelProps): React.JSX.
           </div>
 
           <div className="mt-4 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700">
-            {selectedInputFiles.length} input file{selectedInputFiles.length === 1 ? '' : 's'} selected
+            {selectedInputFiles.length} input file{selectedInputFiles.length === 1 ? '' : 's'}{' '}
+            selected
           </div>
 
           {selectedInputFiles.length > 0 && (
@@ -265,7 +266,8 @@ export function CppJudgePanel({ compileResult }: CppJudgePanelProps): React.JSX.
           </div>
 
           <div className="mt-4 rounded-xl border border-blue-200 bg-white px-3 py-2 text-sm text-slate-700">
-            {selectedOutputFiles.length} output file{selectedOutputFiles.length === 1 ? '' : 's'} selected
+            {selectedOutputFiles.length} output file{selectedOutputFiles.length === 1 ? '' : 's'}{' '}
+            selected
           </div>
 
           {selectedOutputFiles.length > 0 && (
@@ -322,9 +324,7 @@ export function CppJudgePanel({ compileResult }: CppJudgePanelProps): React.JSX.
             <div
               key={test.id}
               className={`rounded-2xl border bg-white p-5 shadow-sm ${
-                test.result.passed
-                  ? 'border-green-200'
-                  : 'border-red-200'
+                test.result.passed ? 'border-green-200' : 'border-red-200'
               }`}
             >
               <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
@@ -332,9 +332,7 @@ export function CppJudgePanel({ compileResult }: CppJudgePanelProps): React.JSX.
                   <h3 className="text-lg font-semibold text-slate-900">{test.label}</h3>
                   <p
                     className={`mt-1 inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${
-                      test.result.passed
-                        ? 'bg-green-100 text-green-700'
-                        : 'bg-red-100 text-red-700'
+                      test.result.passed ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
                     }`}
                   >
                     {test.result.passed ? 'Pass' : 'Fail'}
@@ -342,7 +340,10 @@ export function CppJudgePanel({ compileResult }: CppJudgePanelProps): React.JSX.
                 </div>
 
                 <div className="text-sm text-slate-600">
-                  Timed Out: <span className="font-medium text-slate-800">{test.result.timedOut ? 'Yes' : 'No'}</span>
+                  Timed Out:{' '}
+                  <span className="font-medium text-slate-800">
+                    {test.result.timedOut ? 'Yes' : 'No'}
+                  </span>
                 </div>
               </div>
 
