@@ -121,6 +121,7 @@ export type AppAPI = {
   file: FileAPI
   compiler: CompilerAPI
   submissions: SubmissionsAPI
+  gradebook: GradebookAPI
 }
 
 export type GradebookAPI = {
