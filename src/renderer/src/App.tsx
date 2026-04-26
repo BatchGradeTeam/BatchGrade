@@ -25,9 +25,9 @@ import { INSTRUCTOR_ROLE, STUDENT_ROLE } from '../../shared/types'
 import { AuthProvider } from './components/AuthContext'
 import { ProtectedRoute } from './components/ProtectedRoute'
 import { About } from './pages/About'
-import { GuestBatchGradeInterface } from './pages/GuestBatchGradeInterface'
+//import { GuestBatchGradeInterface } from './pages/GuestBatchGradeInterface'
 import { GuestDashboard } from './pages/GuestDashboard'
-import { GuestStudentInterface } from './pages/GuestStudentInterface'
+//import { GuestStudentInterface } from './pages/GuestStudentInterface'
 import { InstructorDashboard } from './pages/InstructorDashboard'
 import { Login } from './pages/Login'
 import { SignUp } from './pages/SignUp'
@@ -88,9 +88,9 @@ export function App(): React.JSX.Element {
           {/* Guest DashBoard */}
           <Route path="/guestDashboard" element={<GuestDashboard />} />
           {/* Guest Batch Interface */}
-          <Route path="/guestBatchGradeInterface" element={<GuestBatchGradeInterface />} />
+          
           {/* Guest Student Interface */}
-          <Route path="/guestStudentInterface" element={<GuestStudentInterface />} />
+          
           {/* Student Interface */}
           <Route
             path="/studentdashboard"
