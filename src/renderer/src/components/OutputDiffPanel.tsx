@@ -21,6 +21,7 @@
  */
 import { useMemo, useState } from 'react'
 import type { Assignment } from '../../../shared/types'
+import '../assets/styles/OutputDiffPanel.css'
 
 type DiffLineType = 'match' | 'missing' | 'extra'
 
@@ -138,19 +139,15 @@ function computeDiff(expected: string[], actual: string[]): DiffLine[] {
   return result
 }
 
-function lineStyle(type: DiffLineType): React.CSSProperties {
+function lineClass(type: DiffLineType): string {
   switch (type) {
     case 'missing':
-      return { backgroundColor: '#3b0000', color: '#ff6b6b', borderLeft: '3px solid #ff4444' }
+      return 'output-diff-line output-diff-line-missing'
     case 'extra':
-      return { backgroundColor: '#002200', color: '#69db7c', borderLeft: '3px solid #40c057' }
+      return 'output-diff-line output-diff-line-extra'
     case 'match':
     default:
-      return {
-        backgroundColor: 'transparent',
-        color: '#e0e0e0',
-        borderLeft: '3px solid transparent'
-      }
+      return 'output-diff-line output-diff-line-match'
   }
 }
 
@@ -175,38 +172,9 @@ function getComparisonCaseStatus(testCase: OutputComparisonCase): TestCaseStatus
   return diff.every((line) => line.type === 'match') ? 'passed' : 'failed'
 }
 
-function testCaseTabStyle(status: TestCaseStatus, isActive: boolean): React.CSSProperties {
-  const palette: Record<
-    TestCaseStatus,
-    {
-      backgroundColor: string
-      borderColor: string
-      color: string
-    }
-  > = {
-    passed: {
-      backgroundColor: '#15803d',
-      borderColor: '#22c55e',
-      color: '#f0fdf4'
-    },
-    failed: {
-      backgroundColor: '#991b1b',
-      borderColor: '#ef4444',
-      color: '#fef2f2'
-    },
-    pending: {
-      backgroundColor: '#374151',
-      borderColor: '#6b7280',
-      color: '#f9fafb'
-    }
-  }
-
-  return {
-    ...palette[status],
-    border: `1px solid ${palette[status].borderColor}`,
-    opacity: isActive ? 1 : 0.78,
-    boxShadow: isActive ? `0 0 0 2px ${palette[status].borderColor}55` : 'none'
-  }
+function testCaseTabClass(status: TestCaseStatus, isActive: boolean): string {
+  const activeClass = isActive ? ' is-active' : ''
+  return `output-case-tab compact-button output-case-tab-${status}${activeClass}`
 }
 
 /**
@@ -257,33 +225,22 @@ export function OutputDiffPanel({
   const totalExpected = diffLines.filter((l) => l.type !== 'extra').length
 
   const isReady = displayedExpectedOutput !== null && displayedActualOutput !== null
+  const hasPerfectMatch = missingCount === 0 && extraCount === 0
 
   return (
-    <div
-      style={{
-        border: '1px solid gray',
-        padding: '1rem',
-        marginTop: '1rem',
-        backgroundColor: '#2b2b2b'
-      }}
-    >
-      <h2 style={{ marginBottom: '0.5rem' }}>Output Comparison</h2>
-      <p style={{ marginBottom: '1rem', fontSize: '14px', color: '#ccc' }}>
+    <section className="output-diff-panel panel-shell">
+      <h2 className="output-diff-title">Output Comparison</h2>
+      <p className="output-diff-description">
         Your code is run against the assignment&apos;s test cases and compared line-by-line.
         Whitespace differences are ignored.
       </p>
 
-      <div style={{ marginBottom: '1rem' }}>
-        <label
-          style={{ display: 'block', marginBottom: '0.4rem', fontSize: '14px', color: '#ccc' }}
-        >
-          Assignment
-        </label>
+      <div className="output-diff-assignment-group">
+        <label className="output-diff-assignment-label">Assignment</label>
         <select
           value={selectedAssignmentId}
           onChange={(e) => onAssignmentChange(e.target.value)}
-          className="panel-input"
-          style={{ maxWidth: '480px' }}
+          className="panel-input output-diff-assignment-select"
         >
           {assignments.length === 0 && <option value="">No assignments available</option>}
           {assignments.map((a) => (
@@ -295,7 +252,7 @@ export function OutputDiffPanel({
       </div>
 
       {comparisonCases.length > 0 && (
-        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '1rem' }}>
+        <div className="output-diff-tabs">
           {comparisonCases.map((testCase, index) => {
             const isActive = index === activeCaseIndex
             const status = getComparisonCaseStatus(testCase)
@@ -305,8 +262,7 @@ export function OutputDiffPanel({
                 key={testCase.id}
                 type="button"
                 onClick={() => setActiveCaseId(testCase.id)}
-                className="compact-button output-case-tab"
-                style={testCaseTabStyle(status, isActive)}
+                className={testCaseTabClass(status, isActive)}
                 title={`${testCase.label}: ${status}`}
               >
                 {testCase.label}
@@ -317,113 +273,38 @@ export function OutputDiffPanel({
       )}
 
       {activeCase && (
-        <div
-          style={{
-            border: '1px solid #444',
-            padding: '10px',
-            marginBottom: '1rem',
-            backgroundColor: '#1f1f1f',
-            fontSize: '13px'
-          }}
-        >
+        <div className="output-diff-active-case">
           <p>Input: {activeCase.inputLabel ?? 'No input'}</p>
           {activeCase.executionMessage && <p>Run result: {activeCase.executionMessage}</p>}
-          {activeCase.timedOut && <p style={{ color: '#ff6b6b' }}>Timed out.</p>}
+          {activeCase.timedOut && <p className="output-diff-active-case-timeout">Timed out.</p>}
         </div>
       )}
 
       {isRunningTestCases && (
-        <div
-          style={{
-            border: '1px solid #2f6690',
-            padding: '10px',
-            marginBottom: '1rem',
-            backgroundColor: '#102536',
-            color: '#81c3d7',
-            fontSize: '14px'
-          }}
-        >
-          Running assignment test cases...
-        </div>
+        <div className="output-diff-banner output-diff-banner-running">Running assignment test cases...</div>
       )}
 
       {testCaseError && (
-        <div
-          style={{
-            border: '1px solid #ff4444',
-            padding: '10px',
-            marginBottom: '1rem',
-            backgroundColor: '#3b0000',
-            color: '#ff6b6b',
-            fontSize: '14px'
-          }}
-        >
-          {testCaseError}
-        </div>
+        <div className="output-diff-banner output-diff-banner-error">{testCaseError}</div>
       )}
 
-      <div
-        style={{
-          display: 'flex',
-          gap: '1.5rem',
-          marginBottom: '1rem',
-          fontSize: '13px',
-          flexWrap: 'wrap'
-        }}
-      >
-        <span style={{ color: '#e0e0e0' }}>
-          <span
-            style={{
-              display: 'inline-block',
-              width: '12px',
-              height: '12px',
-              backgroundColor: '#555',
-              marginRight: '6px',
-              verticalAlign: 'middle'
-            }}
-          />
+      <div className="output-diff-legend">
+        <span className="output-diff-legend-item output-diff-legend-item-match">
+          <span className="output-diff-legend-swatch output-diff-legend-swatch-match" />
           Match
         </span>
-        <span style={{ color: '#ff6b6b' }}>
-          <span
-            style={{
-              display: 'inline-block',
-              width: '12px',
-              height: '12px',
-              backgroundColor: '#3b0000',
-              border: '1px solid #ff4444',
-              marginRight: '6px',
-              verticalAlign: 'middle'
-            }}
-          />
+        <span className="output-diff-legend-item output-diff-legend-item-missing">
+          <span className="output-diff-legend-swatch output-diff-legend-swatch-missing" />
           Missing / Wrong Output
         </span>
-        <span style={{ color: '#69db7c' }}>
-          <span
-            style={{
-              display: 'inline-block',
-              width: '12px',
-              height: '12px',
-              backgroundColor: '#002200',
-              border: '1px solid #40c057',
-              marginRight: '6px',
-              verticalAlign: 'middle'
-            }}
-          />
+        <span className="output-diff-legend-item output-diff-legend-item-extra">
+          <span className="output-diff-legend-swatch output-diff-legend-swatch-extra" />
           Superfluous Output
         </span>
       </div>
 
       {!isReady && (
-        <div
-          style={{
-            border: '1px solid #444',
-            padding: '12px',
-            backgroundColor: '#1f1f1f',
-            color: '#aaa',
-            fontSize: '14px'
-          }}
-        >
+        <div className="output-diff-info-box">
           {displayedActualOutput === null && displayedExpectedOutput === null && (
             <p>Select an assignment and run your program to see the output comparison.</p>
           )}
@@ -438,20 +319,16 @@ export function OutputDiffPanel({
 
       {isReady && diffLines.length > 0 && (
         <div
-          style={{
-            border: `1px solid ${missingCount === 0 && extraCount === 0 ? '#2f9e44' : '#c92a2a'}`,
-            backgroundColor: missingCount === 0 && extraCount === 0 ? '#1a3a1a' : '#3b0000',
-            padding: '10px',
-            marginBottom: '1rem',
-            fontSize: '14px'
-          }}
+          className={`output-diff-summary-banner ${
+            hasPerfectMatch ? 'output-diff-summary-banner-success' : 'output-diff-summary-banner-failed'
+          }`}
         >
-          {missingCount === 0 && extraCount === 0 ? (
-            <p style={{ color: '#69db7c' }}>
+          {hasPerfectMatch ? (
+            <p className="output-diff-summary-text output-diff-summary-text-success">
               ✓ All {matchCount} line{matchCount === 1 ? '' : 's'} match. Output is correct.
             </p>
           ) : (
-            <p style={{ color: '#ff6b6b' }}>
+            <p className="output-diff-summary-text output-diff-summary-text-failed">
               {matchCount} / {totalExpected} line{totalExpected === 1 ? '' : 's'} matched.
               {missingCount > 0 && ` ${missingCount} missing.`}
               {extraCount > 0 && ` ${extraCount} extra.`}
@@ -464,45 +341,23 @@ export function OutputDiffPanel({
           Side-by-side diff
       ---------------------------------------------------------------- */}
       {isReady && (
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+        <div className="output-diff-grid">
           {/* Actual output column */}
-          <div>
-            <h4 style={{ fontSize: '15px', marginBottom: '6px' }}>
+          <div className="output-diff-column">
+            <h4 className="output-diff-column-title">
               Your Output{' '}
-              <span style={{ fontWeight: 'normal', color: '#aaa', fontSize: '13px' }}>
-                (actual)
-              </span>
+              <span className="output-diff-column-subtitle">(actual)</span>
             </h4>
-            <pre
-              style={{
-                whiteSpace: 'pre-wrap',
-                overflowWrap: 'anywhere',
-                backgroundColor: '#111',
-                border: '1px solid #444',
-                padding: 0,
-                margin: 0,
-                maxHeight: '320px',
-                overflowY: 'auto',
-                fontSize: '12px',
-                fontFamily: 'monospace'
-              }}
-            >
+            <pre className="output-diff-pre">
               {diffLines.map((line, idx) =>
                 line.type !== 'missing' ? (
-                  <div key={idx} style={{ ...lineStyle(line.type), padding: '2px 8px' }}>
+                  <div key={idx} className={lineClass(line.type)}>
                     {linePrefix(line.type)}
                     {line.value}
                   </div>
                 ) : (
                   /* Transparent placeholder to keep rows aligned with actual column */
-                  <div
-                    key={idx}
-                    style={{
-                      padding: '2px 8px',
-                      color: 'transparent',
-                      borderLeft: '3px solid transparent'
-                    }}
-                  >
+                  <div key={idx} className="output-diff-line output-diff-line-placeholder">
                     {'  —'}
                   </div>
                 )
@@ -511,43 +366,21 @@ export function OutputDiffPanel({
           </div>
 
           {/* Expected output column */}
-          <div>
-            <h4 style={{ fontSize: '15px', marginBottom: '6px' }}>
+          <div className="output-diff-column">
+            <h4 className="output-diff-column-title">
               Expected Output{' '}
-              <span style={{ fontWeight: 'normal', color: '#aaa', fontSize: '13px' }}>
-                (instructor)
-              </span>
+              <span className="output-diff-column-subtitle">(instructor)</span>
             </h4>
-            <pre
-              style={{
-                whiteSpace: 'pre-wrap',
-                overflowWrap: 'anywhere',
-                backgroundColor: '#111',
-                border: '1px solid #444',
-                padding: 0,
-                margin: 0,
-                maxHeight: '320px',
-                overflowY: 'auto',
-                fontSize: '12px',
-                fontFamily: 'monospace'
-              }}
-            >
+            <pre className="output-diff-pre">
               {diffLines.map((line, idx) =>
                 line.type !== 'extra' ? (
-                  <div key={idx} style={{ ...lineStyle(line.type), padding: '2px 8px' }}>
+                  <div key={idx} className={lineClass(line.type)}>
                     {linePrefix(line.type === 'match' ? 'match' : 'missing')}
                     {line.value}
                   </div>
                 ) : (
                   /* Transparent placeholder to keep rows aligned with expected column */
-                  <div
-                    key={idx}
-                    style={{
-                      padding: '2px 8px',
-                      color: 'transparent',
-                      borderLeft: '3px solid transparent'
-                    }}
-                  >
+                  <div key={idx} className="output-diff-line output-diff-line-placeholder">
                     {'  —'}
                   </div>
                 )
@@ -556,7 +389,7 @@ export function OutputDiffPanel({
           </div>
         </div>
       )}
-    </div>
+    </section>
   )
 }
 

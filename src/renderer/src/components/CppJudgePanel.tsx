@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState, useRef, useEffectEvent } from 'react'
 import type { CompileCppResult, JudgeCppResult } from '../../../shared/compiler'
+import '../assets/styles/CppJudgePanel.css'
 
 type JudgeCaseResult = {
   id: string
@@ -178,31 +179,31 @@ export function CppJudgePanel({ compileResult }: CppJudgePanelProps): React.JSX.
   ])
 
   return (
-    <div className="mt-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-      <div className="mb-6">
-        <h2 className="text-2xl font-semibold text-slate-900">Judge Test Cases</h2>
-        <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
+    <div className="cpp-judge-panel panel-shell">
+      <div className="judge-header">
+        <h2 className="judge-title">Judge Test Cases</h2>
+        <p className="judge-description">
           Add expected output files and optional input files. When both lists are present, files are
           paired by index and run as individual judge cases.
         </p>
       </div>
 
       {errorMessage && (
-        <div className="mb-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+        <div className="judge-error-alert">
           {errorMessage}
         </div>
       )}
 
-      <div className="grid gap-4 md:grid-cols-2">
-        <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-          <div className="mb-4">
-            <h3 className="text-lg font-semibold text-slate-900">Optional Input Files</h3>
-            <p className="mt-1 text-sm text-slate-600">
+      <div className="judge-grid">
+        <div className="judge-section-card">
+          <div className="judge-section-header">
+            <h3 className="judge-section-title">Optional Input Files</h3>
+            <p className="judge-section-description">
               These files provide stdin for each test case.
             </p>
           </div>
 
-          <div className="flex flex-wrap gap-2">
+          <div className="judge-button-group">
             <button onClick={handleSelectInputFiles} className="secondary-button">
               Add Input File
             </button>
@@ -220,17 +221,17 @@ export function CppJudgePanel({ compileResult }: CppJudgePanelProps): React.JSX.
             </button>
           </div>
 
-          <div className="mt-4 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700">
+          <div className="judge-file-count">
             {selectedInputFiles.length} input file{selectedInputFiles.length === 1 ? '' : 's'}{' '}
             selected
           </div>
 
           {selectedInputFiles.length > 0 && (
-            <ul className="mt-4 grid max-h-48 gap-2 overflow-y-auto">
+            <ul className="judge-file-list">
               {selectedInputFiles.map((filePath) => (
                 <li
                   key={filePath}
-                  className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 [overflow-wrap:anywhere]"
+                  className="judge-file-list-item"
                 >
                   {getFileName(filePath)}
                 </li>
@@ -239,15 +240,15 @@ export function CppJudgePanel({ compileResult }: CppJudgePanelProps): React.JSX.
           )}
         </div>
 
-        <div className="rounded-2xl border border-blue-200 bg-blue-50/60 p-4">
-          <div className="mb-4">
-            <h3 className="text-lg font-semibold text-slate-900">Expected Output Files</h3>
-            <p className="mt-1 text-sm text-slate-600">
+        <div className="judge-section-card judge-section-card-output">
+          <div className="judge-section-header">
+            <h3 className="judge-section-title">Expected Output Files</h3>
+            <p className="judge-section-description">
               These files are used as the expected results for each test.
             </p>
           </div>
 
-          <div className="flex flex-wrap gap-2">
+          <div className="judge-button-group">
             <button onClick={handleSelectOutputFiles} className="primary-button">
               Add Output File
             </button>
@@ -265,17 +266,17 @@ export function CppJudgePanel({ compileResult }: CppJudgePanelProps): React.JSX.
             </button>
           </div>
 
-          <div className="mt-4 rounded-xl border border-blue-200 bg-white px-3 py-2 text-sm text-slate-700">
+          <div className="judge-file-count">
             {selectedOutputFiles.length} output file{selectedOutputFiles.length === 1 ? '' : 's'}{' '}
             selected
           </div>
 
           {selectedOutputFiles.length > 0 && (
-            <ul className="mt-4 grid max-h-48 gap-2 overflow-y-auto">
+            <ul className="judge-file-list">
               {selectedOutputFiles.map((filePath) => (
                 <li
                   key={filePath}
-                  className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 [overflow-wrap:anywhere]"
+                  className="judge-file-list-item"
                 >
                   {getFileName(filePath)}
                 </li>
@@ -285,18 +286,18 @@ export function CppJudgePanel({ compileResult }: CppJudgePanelProps): React.JSX.
         </div>
       </div>
 
-      <div className="mt-6 rounded-2xl border border-slate-200 bg-slate-50 p-4">
-        <div className="mb-4">
-          <h3 className="text-lg font-semibold text-slate-900">Execution</h3>
-          <p className="mt-1 text-sm text-slate-600 [overflow-wrap:anywhere]">
-            <span className="font-medium text-slate-800">Compiled executable:</span>{' '}
+      <div className="judge-execution-card">
+        <div className="judge-section-header">
+          <h3 className="judge-section-title">Execution</h3>
+          <p className="judge-execution-path">
+            <span className="judge-execution-label">Compiled executable:</span>{' '}
             {compileResult?.compileSuccess && compileResult.executablePath
               ? compileResult.executablePath
               : 'Compile a program to enable judging.'}
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="judge-execution-controls">
           <button
             onClick={() => void handleRunJudge()}
             disabled={isJudging || !compileResult?.compileSuccess || !compileResult.executablePath}
@@ -310,7 +311,7 @@ export function CppJudgePanel({ compileResult }: CppJudgePanelProps): React.JSX.
           </button>
 
           {summary.totalCount > 0 && (
-            <div className="rounded-xl border border-blue-200 bg-blue-50 px-4 py-2 text-sm font-medium text-blue-800">
+            <div className="judge-summary-pill">
               Passed {summary.passedCount} / {summary.totalCount} test
               {summary.totalCount === 1 ? '' : 's'}
             </div>
@@ -319,55 +320,55 @@ export function CppJudgePanel({ compileResult }: CppJudgePanelProps): React.JSX.
       </div>
 
       {judgeResults.length > 0 && (
-        <div className="mt-6 grid gap-4">
+        <div className="judge-results-grid">
           {judgeResults.map((test) => (
             <div
               key={test.id}
-              className={`rounded-2xl border bg-white p-5 shadow-sm ${
-                test.result.passed ? 'border-green-200' : 'border-red-200'
+              className={`judge-result-card ${
+                test.result.passed ? 'judge-result-card-pass' : 'judge-result-card-fail'
               }`}
             >
-              <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+              <div className="judge-result-header">
                 <div>
-                  <h3 className="text-lg font-semibold text-slate-900">{test.label}</h3>
+                  <h3 className="judge-result-title">{test.label}</h3>
                   <p
-                    className={`mt-1 inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${
-                      test.result.passed ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+                    className={`judge-result-status-pill ${
+                      test.result.passed ? 'judge-result-status-pass' : 'judge-result-status-fail'
                     }`}
                   >
                     {test.result.passed ? 'Pass' : 'Fail'}
                   </p>
                 </div>
 
-                <div className="text-sm text-slate-600">
+                <div className="judge-result-metadata">
                   Timed Out:{' '}
-                  <span className="font-medium text-slate-800">
+                  <span className="judge-result-metadata-value">
                     {test.result.timedOut ? 'Yes' : 'No'}
                   </span>
                 </div>
               </div>
 
-              <div className="grid gap-2 text-sm text-slate-700">
-                <p className="[overflow-wrap:anywhere]">
-                  <span className="font-medium text-slate-900">Output File:</span> {test.outputFile}
+              <div className="judge-result-details">
+                <p className="judge-result-detail-item">
+                  <span className="judge-result-detail-label">Output File:</span> {test.outputFile}
                 </p>
-                <p className="[overflow-wrap:anywhere]">
-                  <span className="font-medium text-slate-900">Input File:</span>{' '}
+                <p className="judge-result-detail-item">
+                  <span className="judge-result-detail-label">Input File:</span>{' '}
                   {test.inputFile ?? 'No input file'}
                 </p>
               </div>
 
-              <div className="mt-5 grid gap-4 lg:grid-cols-2">
-                <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
-                  <h4 className="text-sm font-semibold text-slate-900">Expected Output</h4>
-                  <pre className="mt-2 max-h-48 overflow-y-auto whitespace-pre-wrap rounded-lg border border-slate-200 bg-white p-3 text-xs text-slate-700 [overflow-wrap:anywhere]">
+              <div className="judge-result-output-grid">
+                <div className="judge-output-section">
+                  <h4 className="judge-output-title">Expected Output</h4>
+                  <pre className="judge-output-content">
                     {test.result.expectedOutput || 'No expected output.'}
                   </pre>
                 </div>
 
-                <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
-                  <h4 className="text-sm font-semibold text-slate-900">Actual Output</h4>
-                  <pre className="mt-2 max-h-48 overflow-y-auto whitespace-pre-wrap rounded-lg border border-slate-200 bg-white p-3 text-xs text-slate-700 [overflow-wrap:anywhere]">
+                <div className="judge-output-section">
+                  <h4 className="judge-output-title">Actual Output</h4>
+                  <pre className="judge-output-content">
                     {test.result.actualOutput || 'No actual output.'}
                   </pre>
                 </div>

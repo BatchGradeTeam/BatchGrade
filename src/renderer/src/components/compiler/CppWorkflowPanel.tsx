@@ -1,4 +1,3 @@
-import './CppWorkflowPanel.css'
 /**
  * CppWorkflowPanel.tsx
  *
@@ -16,6 +15,7 @@ import './CppWorkflowPanel.css'
  *  onRunResultChange is passed down into useCppWorkflow so the parent page
  *  can receive runResult.stdout and feed it into OutputDiffPanel.
  */
+import '../../assets/styles/CppWorkflowPanel.css'
 import type { CompileCppResult, RunCppResult } from '../../../../shared/compiler'
 import { useCppWorkflow } from '../../components/compiler/useCPPWorkflow'
 

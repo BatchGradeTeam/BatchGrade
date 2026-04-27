@@ -15,8 +15,6 @@
  *  - Gradebook access
  */
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { useAuth } from '../components/AuthContext'
 import { NavBar } from '../components/Navbar'
 import AssignmentConfigPanel from '../components/AssignmentConfigPanel'
 import { AboutPanel } from '../components/AboutPanel'
@@ -46,9 +44,6 @@ export function InstructorDashboard(): React.JSX.Element {
   // -----------------------------------------------------------
   // Navigation Hook
   // -----------------------------------------------------------
-  // Enables programmatic navigation between routes
-  const navigate = useNavigate()
-  const { logout } = useAuth()
 
   /**
    * @brief Tracks which workspace panel is currently visible.
@@ -180,7 +175,7 @@ export function InstructorDashboard(): React.JSX.Element {
             <GradingPanel />
           ) : activeWorkspace === 'gradingPlus' ? (
             <GradingPlusPanel
-              title="Grading+ Page"
+              title="Grading+"
               description="Instructor batch grading workflow for compiling and judging multiple student submissions."
               dataSourceMode="server"
               gradebookMode="local"
