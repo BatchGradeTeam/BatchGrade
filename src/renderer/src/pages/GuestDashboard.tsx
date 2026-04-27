@@ -7,7 +7,6 @@ import { GradingPlusPanel } from '../components/grading/GradingPlusPanel'
 type GuestWorkspace = 'none' | 'grading' | 'gradingPlus' | 'about'
 
 export function GuestDashboard(): React.JSX.Element {
-
   const [activeWorkspace, setActiveWorkspace] = useState<GuestWorkspace>('none')
 
   function closeWorkspace(): void {

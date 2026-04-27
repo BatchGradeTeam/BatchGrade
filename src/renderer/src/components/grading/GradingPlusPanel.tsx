@@ -732,17 +732,9 @@ export function GradingPlusPanel({
         </p>
       </div>
 
-      {batchError && (
-        <div className="grading-plus-error-alert">
-          {batchError}
-        </div>
-      )}
+      {batchError && <div className="grading-plus-error-alert">{batchError}</div>}
 
-      {batchMessage && (
-        <div className="grading-plus-success-alert">
-          {batchMessage}
-        </div>
-      )}
+      {batchMessage && <div className="grading-plus-success-alert">{batchMessage}</div>}
 
       <div className="grading-plus-setup-card">
         <div className="grading-plus-setup-header">
@@ -755,10 +747,7 @@ export function GradingPlusPanel({
 
         {isServerMode && (
           <div className="grading-plus-assignment-card">
-            <label
-              htmlFor="batch-assignment-select"
-              className="grading-plus-label"
-            >
+            <label htmlFor="batch-assignment-select" className="grading-plus-label">
               Assignment
             </label>
 
@@ -977,8 +966,7 @@ export function GradingPlusPanel({
 
             <div className="grading-plus-card-content">
               <p>
-                <span className="grading-plus-card-label">Total Students:</span>{' '}
-                {students.length}
+                <span className="grading-plus-card-label">Total Students:</span> {students.length}
               </p>
 
               <p>

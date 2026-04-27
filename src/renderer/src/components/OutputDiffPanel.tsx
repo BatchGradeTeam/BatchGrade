@@ -281,7 +281,9 @@ export function OutputDiffPanel({
       )}
 
       {isRunningTestCases && (
-        <div className="output-diff-banner output-diff-banner-running">Running assignment test cases...</div>
+        <div className="output-diff-banner output-diff-banner-running">
+          Running assignment test cases...
+        </div>
       )}
 
       {testCaseError && (
@@ -320,7 +322,9 @@ export function OutputDiffPanel({
       {isReady && diffLines.length > 0 && (
         <div
           className={`output-diff-summary-banner ${
-            hasPerfectMatch ? 'output-diff-summary-banner-success' : 'output-diff-summary-banner-failed'
+            hasPerfectMatch
+              ? 'output-diff-summary-banner-success'
+              : 'output-diff-summary-banner-failed'
           }`}
         >
           {hasPerfectMatch ? (
@@ -345,8 +349,7 @@ export function OutputDiffPanel({
           {/* Actual output column */}
           <div className="output-diff-column">
             <h4 className="output-diff-column-title">
-              Your Output{' '}
-              <span className="output-diff-column-subtitle">(actual)</span>
+              Your Output <span className="output-diff-column-subtitle">(actual)</span>
             </h4>
             <pre className="output-diff-pre">
               {diffLines.map((line, idx) =>
@@ -368,8 +371,7 @@ export function OutputDiffPanel({
           {/* Expected output column */}
           <div className="output-diff-column">
             <h4 className="output-diff-column-title">
-              Expected Output{' '}
-              <span className="output-diff-column-subtitle">(instructor)</span>
+              Expected Output <span className="output-diff-column-subtitle">(instructor)</span>
             </h4>
             <pre className="output-diff-pre">
               {diffLines.map((line, idx) =>

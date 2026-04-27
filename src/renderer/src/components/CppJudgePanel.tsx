@@ -188,11 +188,7 @@ export function CppJudgePanel({ compileResult }: CppJudgePanelProps): React.JSX.
         </p>
       </div>
 
-      {errorMessage && (
-        <div className="judge-error-alert">
-          {errorMessage}
-        </div>
-      )}
+      {errorMessage && <div className="judge-error-alert">{errorMessage}</div>}
 
       <div className="judge-grid">
         <div className="judge-section-card">
@@ -229,10 +225,7 @@ export function CppJudgePanel({ compileResult }: CppJudgePanelProps): React.JSX.
           {selectedInputFiles.length > 0 && (
             <ul className="judge-file-list">
               {selectedInputFiles.map((filePath) => (
-                <li
-                  key={filePath}
-                  className="judge-file-list-item"
-                >
+                <li key={filePath} className="judge-file-list-item">
                   {getFileName(filePath)}
                 </li>
               ))}
@@ -274,10 +267,7 @@ export function CppJudgePanel({ compileResult }: CppJudgePanelProps): React.JSX.
           {selectedOutputFiles.length > 0 && (
             <ul className="judge-file-list">
               {selectedOutputFiles.map((filePath) => (
-                <li
-                  key={filePath}
-                  className="judge-file-list-item"
-                >
+                <li key={filePath} className="judge-file-list-item">
                   {getFileName(filePath)}
                 </li>
               ))}

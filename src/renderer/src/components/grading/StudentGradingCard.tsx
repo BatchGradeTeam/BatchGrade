@@ -133,9 +133,7 @@ export function StudentGradingCard({
             {/* Compile result */}
             {student.compileResult && (
               <div className="student-grading-card-detail-row">
-                <p>
-                  Compile Success: {student.compileResult.compileSuccess ? 'Yes' : 'No'}
-                </p>
+                <p>Compile Success: {student.compileResult.compileSuccess ? 'Yes' : 'No'}</p>
               </div>
             )}
 
