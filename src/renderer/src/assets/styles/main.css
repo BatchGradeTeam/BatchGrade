@@ -737,7 +737,7 @@ footer {
   justify-content: space-between;
   width: 100%;
   max-width: 90vw;
-  margin: 8rem auto 3rem auto;
+  margin: 6rem auto 3rem auto;
   padding: 2rem;
   gap: 2rem;
   color: var(--ev-c-white);
@@ -749,7 +749,7 @@ footer {
 .dashboard-container {
   width: 100%;
   max-width: 90vw;
-  margin: 0 auto;
+  margin: 0 auto 2rem auto;
   padding: 2rem;
   background: var(--ev-c-white);
   color: var(--ev-c-gray-1);
