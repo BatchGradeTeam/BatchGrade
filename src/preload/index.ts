@@ -6,7 +6,8 @@ import type {
   CompilerAPI,
   FileAPI,
   SubmissionsAPI,
-  UsersAPI
+  UsersAPI,
+  GradebookAPI
 } from './types'
 
 const usersApi: UsersAPI = {
@@ -52,13 +53,20 @@ const assignmentsApi: AssignmentsAPI = {
     ipcRenderer.invoke('assignments:replaceTestCases', assignmentUuid, testCases)
 }
 
+const gradebookApi: GradebookAPI = {
+  getAll: () => ipcRenderer.invoke('gradebook:getAll'),
+  create: (record) => ipcRenderer.invoke('gradebook:create', record),
+  clear: () => ipcRenderer.invoke('gradebook:clear')
+}
+
 // Custom APIs for renderer
 const api: AppAPI = {
   users: usersApi,
   assignments: assignmentsApi,
   file: fileApi,
   compiler: compilerApi,
-  submissions: submissionsApi
+  submissions: submissionsApi,
+  gradebook: gradebookApi
 }
 
 // Use `contextBridge` APIs to expose Electron APIs to

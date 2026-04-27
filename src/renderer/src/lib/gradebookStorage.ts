@@ -48,6 +48,10 @@ export async function loadGradebookRecords(
     }
   }
 
+  if (mode === 'local') {
+    return window.api.gradebook.getAll()
+  }
+
   return loadLocalGradebookRecords(mode === 'guest' ? 'guest' : 'local')
 }
 
@@ -61,6 +65,11 @@ export async function saveGradebookRecord(
   record: GradebookRecord,
   mode: GradebookStorageMode = 'local'
 ): Promise<void> {
+  if (mode === 'local') {
+    await window.api.gradebook.create(record)
+    return
+  }
+
   await saveLocalGradebookRecord(record, mode === 'guest' ? 'guest' : 'local')
 }
 
@@ -87,6 +96,10 @@ export async function clearGradebookRecords(
   mode: Exclude<GradebookStorageMode, 'server'> = 'local'
 ): Promise<void> {
   try {
+    if (mode === 'local') {
+      await window.api.gradebook.clear()
+      return
+    }
     localStorage.removeItem(GRADEBOOK_STORAGE_KEYS[mode])
   } catch (error) {
     console.error('Failed to clear Gradebook records:', error)

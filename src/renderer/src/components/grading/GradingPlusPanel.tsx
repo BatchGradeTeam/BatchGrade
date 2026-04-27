@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import type { BatchJudgeCaseResult, BatchStudentSubmission } from '../../../../shared/batchGrading'
 import type { GradebookRecord } from '../../../../shared/gradebookTypes'
 import type { Assignment, AssignmentTestCase } from '../../../../shared/types'
+import '../../assets/styles/GradingPlusPanel.css'
 import {
   clearGradebookRecords,
   saveGradebookRecord,
@@ -26,9 +27,6 @@ interface GradingPlusPanelProps {
   onGoHome?: () => void
 }
 
-/**
- * Returns the file name from a full file path.
- */
 function getFileName(filePath: string): string {
   const parts = filePath.split(/[/\\]/)
   return parts[parts.length - 1] || filePath
@@ -48,6 +46,7 @@ type JudgeFilePairPreview = {
 }
 
 type GradingMode = 'local' | 'docker'
+
 type JudgeCaseData = {
   testNumber: number
   inputLabel: string | null
@@ -113,7 +112,7 @@ function buildGradebookRecord(
 }
 
 export function GradingPlusPanel({
-  title = 'Grading+ Page',
+  title = 'Grading+',
   description = 'Batch grading workflow for compiling and judging multiple student submissions.',
   dataSourceMode = 'server',
   gradebookMode = 'local',
@@ -170,6 +169,7 @@ export function GradingPlusPanel({
 
   // Determines whether grading should use saved assignment cases or manual files.
   const useSavedTestCases = testCaseMode === 'saved' && assignmentTestCases.length > 0
+
   const judgeFilePairPreview = useSavedTestCases
     ? assignmentTestCases.map((testCase) => ({
         inputFile:
@@ -252,6 +252,7 @@ export function GradingPlusPanel({
         setBatchError(null)
       } catch (error) {
         console.error('Error loading assignments for batch grading:', error)
+
         if (isMounted) {
           setBatchError('Could not load assignments for grading.')
         }
@@ -519,9 +520,11 @@ export function GradingPlusPanel({
   async function handleSelectInputFile(): Promise<void> {
     try {
       const file = await window.api.file.select()
+
       setSelectedInputFiles((currentFiles) =>
         sortFilesAlphabetically(appendUniqueFile(currentFiles, file))
       )
+
       setBatchError(null)
       setBatchMessage(null)
     } catch (error) {
@@ -551,13 +554,15 @@ export function GradingPlusPanel({
   async function handleSelectOutputFile(): Promise<void> {
     try {
       const file = await window.api.file.select()
+
       setSelectedOutputFiles((currentFiles) =>
         sortFilesAlphabetically(appendUniqueFile(currentFiles, file))
       )
+
       setBatchError(null)
       setBatchMessage(null)
     } catch (error) {
-      console.error('Error selecting output file:', error)
+      console.error('Error selecting expected output file:', error)
       setBatchError('Could not select expected output file.')
     }
   }
@@ -636,6 +641,7 @@ export function GradingPlusPanel({
     // Compile with either Docker or the local compiler depending on the selected mode.
     try {
       let compileResult
+
       if (gradingMode === 'docker') {
         const dockerResult = await window.api.compiler.dockerCompileCpp(student.filePaths)
 
@@ -668,6 +674,7 @@ export function GradingPlusPanel({
           errorMessage: 'Compilation failed.',
           savedToGradebook: true
         })
+
         return
       }
 
@@ -707,6 +714,7 @@ export function GradingPlusPanel({
       // Save completed grading results and update the visible student card.
       const passedCount = judgeResults.filter((test) => test.result.passed).length
       const totalCount = judgeResults.length
+
       const savedRecord = buildGradebookRecord(
         student,
         activeAssignmentId,
@@ -714,6 +722,7 @@ export function GradingPlusPanel({
         totalCount,
         'done'
       )
+
       await saveGradebookRecord(savedRecord, gradebookMode)
 
       updateStudent(index, {
@@ -875,63 +884,45 @@ export function GradingPlusPanel({
   ).length
 
   return (
-    <div className="panel-shell">
-      <h1>{title}</h1>
-      <p>{description}</p>
-      <p style={{ color: '#cbd5e1', marginBottom: '1rem' }}>
-        Completed batch grading runs save to the {gradebookDestinationLabel}.
-      </p>
+    <div className="panel-shell grading-plus-panel">
+      <div className="grading-plus-header">
+        <h1 className="grading-plus-title">{title}</h1>
+
+        <p className="grading-plus-description">{description}</p>
+
+        <p className="grading-plus-note">
+          Completed batch grading runs save to the {gradebookDestinationLabel}.
+        </p>
+      </div>
 
       {/* Shows error and success messages for grading/setup actions. */}
-      {batchError && (
-        <div
-          style={{
-            backgroundColor: '#5a1f1f',
-            border: '1px solid red',
-            padding: '10px',
-            marginBottom: '1rem'
-          }}
-        >
-          <p>{batchError}</p>
-        </div>
-      )}
+      {batchError && <div className="grading-plus-error-alert">{batchError}</div>}
 
-      {batchMessage && (
-        <div
-          style={{
-            backgroundColor: '#1f3a1f',
-            border: '1px solid #22c55e',
-            padding: '10px',
-            marginBottom: '1rem'
-          }}
-        >
-          <p>{batchMessage}</p>
-        </div>
-      )}
+      {batchMessage && <div className="grading-plus-success-alert">{batchMessage}</div>}
 
       {/* Main setup area for assignments, files, grading mode, and batch actions. */}
-      <div
-        style={{
-          border: '1px solid gray',
-          padding: '12px',
-          marginBottom: '12px',
-          backgroundColor: '#1f1f1f'
-        }}
-      >
-        <h2 style={{ marginBottom: '10px' }}>Batch Setup</h2>
+      <div className="grading-plus-setup-card">
+        <div className="grading-plus-setup-header">
+          <h2 className="grading-plus-section-title">Batch Setup</h2>
+
+          <p className="grading-plus-section-description">
+            Import submissions, add judge files, and run grading across multiple students.
+          </p>
+        </div>
 
         {/* Server mode lets instructors select an assignment and view saved test-case status. */}
         {isServerMode && (
-          <div style={{ marginBottom: '10px' }}>
-            <label htmlFor="batch-assignment-select" style={{ marginRight: '8px' }}>
-              Assignment:
+          <div className="grading-plus-assignment-card">
+            <label htmlFor="batch-assignment-select" className="grading-plus-label">
+              Assignment
             </label>
+
             <select
               id="batch-assignment-select"
               value={selectedAssignmentId}
               onChange={(e) => setSelectedAssignmentId(e.target.value)}
               disabled={assignments.length === 0 || isBatchGrading}
-              style={{ padding: '6px', minWidth: '220px' }}
+              className="grading-plus-select"
             >
               {assignments.length === 0 ? (
                 <option value="">No assignments available</option>
@@ -943,54 +934,50 @@ export function GradingPlusPanel({
                 ))
               )}
             </select>
-            {isLoadingAssignmentTestCases ? (
-              <span style={{ marginLeft: '8px', fontSize: '13px', color: '#facc15' }}>
-                Loading test cases...
-              </span>
-            ) : assignmentTestCases.length > 0 ? (
-              <span style={{ marginLeft: '8px', fontSize: '13px', color: '#22c55e' }}>
-                Loaded {assignmentTestCases.length} saved test case
-                {assignmentTestCases.length === 1 ? '' : 's'}
-              </span>
-            ) : (
-              <span style={{ marginLeft: '8px', fontSize: '13px', color: '#facc15' }}>
-                No saved test cases. Manual files will be used.
-              </span>
-            )}
+
+            <div className="grading-plus-status">
+              {isLoadingAssignmentTestCases ? (
+                <span className="grading-plus-status-loading">Loading test cases...</span>
+              ) : assignmentTestCases.length > 0 ? (
+                <span className="grading-plus-status-success">
+                  Loaded {assignmentTestCases.length} saved test case
+                  {assignmentTestCases.length === 1 ? '' : 's'}.
+                </span>
+              ) : (
+                <span className="grading-plus-status-warning">
+                  No saved test cases. Manual files will be used.
+                </span>
+              )}
+            </div>
+
+            <div className="grading-plus-radio-group">
+              <label className="grading-plus-radio-option">
+                <input
+                  type="radio"
+                  name="grading-test-case-mode"
+                  checked={testCaseMode === 'saved'}
+                  disabled={assignmentTestCases.length === 0 || isBatchGrading}
+                  onChange={() => setTestCaseMode('saved')}
+                />
+                Saved assignment cases
+              </label>
+
+              <label className="grading-plus-radio-option">
+                <input
+                  type="radio"
+                  name="grading-test-case-mode"
+                  checked={testCaseMode === 'manual'}
+                  disabled={isBatchGrading}
+                  onChange={() => setTestCaseMode('manual')}
+                />
+                Manual files for this run
+              </label>
+            </div>
           </div>
         )}
 
-        {isServerMode && (
-          <div style={{ marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '14px' }}>
-            <span style={{ fontSize: '14px' }}>Test cases:</span>
-
-            <label style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-              <input
-                type="radio"
-                name="grading-test-case-mode"
-                checked={testCaseMode === 'saved'}
-                disabled={assignmentTestCases.length === 0 || isBatchGrading}
-                onChange={() => setTestCaseMode('saved')}
-              />
-              Saved assignment cases
-            </label>
-
-            <label style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-              <input
-                type="radio"
-                name="grading-test-case-mode"
-                checked={testCaseMode === 'manual'}
-                disabled={isBatchGrading}
-                onChange={() => setTestCaseMode('manual')}
-              />
-              Manual files for this run
-            </label>
-          </div>
-        )}
-
-        {/* Action buttons for compiler mode, submissions, judge files, and grading. */}
-        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-          <div style={{ position: 'relative' }}>
+        <div className="grading-plus-button-group">
+          <div className="grading-plus-dropdown-container">
             <button
               onClick={(e) => {
                 e.stopPropagation()
@@ -1002,26 +989,13 @@ export function GradingPlusPanel({
             </button>
 
             {showModeMenu && (
-              <div
-                style={{
-                  position: 'absolute',
-                  backgroundColor: '#1f1f1f',
-                  border: '1px solid gray',
-                  marginTop: '4px',
-                  zIndex: 10,
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '6px',
-                  padding: '6px'
-                }}
-              >
+              <div className="grading-plus-dropdown-menu">
                 <button
                   onClick={() => {
                     setGradingMode('local')
                     setShowModeMenu(false)
                   }}
-                  className="secondary-button"
-                  style={{ display: 'block', width: '100%' }}
+                  className="grading-plus-dropdown-item"
                 >
                   Local Compiler
                 </button>
@@ -1031,8 +1005,7 @@ export function GradingPlusPanel({
                     setGradingMode('docker')
                     setShowModeMenu(false)
                   }}
-                  className="secondary-button"
-                  style={{ display: 'block', width: '100%' }}
+                  className="grading-plus-dropdown-item"
                 >
                   Docker
                 </button>
@@ -1060,7 +1033,7 @@ export function GradingPlusPanel({
             Select Student C++ Files
           </button>
 
-          <div style={{ position: 'relative' }}>
+          <div className="grading-plus-dropdown-container">
             <button
               onClick={(e) => {
                 e.stopPropagation()
@@ -1072,26 +1045,13 @@ export function GradingPlusPanel({
             </button>
 
             {showInputMenu && (
-              <div
-                style={{
-                  position: 'absolute',
-                  backgroundColor: '#1f1f1f',
-                  border: '1px solid gray',
-                  marginTop: '4px',
-                  zIndex: 10,
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '6px',
-                  padding: '6px'
-                }}
-              >
+              <div className="grading-plus-dropdown-menu">
                 <button
                   onClick={() => {
                     setShowInputMenu(false)
                     void handleSelectInputFile()
                   }}
-                  className="secondary-button"
-                  style={{ display: 'block', width: '100%' }}
+                  className="grading-plus-dropdown-item"
                 >
                   Select File
                 </button>
@@ -1101,8 +1061,7 @@ export function GradingPlusPanel({
                     setShowInputMenu(false)
                     void handleSelectInputFolder()
                   }}
-                  className="secondary-button"
-                  style={{ display: 'block', width: '100%' }}
+                  className="grading-plus-dropdown-item"
                 >
                   Select Folder
                 </button>
@@ -1110,7 +1069,7 @@ export function GradingPlusPanel({
             )}
           </div>
 
-          <div style={{ position: 'relative' }}>
+          <div className="grading-plus-dropdown-container">
             <button
               onClick={(e) => {
                 e.stopPropagation()
@@ -1122,26 +1081,13 @@ export function GradingPlusPanel({
             </button>
 
             {showOutputMenu && (
-              <div
-                style={{
-                  position: 'absolute',
-                  backgroundColor: '#1f1f1f',
-                  border: '1px solid gray',
-                  marginTop: '4px',
-                  zIndex: 10,
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '6px',
-                  padding: '6px'
-                }}
-              >
+              <div className="grading-plus-dropdown-menu">
                 <button
                   onClick={() => {
                     setShowOutputMenu(false)
                     void handleSelectOutputFile()
                   }}
-                  className="secondary-button"
-                  style={{ display: 'block', width: '100%' }}
+                  className="grading-plus-dropdown-item"
                 >
                   Select File
                 </button>
@@ -1151,8 +1097,7 @@ export function GradingPlusPanel({
                     setShowOutputMenu(false)
                     void handleSelectOutputFolder()
                   }}
-                  className="secondary-button"
-                  style={{ display: 'block', width: '100%' }}
+                  className="grading-plus-dropdown-item"
                 >
                   Select Folder
                 </button>
@@ -1165,7 +1110,7 @@ export function GradingPlusPanel({
             disabled={isBatchGrading || students.length === 0}
             className={isBatchGrading || students.length === 0 ? 'cancel-button' : 'primary-button'}
           >
-            Grade All Students
+            {isBatchGrading ? 'Grading...' : 'Grade All Students'}
           </button>
 
           {gradebookMode === 'guest' && (
@@ -1181,62 +1126,94 @@ export function GradingPlusPanel({
           )}
         </div>
 
-        {/* Manual judge setup reminders. */}
-        <p style={{ marginTop: '10px', fontSize: '13px', color: '#facc15' }}>
-          ⚠️ If the program requires user input, add input files before grading. Otherwise, test
-          cases may fail due to missing input.
-        </p>
+        <div className="grading-plus-alert-group">
+          <div className="grading-plus-warning-alert">
+            If the program requires user input, add input files before grading. Otherwise, test
+            cases may fail due to missing input.
+          </div>
 
-        <p style={{ fontSize: '13px', color: '#facc15' }}>
-          ⚠️ Input and output files are paired by alphabetical order. Make sure filenames follow the
-          same naming pattern.
-        </p>
+          <div className="grading-plus-warning-alert">
+            Input and output files are paired by alphabetical order. Make sure filenames follow the
+            same naming pattern.
+          </div>
+        </div>
 
-        {/* Summary of the current batch queue and selected test-case setup. */}
-        <div style={{ marginTop: '12px', fontSize: '14px', lineHeight: '1.6' }}>
-          <p>Total Students: {students.length}</p>
-          <p>
-            Active Test Case Mode: {useSavedTestCases ? 'Saved assignment cases' : 'Manual files'}
-          </p>
-          <p>Saved Test Cases: {assignmentTestCases.length}</p>
-          <p>Manual Input Files: {selectedInputFiles.length}</p>
-          <p>Manual Output Files: {selectedOutputFiles.length}</p>
+        <div className="grading-plus-info-grid">
+          <div className="grading-plus-info-card">
+            <h3 className="grading-plus-card-title">Overview</h3>
 
-          {judgeFilePairPreview.length > 0 && (
-            <div style={{ marginTop: '8px' }}>
-              <h3 style={{ marginBottom: '4px' }}>Test Case Pairing</h3>
+            <div className="grading-plus-card-content">
+              <p>
+                <span className="grading-plus-card-label">Total Students:</span> {students.length}
+              </p>
 
-              <ul style={{ paddingLeft: '20px', margin: 0 }}>
-                {judgeFilePairPreview.map((pair, index) => (
-                  <li
-                    key={`${pair.inputFile}-${pair.outputFile}`}
-                    style={{ fontSize: '14px', marginBottom: '4px', overflowWrap: 'anywhere' }}
-                  >
-                    Test {index + 1}: {pair.inputFile ? getFileName(pair.inputFile) : 'No input'} →{' '}
-                    {getFileName(pair.outputFile)}
-                  </li>
-                ))}
-              </ul>
+              <p>
+                <span className="grading-plus-card-label">Active Test Case Mode:</span>{' '}
+                {useSavedTestCases ? 'Saved assignment cases' : 'Manual files'}
+              </p>
 
-              {!useSavedTestCases &&
-                selectedInputFiles.length > 0 &&
-                selectedInputFiles.length !== selectedOutputFiles.length && (
-                  <p style={{ fontSize: '13px', color: '#f87171', marginTop: '8px' }}>
-                    Warning: Input and output file counts do not match yet.
-                  </p>
-                )}
+              <p>
+                <span className="grading-plus-card-label">Saved Test Cases:</span>{' '}
+                {assignmentTestCases.length}
+              </p>
+
+              <p>
+                <span className="grading-plus-card-label">Manual Input Files:</span>{' '}
+                {selectedInputFiles.length}
+              </p>
+
+              <p>
+                <span className="grading-plus-card-label">Manual Output Files:</span>{' '}
+                {selectedOutputFiles.length}
+              </p>
+
+              <p>
+                <span className="grading-plus-card-label">Completed:</span> {completedCount}
+              </p>
+
+              <p>
+                <span className="grading-plus-card-label">Current Student:</span>{' '}
+                {currentStudentIndex !== null ? students[currentStudentIndex]?.studentName : 'None'}
+              </p>
             </div>
-          )}
-          <p>Completed: {completedCount}</p>
-          <p>
-            Current Student:{' '}
-            {currentStudentIndex !== null ? students[currentStudentIndex]?.studentName : 'None'}
-          </p>
+          </div>
+
+          <div className="grading-plus-info-card">
+            <h3 className="grading-plus-card-title">Test Case Pairing</h3>
+
+            {judgeFilePairPreview.length > 0 ? (
+              <div className="grading-plus-card-content-list">
+                <ul className="grading-plus-pair-list">
+                  {judgeFilePairPreview.map((pair, index) => (
+                    <li
+                      key={`${pair.inputFile ?? 'no-input'}-${pair.outputFile}-${index}`}
+                      className="grading-plus-pair-item"
+                    >
+                      <span className="grading-plus-pair-label">Test {index + 1}:</span>{' '}
+                      {pair.inputFile ? getFileName(pair.inputFile) : 'No input'} →{' '}
+                      {getFileName(pair.outputFile)}
+                    </li>
+                  ))}
+                </ul>
+
+                {!useSavedTestCases &&
+                  selectedInputFiles.length > 0 &&
+                  selectedInputFiles.length !== selectedOutputFiles.length && (
+                    <p className="grading-plus-warning-text">
+                      Warning: Input and output file counts do not match yet.
+                    </p>
+                  )}
+              </div>
+            ) : (
+              <p className="grading-plus-placeholder-text">
+                Add input and output files to preview pairings.
+              </p>
+            )}
+          </div>
         </div>
       </div>
 
-      {/* Student cards show per-student status, compile results, and judge results. */}
-      <div style={{ display: 'grid', gap: '12px' }}>
+      <div className="grading-plus-students-grid">
         {students.map((student, index) => {
           return (
             <div
@@ -1259,11 +1236,9 @@ export function GradingPlusPanel({
 
       {/* Optional navigation button used by Guest Mode to return to the dashboard. */}
       {showHomeButton && onGoHome && (
-        <div className="button-container">
-          <button className="secondary-button" onClick={onGoHome}>
-            Back to Dashboard
-          </button>
-        </div>
+        <button onClick={onGoHome} className="primary-button grading-plus-home-button">
+          Go to Home
+        </button>
       )}
     </div>
   )

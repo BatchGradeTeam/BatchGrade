@@ -20,6 +20,7 @@ import type { CompileCppResult } from '../../../../shared/compiler'
 import type { SubmissionSelfCheckSummary } from '../../../../shared/submission'
 import { useEffect } from 'react'
 import { useSubmitWorkflow } from './useSubmitWorkflow'
+import '../../assets/styles/SubmitPanel.css'
 
 type SubmitPanelProps = {
   compileResult: CompileCppResult | null
@@ -83,50 +84,35 @@ export function SubmitPanel({
     onExpectedOutputChange?.(selectedAssignment?.expectedOutputText ?? null)
   }, [onExpectedOutputChange, selectedAssignment])
 
+  const isSubmitDisabled =
+    isSubmitting ||
+    !compileResult?.compileSuccess ||
+    selectedFiles.length === 0 ||
+    isRunningSelfCheck ||
+    (requiresCompletedSelfCheck && !selfCheckSummary)
+
   return (
-    <div
-      className="submit-section"
-      style={{
-        border: '1px solid gray',
-        padding: '1rem',
-        marginTop: '1rem',
-        backgroundColor: '#2b2b2b'
-      }}
-    >
-      <h2 style={{ marginBottom: '0.5rem' }}>Submit for Grading</h2>
-      <p style={{ marginBottom: '1rem' }}>
+    <section className="submit-section submit-panel panel-shell">
+      <h2 className="submit-panel-title">Submit for Grading</h2>
+      <p className="submit-panel-description">
         Submission saves a source snapshot and compile log that can be passed into a sandboxed
         grading workflow later.
       </p>
 
       {errorMessage && (
-        <div
-          style={{
-            backgroundColor: '#5a1f1f',
-            border: '1px solid red',
-            padding: '10px',
-            marginBottom: '1rem'
-          }}
-        >
+        <div className="submit-panel-alert submit-panel-alert-error">
           <p>{errorMessage}</p>
         </div>
       )}
 
       {statusMessage && (
-        <div
-          style={{
-            backgroundColor: '#1f3a1f',
-            border: '1px solid #22c55e',
-            padding: '10px',
-            marginBottom: '1rem'
-          }}
-        >
+        <div className="submit-panel-alert submit-panel-alert-success">
           <p>{statusMessage}</p>
         </div>
       )}
 
       {selectedAssignment && (
-        <div style={{ marginBottom: '1rem', fontSize: '14px', lineHeight: '1.6' }}>
+        <div className="submit-panel-assignment-details">
           <p>
             <strong>Assignment:</strong> {selectedAssignment.name}
           </p>
@@ -136,7 +122,7 @@ export function SubmitPanel({
       )}
 
       {requiresCompletedSelfCheck && (
-        <p style={{ marginBottom: '1rem', fontSize: '14px', color: '#cbd5e1' }}>
+        <p className="submit-panel-self-check-note">
           {isRunningSelfCheck
             ? 'Saved test cases are still running. Submit will unlock when the self-check finishes.'
             : selfCheckSummary
@@ -147,34 +133,24 @@ export function SubmitPanel({
 
       <button
         onClick={() => void handleSubmit()}
-        disabled={
-          isSubmitting ||
-          !compileResult?.compileSuccess ||
-          selectedFiles.length === 0 ||
-          isRunningSelfCheck ||
-          (requiresCompletedSelfCheck && !selfCheckSummary)
-        }
-        className={
-          isSubmitting ||
-          !compileResult?.compileSuccess ||
-          selectedFiles.length === 0 ||
-          isRunningSelfCheck ||
-          (requiresCompletedSelfCheck && !selfCheckSummary)
-            ? 'cancel-button'
-            : 'primary-button'
-        }
+        disabled={isSubmitDisabled}
+        className={`submit-panel-submit-button ${
+          isSubmitDisabled
+            ? 'submit-panel-submit-button-disabled'
+            : 'submit-panel-submit-button-primary'
+        }`}
       >
         {isSubmitting ? 'Submitting...' : 'Submit Code'}
       </button>
 
       {submitResult && (
-        <div style={{ marginTop: '1rem', borderTop: '1px solid gray', paddingTop: '1rem' }}>
+        <div className="submit-panel-result">
           <p>Message: {submitResult.message}</p>
           <p>Submission ID: {submitResult.submissionId ?? 'Not created'}</p>
           <p>Submitted At: {submitResult.submittedAt ?? 'Not recorded'}</p>
           <p>Saved Files: {submitResult.submittedFiles.length}</p>
         </div>
       )}
-    </div>
+    </section>
   )
 }

@@ -20,6 +20,7 @@ import type {
   NewAssignmentTestCase,
   UpdateAssignment
 } from '../shared/types'
+import type { GradebookRecord } from '../shared/gradebookTypes'
 
 export type AssignmentTestCaseInput = Omit<
   NewAssignmentTestCase,
@@ -120,4 +121,11 @@ export type AppAPI = {
   file: FileAPI
   compiler: CompilerAPI
   submissions: SubmissionsAPI
+  gradebook: GradebookAPI
+}
+
+export type GradebookAPI = {
+  getAll: () => Promise<GradebookRecord[]>
+  create: (record: GradebookRecord) => Promise<GradebookRecord>
+  clear: () => Promise<void>
 }

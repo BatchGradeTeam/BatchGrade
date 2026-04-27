@@ -20,6 +20,7 @@ BatchGrade is a locally hosted automated grading platform designed to streamline
 
 - [Recommended IDE Setup](#recommended-ide-setup)
 - [Project Setup](#project-setup)
+- [Docker-Based Grading](#docker-based-grading)
 - [Scripts & Commands](#scripts--commands)
 - [Testing (Vitest)](#testing-vitest)
 - [Database + IPC Wiring Guide](#database--ipc-wiring-guide)
@@ -126,6 +127,20 @@ Examples:
 - The executable inside the unpacked folder is named after the application (package name: `batchgrade`).
 
 Use `npm run clean` to remove `dist/`, `out/`, and `node_modules/`.
+
+---
+
+## Docker-Based Grading
+
+BatchGrade can compile and run submitted code inside Docker containers. Make sure Docker Desktop or Docker Engine is installed and running before using the Docker grading workflow.
+
+The current Docker compiler images are:
+
+- C++: `gcc:14`
+- Java: `eclipse-temurin:21-jdk-alpine`
+- Python: `python:3.12-slim`
+
+The first Docker compile or run may take longer while these images are downloaded.
 
 ---
 

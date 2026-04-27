@@ -73,17 +73,32 @@ export type DockerInstallationInfo = {
 }
 
 // ***********************************************************************
+// Docker Runtime Arguments
+export const DOCKER_RUN_ARGS = [
+  'run',
+  '--rm' // Remove the container after it exits
+] as const
+
+export const DOCKER_SANDBOX_ARGS = [
+  '--network',
+  'none', // Disable network access
+  '--cap-drop',
+  'ALL', // Default to no capabilities
+  '--security-opt',
+  'no-new-privileges', // Help prevent privilege escalation
+  '--pids-limit',
+  '5' // Prevent fork bombs. For simple programs this is ok. For more complex programs, this may need to be increased.
+  // More arguments will be added as needed
+] as const
+
+// ***********************************************************************
 // Docker Compilation
 export type DockerCompileRequest = {
   sourceFiles: string[]
 }
 
-export type DockerCompileResult = {
+export type DockerCompileResult = CompileCppResult & {
   success: boolean
-  executablePath: string | null
-  stdout: string
-  stderr: string
-  message: string
 }
 
 // ***********************************************************************

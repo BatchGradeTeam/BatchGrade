@@ -1,0 +1,406 @@
+/* AssignmentConfigPanel.css - semantic styling aligned with CppWorkflowPanel */
+
+.assignment-config-panel {
+  color: var(--ev-c-gray-1);
+}
+
+.assignment-config-panel .panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.assignment-config-panel .panel-header h2 {
+  margin: 0;
+  font-size: 1.45rem;
+  font-weight: 700;
+  color: var(--ev-c-gray-1);
+}
+
+.assignment-config-panel .panel-header p {
+  margin: 0.35rem 0 0 0;
+  color: var(--ev-c-text-3);
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.assignment-config-panel .panel-list-shell,
+.assignment-config-panel .assignment-config-content-card {
+  background: var(--ev-c-white);
+  border: 1px solid #d9e2ec;
+  border-radius: 30px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  padding: 1.75rem;
+}
+
+.assignment-config-panel .panel-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.assignment-config-panel .assignment-config-content-card {
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+}
+
+.assignment-config-panel .assignment-config-content-card-submit .submit-button {
+  align-self: flex-start;
+}
+
+.assignment-config-panel .panel-list-shell {
+  margin-top: 1.5rem;
+}
+
+.assignment-config-panel .panel-subheader h3,
+.assignment-config-panel .assignment-section-header h3,
+.assignment-config-panel .panel-list-shell h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--ev-c-gray-1);
+}
+
+.assignment-config-panel .panel-subheader p,
+.assignment-config-panel .assignment-section-header p {
+  margin: 0.35rem 0 0 0;
+  color: var(--ev-c-text-3);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.assignment-config-panel .assignment-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
+.assignment-config-panel .primary-button,
+.assignment-config-panel .secondary-button,
+.assignment-config-panel .submit-button,
+.assignment-config-panel .btn-ghost {
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease,
+    background 0.18s ease,
+    opacity 0.18s ease;
+}
+
+.assignment-config-panel .primary-button,
+.assignment-config-panel .submit-button {
+  min-height: 52px;
+  border-radius: 14px;
+  font-size: 0.95rem;
+  font-weight: 650;
+}
+
+.assignment-config-panel .secondary-button {
+  min-height: 50px;
+  border-radius: 14px;
+  font-size: 0.92rem;
+  font-weight: 600;
+}
+
+.assignment-config-panel .primary-button:hover:not(:disabled),
+.assignment-config-panel .secondary-button:hover:not(:disabled),
+.assignment-config-panel .submit-button:hover:not(:disabled),
+.assignment-config-panel .btn-ghost:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.assignment-config-panel .primary-button:disabled,
+.assignment-config-panel .secondary-button:disabled,
+.assignment-config-panel .submit-button:disabled,
+.assignment-config-panel .btn-ghost:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.assignment-config-panel .assignment-section-header--tests {
+  margin-top: 0.5rem;
+}
+
+.assignment-config-panel .panel-section {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  padding: 0.9rem 1rem;
+  border: 1px solid #d9e2ec;
+  border-radius: 16px;
+  background: #f8fbff;
+}
+
+.assignment-config-panel .panel-section label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--ev-c-gray-1);
+  font-size: 0.92rem;
+}
+
+.assignment-config-panel .solution-type-option-spaced {
+  margin-left: 0;
+}
+
+.assignment-config-panel .field-label {
+  display: block;
+  margin: 0 0 0.45rem 0;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--ev-c-gray-1);
+}
+
+.assignment-config-panel .panel-input,
+.assignment-config-panel .panel-textarea {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid #d1d5db;
+  border-radius: 14px;
+  background: var(--ev-c-white);
+  color: var(--ev-c-gray-1);
+  font-size: 0.95rem;
+  padding: 0.85rem 1rem;
+  transition:
+    border-color 0.18s ease,
+    box-shadow 0.18s ease;
+}
+
+.assignment-config-panel .panel-input:focus,
+.assignment-config-panel .panel-textarea:focus {
+  outline: none;
+  border-color: var(--ev-c-blue-2);
+  box-shadow: 0 0 0 4px rgba(129, 195, 215, 0.25);
+}
+
+.assignment-config-panel .panel-textarea {
+  min-height: 120px;
+  resize: vertical;
+}
+
+.assignment-config-panel .solution-box,
+.assignment-config-panel .panel-output-preview,
+.assignment-config-panel .test-case-card,
+.assignment-config-panel .panel-list-item {
+  background: #f8fbff;
+  border: 1px solid #d9e2ec;
+  border-radius: 18px;
+}
+
+.assignment-config-panel .solution-box,
+.assignment-config-panel .panel-output-preview,
+.assignment-config-panel .test-case-card {
+  padding: 1rem;
+}
+
+.assignment-config-panel .helper-text {
+  margin: 0.65rem 0 0 0;
+  color: var(--ev-c-text-3);
+  font-size: 0.85rem;
+  line-height: 1.4;
+}
+
+.assignment-config-panel .panel-pre {
+  margin: 0.45rem 0 0 0;
+  max-height: 220px;
+  overflow: auto;
+  border-radius: 14px;
+  border: 1px solid #d9e2ec;
+  background: var(--ev-c-white);
+  padding: 0.9rem;
+  color: var(--ev-c-gray-1);
+  font-size: 0.85rem;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font-family:
+    'JetBrains Mono',
+    'Fira Code',
+    'Cascadia Code',
+    Consolas,
+    monospace;
+}
+
+.assignment-config-panel .test-case-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.assignment-config-panel .test-case-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.75rem;
+  margin-bottom: 0.85rem;
+}
+
+.assignment-config-panel .test-case-card-header h4 {
+  margin: 0;
+  font-size: 1rem;
+  color: var(--ev-c-gray-1);
+}
+
+.assignment-config-panel .test-case-card-header p {
+  margin: 0.3rem 0 0 0;
+  color: var(--ev-c-text-3);
+  font-size: 0.85rem;
+}
+
+.assignment-config-panel .test-case-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.assignment-config-panel .test-case-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.assignment-config-panel .test-case-field--required .field-label::after {
+  content: ' *';
+  color: #dc2626;
+}
+
+.assignment-config-panel .panel-empty {
+  border: 1px dashed #cbd5e1;
+  border-radius: 16px;
+  padding: 0.9rem 1rem;
+  color: #94a3b8;
+  font-style: italic;
+  background: #f8fbff;
+}
+
+.assignment-config-panel .panel-success,
+.assignment-config-panel .panel-error {
+  padding: 0.8rem 1rem;
+  border-radius: 14px;
+  font-size: 0.92rem;
+}
+
+.assignment-config-panel .panel-success {
+  background: #f0fdf4;
+  border: 1px solid #86efac;
+  color: #166534;
+}
+
+.assignment-config-panel .panel-error {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #b91c1c;
+}
+
+.assignment-config-panel .panel-list {
+  list-style: none;
+  margin: 1rem 0 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.assignment-config-panel .panel-list-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1rem;
+}
+
+.assignment-config-panel .panel-list-item strong {
+  color: var(--ev-c-gray-1);
+}
+
+.assignment-config-panel .panel-list-item > div:first-child > div {
+  color: var(--ev-c-text-3);
+  font-size: 0.88rem;
+  margin-top: 0.25rem;
+  overflow-wrap: anywhere;
+}
+
+.assignment-config-panel .panel-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.assignment-config-panel .assignment-config-action-button {
+  font-size: 0.8rem;
+  padding: 0.4rem 0.75rem;
+}
+
+.assignment-config-panel .assignment-config-action-button-danger {
+  color: #b91c1c;
+}
+
+.assignment-config-panel .compact-button {
+  min-height: 44px;
+}
+
+@media (max-width: 1100px) {
+  .assignment-config-panel .panel-list-shell,
+  .assignment-config-panel .assignment-config-content-card {
+    padding: 1.5rem;
+  }
+
+  .assignment-config-panel .test-case-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .assignment-config-panel .panel-list-item {
+    flex-direction: column;
+  }
+
+  .assignment-config-panel .panel-actions {
+    flex-direction: row;
+  }
+}
+
+@media (max-width: 700px) {
+  .assignment-config-panel .panel-header,
+  .assignment-config-panel .assignment-section-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .assignment-config-panel .panel-list-shell,
+  .assignment-config-panel .assignment-config-content-card {
+    border-radius: 24px;
+    padding: 1.15rem;
+  }
+
+  .assignment-config-panel .panel-header h2 {
+    font-size: 1.3rem;
+  }
+
+  .assignment-config-panel .panel-subheader h3,
+  .assignment-config-panel .assignment-section-header h3,
+  .assignment-config-panel .panel-list-shell h3 {
+    font-size: 1.02rem;
+  }
+
+  .assignment-config-panel .assignment-section-header .compact-button,
+  .assignment-config-panel .submit-button,
+  .assignment-config-panel .assignment-config-content-card-submit .submit-button {
+    width: 100%;
+  }
+
+  .assignment-config-panel .panel-section {
+    padding: 0.8rem 0.85rem;
+  }
+
+  .assignment-config-panel .panel-list-item {
+    padding: 0.9rem;
+  }
+
+  .assignment-config-panel .panel-actions {
+    width: 100%;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+  }
+}
