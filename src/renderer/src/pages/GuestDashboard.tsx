@@ -2,7 +2,6 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../components/AuthContext'
 import { NavBar } from '../components/Navbar'
-import { Footer } from '../components/Footer'
 import { AboutPanel } from '../components/AboutPanel'
 import { GradingPanel } from '../components/grading/GradingPanel'
 import { GradingPlusPanel } from '../components/grading/GradingPlusPanel'
@@ -103,8 +102,6 @@ export function GuestDashboard(): React.JSX.Element {
           Logout
         </button>
       </div>
-
-      <Footer />
     </>
   )
 }

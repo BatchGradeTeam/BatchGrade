@@ -18,7 +18,6 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../components/AuthContext'
 import { NavBar } from '../components/Navbar'
-import { Footer } from '../components/Footer'
 import AssignmentConfigPanel from '../components/AssignmentConfigPanel'
 import { AboutPanel } from '../components/AboutPanel'
 import { GradebookPanel } from '../components/grading/GradebookPanel'
@@ -215,11 +214,6 @@ export function InstructorDashboard(): React.JSX.Element {
           Logout
         </button>
       </div>
-
-      {/*-----------------------------------------------------------
-        Application Footer
-      -----------------------------------------------------------*/}
-      <Footer />
     </>
   )
 }

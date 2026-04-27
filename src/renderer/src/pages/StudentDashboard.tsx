@@ -16,7 +16,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { NavBar } from '../components/Navbar'
-import { Footer } from '../components/Footer'
 import { useAuth } from '../components/AuthContext'
 import { CppWorkflowPanel } from '../components/compiler/CppWorkflowPanel'
 import { OutputDiffPanel, type OutputComparisonCase } from '../components/OutputDiffPanel'
@@ -317,8 +316,6 @@ export function StudentDashboard(): React.JSX.Element {
           Logout
         </button>
       </div>
-
-      <Footer />
     </>
   )
 }

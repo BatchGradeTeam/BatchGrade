@@ -16,7 +16,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { INSTRUCTOR_ROLE, STUDENT_ROLE } from '../../../shared/types'
-import { Footer } from '../components/Footer'
 import { IpcPing } from '../components/IpcPing'
 import { NavBar } from '../components/Navbar'
 import { useAuth } from '../components/AuthContext'
@@ -245,11 +244,6 @@ export function SignUp(): React.JSX.Element {
           </div>
         </div>
       </div>
-
-      {/*-----------------------------------------------------------
-        Page Footer
-        -----------------------------------------------------------*/}
-      <Footer />
     </>
   )
 }
