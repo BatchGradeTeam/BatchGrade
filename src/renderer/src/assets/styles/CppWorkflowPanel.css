@@ -3,10 +3,10 @@
 .cpp-workflow-page {
   min-height: 100%;
   width: 100%;
-  padding: 2rem;
+  padding: 0;
   box-sizing: border-box;
-  background: linear-gradient(180deg, #f8fafc 0%, #eef4fb 100%);
-  color: #0f172a;
+  background: transparent;
+  color: var(--ev-c-gray-1);
 }
 
 .cpp-workflow-grid {
@@ -17,12 +17,10 @@
 }
 
 .cpp-card {
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
-  border-radius: 24px;
-  box-shadow:
-    0 12px 32px rgba(15, 23, 42, 0.08),
-    0 2px 8px rgba(15, 23, 42, 0.04);
+  background: var(--ev-c-white);
+  border: 1px solid #d9e2ec;
+  border-radius: 30px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
 }
 
 .cpp-submission-card {
@@ -63,21 +61,21 @@
 
 .cpp-section-title {
   margin: 0;
-  font-size: 1.7rem;
+  font-size: 1.45rem;
   font-weight: 700;
-  color: #0f172a;
+  color: var(--ev-c-gray-1);
 }
 
 .cpp-section-description {
   margin: 0;
-  color: #64748b;
+  color: var(--ev-c-text-3);
   font-size: 0.95rem;
   line-height: 1.5;
 }
 
 .cpp-summary-label {
   margin: 0 0 0.25rem 0;
-  color: #64748b;
+  color: var(--ev-c-text-3);
   font-size: 0.8rem;
   font-weight: 700;
   letter-spacing: 0.05em;
@@ -88,12 +86,12 @@
   margin: 0;
   font-size: 1.4rem;
   font-weight: 700;
-  color: #0f172a;
+  color: var(--ev-c-gray-1);
 }
 
 .cpp-summary-subtitle {
   margin: 0.35rem 0 0 0;
-  color: #64748b;
+  color: var(--ev-c-text-3);
   font-size: 0.95rem;
   line-height: 1.5;
 }
@@ -101,7 +99,7 @@
 .cpp-label {
   font-size: 0.92rem;
   font-weight: 600;
-  color: #475569;
+  color: var(--ev-c-gray-1);
 }
 
 .cpp-form-section {
@@ -136,24 +134,24 @@
   min-height: 54px;
   padding: 0.95rem 1.25rem;
   color: white;
-  background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);
-  box-shadow: 0 10px 24px rgba(37, 99, 235, 0.22);
+  background: var(--ev-c-blue-3);
+  box-shadow: 0 8px 20px rgba(47, 102, 144, 0.24);
 }
 
 .cpp-button-primary:hover:not(:disabled) {
-  background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 100%);
+  background: var(--ev-c-blue-2);
 }
 
 .cpp-button-secondary {
   min-height: 52px;
   padding: 0.9rem 1rem;
   background: white;
-  border: 1px solid #cbd5e1;
-  color: #334155;
+  border: 1px solid #d9e2ec;
+  color: var(--ev-c-gray-1);
 }
 
 .cpp-button-secondary:hover:not(:disabled) {
-  background: #f8fafc;
+  background: #f8fbff;
 }
 
 .cpp-button-full {
@@ -167,7 +165,7 @@
   border-radius: 14px;
   border: 1px solid #d1d5db;
   background: white;
-  color: #0f172a;
+  color: var(--ev-c-gray-1);
   padding: 1rem;
   font-size: 0.95rem;
   box-sizing: border-box;
@@ -179,8 +177,8 @@
 
 .cpp-textarea:focus {
   outline: none;
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
+  border-color: var(--ev-c-blue-2);
+  box-shadow: 0 0 0 4px rgba(129, 195, 215, 0.25);
 }
 
 .cpp-alert {
@@ -210,9 +208,9 @@
 .cpp-file-list-empty {
   padding: 0.9rem 1rem;
   border-radius: 14px;
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
-  color: #334155;
+  background: #f8fbff;
+  border: 1px solid #d9e2ec;
+  color: var(--ev-c-gray-1);
   overflow-wrap: anywhere;
 }
 
@@ -254,8 +252,8 @@
 .cpp-terminal-window {
   margin-top: 1rem;
   border-radius: 18px;
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
+  background: #f8fbff;
+  border: 1px solid #d9e2ec;
   overflow: hidden;
 }
 
@@ -267,7 +265,7 @@
   overflow: auto;
   font-size: 0.88rem;
   line-height: 1.6;
-  color: #334155;
+  color: var(--ev-c-gray-1);
   background: transparent;
   font-family:
     'JetBrains Mono',
@@ -291,8 +289,8 @@
   flex-direction: column;
   gap: 0.25rem;
   padding: 0.9rem 1rem;
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
+  background: #f8fbff;
+  border: 1px solid #d9e2ec;
   border-radius: 14px;
 }
 
@@ -309,7 +307,7 @@
 }
 
 .cpp-result-meta-value {
-  color: #334155;
+  color: var(--ev-c-gray-1);
   line-height: 1.5;
 }
 
@@ -342,6 +340,10 @@
   min-height: 72px;
 }
 
+.cpp-judge-panel {
+  margin-top: 2rem;
+}
+
 @media (max-width: 1100px) {
   .cpp-workflow-grid {
     grid-template-columns: 1fr;
@@ -353,10 +355,6 @@
 }
 
 @media (max-width: 700px) {
-  .cpp-workflow-page {
-    padding: 1rem;
-  }
-
   .cpp-summary-card {
     flex-direction: column;
   }

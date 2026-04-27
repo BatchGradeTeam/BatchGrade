@@ -1,0 +1,432 @@
+/* GradingPlusPanel.css - Pure semantic CSS matching CppWorkflowPanel */
+
+.grading-plus-panel {
+  color: var(--ev-c-gray-1);
+}
+
+/* Header Section */
+.grading-plus-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-bottom: 1.5rem;
+}
+
+.grading-plus-title {
+  margin: 0;
+  font-size: 1.45rem;
+  font-weight: 700;
+  color: var(--ev-c-gray-1);
+}
+
+.grading-plus-description {
+  margin: 0;
+  color: var(--ev-c-text-3);
+  font-size: 0.95rem;
+  line-height: 1.5;
+  max-width: 100%;
+}
+
+.grading-plus-note {
+  margin: 0.5rem 0 0 0;
+  color: var(--ev-c-text-3);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+/* Alerts */
+.grading-plus-error-alert,
+.grading-plus-success-alert,
+.grading-plus-warning-alert {
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  border-radius: 16px;
+  border: 1px solid;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.grading-plus-error-alert {
+  background: #fef2f2;
+  border-color: #fecaca;
+  color: #b91c1c;
+}
+
+.grading-plus-success-alert {
+  background: #f0fdf4;
+  border-color: #86efac;
+  color: #166534;
+}
+
+.grading-plus-warning-alert {
+  background: #fffbeb;
+  border-color: #fcd34d;
+  color: #92400e;
+  margin-bottom: 0;
+}
+
+/* Setup Card */
+.grading-plus-setup-card {
+  background: var(--ev-c-white);
+  border: 1px solid #d9e2ec;
+  border-radius: 30px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  padding: 1.75rem;
+  margin-bottom: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.grading-plus-setup-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.grading-plus-section-title {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--ev-c-gray-1);
+}
+
+.grading-plus-section-description {
+  margin: 0;
+  color: var(--ev-c-text-3);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+/* Assignment Card */
+.grading-plus-assignment-card {
+  background: var(--ev-c-white);
+  border: 1px solid #d9e2ec;
+  border-radius: 18px;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.grading-plus-label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--ev-c-gray-1);
+}
+
+.grading-plus-select {
+  width: 100%;
+  max-width: 28rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid #d9e2ec;
+  border-radius: 14px;
+  background: var(--ev-c-white);
+  color: var(--ev-c-gray-1);
+  font-size: 0.95rem;
+  outline: none;
+  transition:
+    border-color 0.18s ease,
+    box-shadow 0.18s ease;
+}
+
+.grading-plus-select:focus {
+  border-color: var(--ev-c-blue-2);
+  box-shadow: 0 0 0 4px rgba(129, 195, 215, 0.25);
+}
+
+.grading-plus-select:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Status Display */
+.grading-plus-status {
+  font-size: 0.95rem;
+  margin-top: 0.75rem;
+}
+
+.grading-plus-status-loading {
+  color: #b45309;
+}
+
+.grading-plus-status-success {
+  color: #15803d;
+}
+
+.grading-plus-status-warning {
+  color: #b45309;
+}
+
+/* Radio Group */
+.grading-plus-radio-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+  font-size: 0.95rem;
+}
+
+.grading-plus-radio-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--ev-c-text-3);
+  cursor: pointer;
+}
+
+.grading-plus-radio-option input[type="radio"] {
+  cursor: pointer;
+}
+
+.grading-plus-radio-option input[type="radio"]:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+/* Button Group */
+.grading-plus-button-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.grading-plus-button-group .primary-button,
+.grading-plus-button-group .secondary-button,
+.grading-plus-button-group .cancel-button {
+  min-height: 52px;
+  border-radius: 14px;
+  font-size: 0.95rem;
+  font-weight: 650;
+  border: none;
+  cursor: pointer;
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease,
+    background 0.18s ease,
+    opacity 0.18s ease;
+  padding: 0.95rem 1.25rem;
+}
+
+.grading-plus-button-group .primary-button {
+  color: white;
+  background: var(--ev-c-blue-3);
+  box-shadow: 0 8px 20px rgba(47, 102, 144, 0.24);
+}
+
+.grading-plus-button-group .primary-button:hover:not(:disabled) {
+  background: var(--ev-c-blue-2);
+  transform: translateY(-1px);
+}
+
+.grading-plus-button-group .primary-button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.grading-plus-button-group .secondary-button {
+  background: white;
+  border: 1px solid #d9e2ec;
+  color: var(--ev-c-gray-1);
+  padding: 0.9rem 1rem;
+}
+
+.grading-plus-button-group .secondary-button:hover:not(:disabled) {
+  background: #f8fbff;
+  transform: translateY(-1px);
+}
+
+.grading-plus-button-group .secondary-button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.grading-plus-button-group .cancel-button {
+  background: #e2e8f0;
+  border: 1px solid #d9e2ec;
+  color: var(--ev-c-text-3);
+  padding: 0.9rem 1rem;
+}
+
+.grading-plus-button-group .cancel-button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* Dropdown Container */
+.grading-plus-dropdown-container {
+  position: relative;
+}
+
+.grading-plus-dropdown-menu {
+  position: absolute;
+  left: 0;
+  top: 100%;
+  z-index: 20;
+  margin-top: 0.5rem;
+  min-width: 180px;
+  border-radius: 14px;
+  border: 1px solid #d9e2ec;
+  background: var(--ev-c-white);
+  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.12);
+  padding: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.grading-plus-dropdown-item {
+  width: 100%;
+  text-align: left;
+  padding: 0.75rem 1rem;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--ev-c-gray-1);
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition:
+    background 0.18s ease,
+    border-color 0.18s ease;
+}
+
+.grading-plus-dropdown-item:hover:not(:disabled) {
+  background: #f8fbff;
+  border-color: #d9e2ec;
+}
+
+.grading-plus-dropdown-item:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* Alert Group */
+.grading-plus-alert-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+/* Info Grid */
+.grading-plus-info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1rem;
+}
+
+.grading-plus-info-card {
+  background: var(--ev-c-white);
+  border: 1px solid #d9e2ec;
+  border-radius: 18px;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.grading-plus-card-title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--ev-c-gray-1);
+}
+
+.grading-plus-card-content,
+.grading-plus-card-content-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.grading-plus-card-content p {
+  margin: 0;
+  color: var(--ev-c-text-3);
+  line-height: 1.5;
+}
+
+.grading-plus-card-label {
+  font-weight: 600;
+  color: var(--ev-c-gray-1);
+}
+
+.grading-plus-pair-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.grading-plus-pair-item {
+  padding: 0.75rem 1rem;
+  border-radius: 12px;
+  background: #f8fbff;
+  border: 1px solid #d9e2ec;
+  color: var(--ev-c-text-3);
+  font-size: 0.9rem;
+  overflow-wrap: anywhere;
+  line-height: 1.4;
+}
+
+.grading-plus-pair-label {
+  font-weight: 600;
+  color: var(--ev-c-gray-1);
+}
+
+.grading-plus-warning-text {
+  margin: 0.75rem 0 0 0;
+  color: #a12626;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.grading-plus-placeholder-text {
+  margin: 0;
+  color: var(--ev-c-text-3);
+  font-size: 0.9rem;
+  font-style: italic;
+  line-height: 1.5;
+}
+
+/* Students Grid */
+.grading-plus-students-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+/* Home Button */
+.grading-plus-home-button {
+  margin-top: 1.5rem;
+}
+
+/* Responsive Layout */
+@media (max-width: 1200px) {
+  .grading-plus-info-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .grading-plus-button-group {
+    gap: 0.5rem;
+  }
+
+  .grading-plus-button-group .primary-button,
+  .grading-plus-button-group .cancel-button {
+    padding: 0.8rem 1rem;
+    font-size: 0.9rem;
+    min-height: 48px;
+  }
+
+  .grading-plus-radio-group {
+    flex-direction: column;
+    gap: 1rem;
+  }
+}

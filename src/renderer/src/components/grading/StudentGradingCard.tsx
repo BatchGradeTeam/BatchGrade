@@ -6,6 +6,7 @@
  */
 
 import type { BatchStudentSubmission } from '../../../../shared/batchGrading'
+import '../../assets/styles/StudentGradingCard.css'
 
 /**
  * Props for StudentGradingCard component.
@@ -67,35 +68,21 @@ export function StudentGradingCard({
     student.status === 'judging' ||
     student.status === 'done'
 
+  const cardClassName = `student-grading-card${isExpanded ? ' student-grading-card-expanded' : ''}`
+
   return (
-    <div
-      style={{
-        border: isExpanded ? '2px solid #22c55e' : '1px solid gray', // Highlight active card
-        backgroundColor: '#1f1f1f',
-        padding: '12px'
-      }}
-    >
+    <div className={cardClassName}>
       {/* Header section (clickable to expand/collapse) */}
-      <div
-        onClick={onToggle}
-        style={{
-          cursor: 'pointer',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'flex-start',
-          marginBottom: '8px',
-          gap: '12px'
-        }}
-      >
+      <div onClick={onToggle} className="student-grading-card-header">
         {/* Student name and completion indicator */}
-        <div style={{ flex: 1 }}>
-          <h3 style={{ marginBottom: '8px' }}>
+        <div className="student-grading-card-title-wrap">
+          <h3 className="student-grading-card-title">
             {student.studentName} {student.status === 'done' ? '✅' : ''}
           </h3>
         </div>
 
         {/* Action button + expand/collapse arrow */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+        <div className="student-grading-card-actions">
           <button
             onClick={(e) => {
               e.stopPropagation()
@@ -108,7 +95,7 @@ export function StudentGradingCard({
           </button>
 
           {/* Expand/collapse indicator */}
-          <span style={{ fontSize: '18px' }}>{isExpanded ? '▼' : '▶'}</span>
+          <span className="student-grading-card-toggle">{isExpanded ? '▼' : '▶'}</span>
         </div>
       </div>
 
@@ -116,37 +103,26 @@ export function StudentGradingCard({
       {isExpanded && (
         <>
           {/* Basic student information */}
-          <div style={{ marginTop: '12px' }}>
-            <p style={{ fontSize: '14px' }}>Student ID: {student.studentId}</p>
-            <p style={{ fontSize: '14px' }}>Folder: {student.folderName}</p>
-            <p style={{ fontSize: '14px' }}>Status: {student.status}</p>
+          <div className="student-grading-card-meta">
+            <p>Student ID: {student.studentId}</p>
+            <p>Folder: {student.folderName}</p>
+            <p>Status: {student.status}</p>
 
             {/* List of submitted C++ files */}
-            <p style={{ fontSize: '14px', marginTop: '10px' }}>C++ Files:</p>
-            <ul style={{ marginTop: '4px', paddingLeft: '20px' }}>
+            <p className="student-grading-card-files-label">C++ Files:</p>
+            <ul className="student-grading-card-files">
               {student.fileNames.map((fileName) => (
-                <li key={fileName} style={{ fontSize: '14px', overflowWrap: 'anywhere' }}>
-                  {fileName}
-                </li>
+                <li key={fileName}>{fileName}</li>
               ))}
             </ul>
           </div>
 
           {/* Grading details section */}
-          <div
-            style={{
-              marginTop: '12px',
-              padding: '12px',
-              border: '1px solid #4b5563',
-              backgroundColor: '#111827'
-            }}
-          >
-            <p style={{ fontSize: '14px', fontWeight: 'bold', marginBottom: '8px' }}>
-              Grading Details
-            </p>
+          <div className="student-grading-card-details">
+            <p className="student-grading-card-details-title">Grading Details</p>
 
             {/* Current grading stage */}
-            <p style={{ fontSize: '14px', marginBottom: '8px' }}>
+            <p className="student-grading-card-stage">
               {student.status === 'grading' && 'Compiling submission...'}
               {student.status === 'judging' && 'Running judge test cases...'}
               {student.status === 'done' && 'Grading complete.'}
@@ -156,17 +132,15 @@ export function StudentGradingCard({
 
             {/* Compile result */}
             {student.compileResult && (
-              <div style={{ marginTop: '10px' }}>
-                <p style={{ fontSize: '14px' }}>
-                  Compile Success: {student.compileResult.compileSuccess ? 'Yes' : 'No'}
-                </p>
+              <div className="student-grading-card-detail-row">
+                <p>Compile Success: {student.compileResult.compileSuccess ? 'Yes' : 'No'}</p>
               </div>
             )}
 
             {/* Judge result summary */}
             {student.totalCount > 0 && (
-              <div style={{ marginTop: '10px' }}>
-                <p style={{ fontSize: '14px' }}>
+              <div className="student-grading-card-detail-row">
+                <p>
                   Judge Result: {student.passedCount} / {student.totalCount} passed
                 </p>
               </div>
@@ -174,7 +148,7 @@ export function StudentGradingCard({
 
             {/* Error message */}
             {student.errorMessage && (
-              <p style={{ marginTop: '10px', color: '#f87171' }}>Error: {student.errorMessage}</p>
+              <p className="student-grading-card-error">Error: {student.errorMessage}</p>
             )}
           </div>
         </>

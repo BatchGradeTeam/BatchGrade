@@ -8,9 +8,10 @@
  * authentication state of the user.
  *
  * If the user is logged in, a profile avatar is displayed
- * which currently functions as a logout trigger. If the
+ * which opens a small profile popover with a logout action. If the
  * user is not logged in, a login button is shown instead.
  */
+import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { INSTRUCTOR_ROLE, STUDENT_ROLE } from '../../../main/database/schema'
 import avatar from '../assets/profile.png'
@@ -34,6 +35,8 @@ export function NavBar(): React.JSX.Element {
   const navigate = useNavigate()
   // Access authentication state and logout function
   const { isLoggedIn, user, logout } = useAuth()
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false)
+  const profileMenuRef = useRef<HTMLDivElement | null>(null)
 
   // Determine which profile image to display based on user role
   const profileImage =
@@ -42,6 +45,34 @@ export function NavBar(): React.JSX.Element {
       : user?.role === INSTRUCTOR_ROLE
         ? instructorProfile
         : avatar
+
+  async function handleLogout(): Promise<void> {
+    try {
+      await logout()
+      setIsProfileModalOpen(false)
+      navigate('/login')
+    } catch (error) {
+      console.error('Error signing out: ', error)
+    }
+  }
+
+  useEffect(() => {
+    function handlePointerDown(event: MouseEvent): void {
+      if (!profileMenuRef.current?.contains(event.target as Node)) {
+        setIsProfileModalOpen(false)
+      }
+    }
+
+    if (!isProfileModalOpen) {
+      return
+    }
+
+    window.addEventListener('mousedown', handlePointerDown)
+
+    return () => {
+      window.removeEventListener('mousedown', handlePointerDown)
+    }
+  }, [isProfileModalOpen])
 
   return (
     <div className="navbar-container">
@@ -55,24 +86,49 @@ export function NavBar(): React.JSX.Element {
         -----------------------------------------------------------*/}
         {isLoggedIn ? (
           /* Logged-in State:
-              Display user avater which currently triggers logout
-              when clicked. Future implementations may include
-              a dropdown profile menu */
-          <img
-            src={profileImage}
-            alt="Profile"
-            className="profile-image"
-            onClick={() => {
-              void logout()
-                .then(() => {
-                  // Redirect user to the Login page
-                  navigate('/login')
-                })
-                .catch((error) => {
-                  console.error('Error signing out: ', error)
-                })
-            }}
-          />
+              Display user avatar which opens a profile popover
+              with account actions when clicked. */
+          <div className="navbar-profile-menu" ref={profileMenuRef}>
+            <img
+              src={profileImage}
+              alt="Profile"
+              className="profile-image"
+              onClick={() => setIsProfileModalOpen((current) => !current)}
+            />
+
+            {isProfileModalOpen && (
+              <div className="navbar-profile-popover">
+                <div className="navbar-profile-modal-header">
+                  <img src={profileImage} alt="Profile" className="navbar-profile-modal-image" />
+
+                  <div className="navbar-profile-modal-copy">
+                    <h3 className="navbar-profile-modal-title">Profile</h3>
+                    <p className="navbar-profile-modal-subtitle">Manage your current session.</p>
+                  </div>
+                </div>
+
+                <div className="navbar-profile-modal-meta">
+                  <p>
+                    <span className="navbar-profile-modal-label">Email</span>
+                    <span className="navbar-profile-modal-value">{user?.email ?? 'Unknown'}</span>
+                  </p>
+                  <p>
+                    <span className="navbar-profile-modal-label">Role</span>
+                    <span className="navbar-profile-modal-value">{user?.role ?? 'Unknown'}</span>
+                  </p>
+                </div>
+
+                <div className="navbar-profile-modal-actions">
+                  <button className="primary-button" onClick={() => void handleLogout()}>
+                    Logout
+                  </button>
+                  <button className="secondary-button" onClick={() => setIsProfileModalOpen(false)}>
+                    Close
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
         ) : (
           /* Logged-Out State:
               Display login button */

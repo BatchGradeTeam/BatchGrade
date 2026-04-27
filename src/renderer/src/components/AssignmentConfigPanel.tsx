@@ -9,6 +9,7 @@ import {
   publishServerAssignment,
   updateServerAssignment
 } from '../lib/serverData'
+import '../assets/styles/AssignmentConfigPanel.css'
 
 /**
  * @brief Local form state used by AssignmentConfigPanel.
@@ -599,7 +600,7 @@ export function AssignmentConfigPanel(): React.JSX.Element {
   }
 
   return (
-    <div className="panel-shell">
+    <div className="panel-shell assignment-config-panel">
       <div className="panel-header">
         <div>
           <h2>Assignment Configuration</h2>
@@ -617,265 +618,273 @@ export function AssignmentConfigPanel(): React.JSX.Element {
       </div>
 
       <div className="panel-form">
-        <div className="panel-subheader">
-          <h3>Assignment Creation</h3>
-          <p>Enter assignment metadata before creating the assignment.</p>
-        </div>
+        <section className="assignment-config-content-card">
+          <div className="panel-subheader">
+            <h3>Assignment Creation</h3>
+            <p>Enter assignment metadata before creating the assignment.</p>
+          </div>
 
-        <input
-          type="text"
-          placeholder="Assignment name"
-          value={form.name}
-          onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
-          className="panel-input"
-        />
-
-        <div>
-          <label className="field-label">Due date</label>
           <input
-            type="date"
-            value={form.dueDate}
-            onChange={(e) => setForm((f) => ({ ...f, dueDate: e.target.value }))}
+            type="text"
+            placeholder="Assignment name"
+            value={form.name}
+            onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
             className="panel-input"
           />
-        </div>
 
-        <div>
-          <label className="field-label">Grading criteria score</label>
-          <input
-            type="number"
-            min="0"
-            step="1"
-            placeholder="Enter score"
-            value={form.gradingCriteria}
-            onChange={(e) => {
-              const value = e.target.value
-
-              if (value === '' || /^(0|[1-9]\d*)$/.test(value)) {
-                setForm((f) => ({ ...f, gradingCriteria: value }))
-                setError(null)
-              } else {
-                setError(
-                  'Grading criteria must be a non-negative whole number. Please use numbers only.'
-                )
-              }
-            }}
-            className="panel-input"
-          />
-        </div>
-
-        <div className="assignment-section-header">
           <div>
-            <h3>Reference Solution</h3>
-            <p>Instructor answer source or fallback expected output.</p>
-          </div>
-        </div>
-
-        <div className="panel-section">
-          <label>
+            <label className="field-label">Due date</label>
             <input
-              type="radio"
-              name="solutionType"
-              checked={form.solutionType === 'text'}
-              onChange={() =>
-                setForm((f) => ({
-                  ...f,
-                  solutionType: 'text'
-                }))
-              }
-            />
-            Text output
-          </label>
-
-          <label style={{ marginLeft: '1rem' }}>
-            <input
-              type="radio"
-              name="solutionType"
-              checked={form.solutionType === 'file'}
-              onChange={() =>
-                setForm((f) => ({
-                  ...f,
-                  solutionType: 'file',
-                  expectedOutputText: ''
-                }))
-              }
-            />
-            C++ file
-          </label>
-        </div>
-
-        {form.solutionType === 'text' ? (
-          <div className="solution-box reference-solution-box">
-            <label className="field-label">Fallback expected output</label>
-            <textarea
-              placeholder="Used when no grading test cases are added"
-              value={form.expectedOutputText}
-              onChange={(e) => setForm((f) => ({ ...f, expectedOutputText: e.target.value }))}
-              className="panel-input panel-textarea"
-              rows={5}
+              type="date"
+              value={form.dueDate}
+              onChange={(e) => setForm((f) => ({ ...f, dueDate: e.target.value }))}
+              className="panel-input"
             />
           </div>
-        ) : (
-          <div className="solution-box reference-solution-box">
-            <label className="field-label">Reference C++ file</label>
+
+          <div>
+            <label className="field-label">Grading criteria score</label>
+            <input
+              type="number"
+              min="0"
+              step="1"
+              placeholder="Enter score"
+              value={form.gradingCriteria}
+              onChange={(e) => {
+                const value = e.target.value
+
+                if (value === '' || /^(0|[1-9]\d*)$/.test(value)) {
+                  setForm((f) => ({ ...f, gradingCriteria: value }))
+                  setError(null)
+                } else {
+                  setError(
+                    'Grading criteria must be a non-negative whole number. Please use numbers only.'
+                  )
+                }
+              }}
+              className="panel-input"
+            />
+          </div>
+        </section>
+
+        <section className="assignment-config-content-card">
+          <div className="assignment-section-header">
+            <div>
+              <h3>Reference Solution</h3>
+              <p>Instructor answer source or fallback expected output.</p>
+            </div>
+          </div>
+
+          <div className="panel-section">
+            <label>
+              <input
+                type="radio"
+                name="solutionType"
+                checked={form.solutionType === 'text'}
+                onChange={() =>
+                  setForm((f) => ({
+                    ...f,
+                    solutionType: 'text'
+                  }))
+                }
+              />
+              Text output
+            </label>
+
+            <label className="solution-type-option solution-type-option-spaced">
+              <input
+                type="radio"
+                name="solutionType"
+                checked={form.solutionType === 'file'}
+                onChange={() =>
+                  setForm((f) => ({
+                    ...f,
+                    solutionType: 'file',
+                    expectedOutputText: ''
+                  }))
+                }
+              />
+              C++ file
+            </label>
+          </div>
+
+          {form.solutionType === 'text' ? (
+            <div className="solution-box reference-solution-box">
+              <label className="field-label">Fallback expected output</label>
+              <textarea
+                placeholder="Used when no grading test cases are added"
+                value={form.expectedOutputText}
+                onChange={(e) => setForm((f) => ({ ...f, expectedOutputText: e.target.value }))}
+                className="panel-input panel-textarea"
+                rows={5}
+              />
+            </div>
+          ) : (
+            <div className="solution-box reference-solution-box">
+              <label className="field-label">Reference C++ file</label>
+
+              <button
+                type="button"
+                onClick={() => void handleSelectFile()}
+                className="secondary-button compact-button"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? 'Compiling...' : 'Select .cpp File'}
+              </button>
+
+              {selectedFileName ? (
+                <p className="helper-text">Selected: {selectedFileName}</p>
+              ) : (
+                <p className="helper-text">No reference file selected.</p>
+              )}
+
+              {/* FR11: Preview compiled output once the pipeline has run */}
+              {compiledOutput !== null && (
+                <div className="panel-output-preview">
+                  <label className="field-label">Compiled solution output (preview)</label>
+                  <pre className="panel-pre">{compiledOutput}</pre>
+                </div>
+              )}
+            </div>
+          )}
+        </section>
+
+        <section className="assignment-config-content-card">
+          <div className="assignment-section-header assignment-section-header--tests">
+            <div>
+              <h3>Grading Test Cases</h3>
+              <p>Input and expected-output pairs used by Grading+.</p>
+            </div>
 
             <button
               type="button"
-              onClick={() => void handleSelectFile()}
-              className="secondary-button compact-button"
-              disabled={isSubmitting}
+              className="primary-button compact-button"
+              onClick={() =>
+                setTestCases((currentTestCases) => [...currentTestCases, createEmptyTestCase()])
+              }
             >
-              {isSubmitting ? 'Compiling...' : 'Select .cpp File'}
+              + Add Test Case
             </button>
+          </div>
 
-            {selectedFileName ? (
-              <p className="helper-text">Selected: {selectedFileName}</p>
+          <div className="test-case-list">
+            {testCases.length === 0 ? (
+              <div className="panel-empty">No grading test cases added.</div>
             ) : (
-              <p className="helper-text">No reference file selected.</p>
-            )}
+              testCases.map((testCase, index) => (
+                <div key={index} className="test-case-card">
+                  <div className="test-case-card-header">
+                    <div>
+                      <h4>Test case {index + 1}</h4>
+                      <p>{testCase.expectedOutputFileName ?? 'Expected output required'}</p>
+                    </div>
+                    <button
+                      type="button"
+                      className="btn-ghost assignment-config-action-button"
+                      onClick={() =>
+                        setTestCases((currentTestCases) =>
+                          currentTestCases.filter((_, testCaseIndex) => testCaseIndex !== index)
+                        )
+                      }
+                    >
+                      Remove
+                    </button>
+                  </div>
 
-            {/* FR11: Preview compiled output once the pipeline has run */}
-            {compiledOutput !== null && (
-              <div className="panel-output-preview">
-                <label className="field-label">Compiled solution output (preview)</label>
-                <pre className="panel-pre">{compiledOutput}</pre>
-              </div>
+                  <div className="test-case-grid">
+                    <div className="test-case-field">
+                      <label className="field-label">Input</label>
+                      <textarea
+                        placeholder="Optional stdin"
+                        value={testCase.inputText}
+                        onChange={(e) =>
+                          setTestCases((currentTestCases) =>
+                            currentTestCases.map((currentTestCase, testCaseIndex) =>
+                              testCaseIndex === index
+                                ? {
+                                    ...currentTestCase,
+                                    inputText: e.target.value,
+                                    inputFileName: null,
+                                    inputFilePath: null
+                                  }
+                                : currentTestCase
+                            )
+                          )
+                        }
+                        className="panel-input panel-textarea"
+                        rows={5}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => void handleSelectTestCaseFile(index, 'input')}
+                        className="secondary-button compact-button"
+                      >
+                        Select Input
+                      </button>
+                      {testCase.inputFileName && (
+                        <p className="helper-text">Input file: {testCase.inputFileName}</p>
+                      )}
+                    </div>
+
+                    <div className="test-case-field test-case-field--required">
+                      <label className="field-label">Expected Output</label>
+                      <textarea
+                        placeholder="Required expected stdout"
+                        value={testCase.expectedOutputText}
+                        onChange={(e) =>
+                          setTestCases((currentTestCases) =>
+                            currentTestCases.map((currentTestCase, testCaseIndex) =>
+                              testCaseIndex === index
+                                ? {
+                                    ...currentTestCase,
+                                    expectedOutputText: e.target.value,
+                                    expectedOutputFileName: null,
+                                    expectedOutputFilePath: null
+                                  }
+                                : currentTestCase
+                            )
+                          )
+                        }
+                        className="panel-input panel-textarea"
+                        rows={5}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => void handleSelectTestCaseFile(index, 'expectedOutput')}
+                        className="secondary-button compact-button"
+                      >
+                        Select Output
+                      </button>
+                      {testCase.expectedOutputFileName && (
+                        <p className="helper-text">
+                          Expected output file: {testCase.expectedOutputFileName}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))
             )}
           </div>
-        )}
+        </section>
 
-        <div className="assignment-section-header assignment-section-header--tests">
-          <div>
-            <h3>Grading Test Cases</h3>
-            <p>Input and expected-output pairs used by Grading+.</p>
+        <section className="assignment-config-content-card assignment-config-content-card-submit">
+          <div className="panel-subheader">
+            <h3>Save Assignment</h3>
+            <p>Create or update the assignment configuration.</p>
           </div>
 
           <button
-            type="button"
-            className="primary-button compact-button"
-            onClick={() =>
-              setTestCases((currentTestCases) => [...currentTestCases, createEmptyTestCase()])
-            }
+            onClick={() => void handleSubmit()}
+            className="submit-button"
+            disabled={isSubmitting}
           >
-            + Add Test Case
+            {isSubmitting ? 'Saving…' : editingUuid ? 'Update Assignment' : '+ Create Assignment'}
           </button>
-        </div>
 
-        <div className="test-case-list">
-          {testCases.length === 0 ? (
-            <div className="panel-empty">No grading test cases added.</div>
-          ) : (
-            testCases.map((testCase, index) => (
-              <div key={index} className="test-case-card">
-                <div className="test-case-card-header">
-                  <div>
-                    <h4>Test case {index + 1}</h4>
-                    <p>{testCase.expectedOutputFileName ?? 'Expected output required'}</p>
-                  </div>
-                  <button
-                    type="button"
-                    className="btn-ghost text-xs"
-                    onClick={() =>
-                      setTestCases((currentTestCases) =>
-                        currentTestCases.filter((_, testCaseIndex) => testCaseIndex !== index)
-                      )
-                    }
-                  >
-                    Remove
-                  </button>
-                </div>
-
-                <div className="test-case-grid">
-                  <div className="test-case-field">
-                    <label className="field-label">Input</label>
-                    <textarea
-                      placeholder="Optional stdin"
-                      value={testCase.inputText}
-                      onChange={(e) =>
-                        setTestCases((currentTestCases) =>
-                          currentTestCases.map((currentTestCase, testCaseIndex) =>
-                            testCaseIndex === index
-                              ? {
-                                  ...currentTestCase,
-                                  inputText: e.target.value,
-                                  inputFileName: null,
-                                  inputFilePath: null
-                                }
-                              : currentTestCase
-                          )
-                        )
-                      }
-                      className="panel-input panel-textarea"
-                      rows={5}
-                    />
-                    <button
-                      type="button"
-                      onClick={() => void handleSelectTestCaseFile(index, 'input')}
-                      className="secondary-button compact-button"
-                    >
-                      Select Input
-                    </button>
-                    {testCase.inputFileName && (
-                      <p className="helper-text">Input file: {testCase.inputFileName}</p>
-                    )}
-                  </div>
-
-                  <div className="test-case-field test-case-field--required">
-                    <label className="field-label">Expected Output</label>
-                    <textarea
-                      placeholder="Required expected stdout"
-                      value={testCase.expectedOutputText}
-                      onChange={(e) =>
-                        setTestCases((currentTestCases) =>
-                          currentTestCases.map((currentTestCase, testCaseIndex) =>
-                            testCaseIndex === index
-                              ? {
-                                  ...currentTestCase,
-                                  expectedOutputText: e.target.value,
-                                  expectedOutputFileName: null,
-                                  expectedOutputFilePath: null
-                                }
-                              : currentTestCase
-                          )
-                        )
-                      }
-                      className="panel-input panel-textarea"
-                      rows={5}
-                    />
-                    <button
-                      type="button"
-                      onClick={() => void handleSelectTestCaseFile(index, 'expectedOutput')}
-                      className="secondary-button compact-button"
-                    >
-                      Select Output
-                    </button>
-                    {testCase.expectedOutputFileName && (
-                      <p className="helper-text">
-                        Expected output file: {testCase.expectedOutputFileName}
-                      </p>
-                    )}
-                  </div>
-                </div>
-              </div>
-            ))
-          )}
-        </div>
-
-        <div className="panel-subheader">
-          <h3>Save Assignment</h3>
-          <p>Create or update the assignment configuration.</p>
-        </div>
-
-        <button
-          onClick={() => void handleSubmit()}
-          className="submit-button"
-          disabled={isSubmitting}
-        >
-          {isSubmitting ? 'Saving…' : editingUuid ? 'Update Assignment' : '+ Create Assignment'}
-        </button>
-
-        {statusMessage && <div className="panel-success">✓ {statusMessage}</div>}
-        {error && <div className="panel-error">⚠ {error}</div>}
+          {statusMessage && <div className="panel-success">✓ {statusMessage}</div>}
+          {error && <div className="panel-error">⚠ {error}</div>}
+        </section>
       </div>
 
       <div className="panel-list-shell">
@@ -905,21 +914,24 @@ export function AssignmentConfigPanel(): React.JSX.Element {
                 </div>
 
                 <div className="panel-actions">
-                  <button onClick={() => void startEdit(assignment)} className="btn-ghost text-xs">
+                  <button
+                    onClick={() => void startEdit(assignment)}
+                    className="btn-ghost assignment-config-action-button"
+                  >
                     Edit
                   </button>
 
                   {deleteConfirm === assignment.uuid ? (
                     <button
                       onClick={() => void handleDelete(assignment.uuid)}
-                      className="btn-ghost text-xs text-red-400"
+                      className="btn-ghost assignment-config-action-button assignment-config-action-button-danger"
                     >
                       Confirm?
                     </button>
                   ) : (
                     <button
                       onClick={() => setDeleteConfirm(assignment.uuid)}
-                      className="btn-ghost text-xs"
+                      className="btn-ghost assignment-config-action-button"
                     >
                       Delete
                     </button>

@@ -1,8 +1,5 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { useAuth } from '../components/AuthContext'
 import { NavBar } from '../components/Navbar'
-import { Footer } from '../components/Footer'
 import { AboutPanel } from '../components/AboutPanel'
 import { GradingPanel } from '../components/grading/GradingPanel'
 import { GradingPlusPanel } from '../components/grading/GradingPlusPanel'
@@ -10,9 +7,6 @@ import { GradingPlusPanel } from '../components/grading/GradingPlusPanel'
 type GuestWorkspace = 'none' | 'grading' | 'gradingPlus' | 'about'
 
 export function GuestDashboard(): React.JSX.Element {
-  const navigate = useNavigate()
-  const { logout } = useAuth()
-
   const [activeWorkspace, setActiveWorkspace] = useState<GuestWorkspace>('none')
 
   function closeWorkspace(): void {
@@ -40,7 +34,7 @@ export function GuestDashboard(): React.JSX.Element {
       <NavBar />
 
       <div className="dashboard-header">
-        <div className="dashboard-header-container"></div>
+        <div className="dashboard-header-container guest-icon"></div>
         <div className="dashboard-header-container">
           <h1 className="title">Guest Dashboard</h1>
           <p>Access grading tools and learn more about the platform from this dashboard.</p>
@@ -91,20 +85,6 @@ export function GuestDashboard(): React.JSX.Element {
           )}
         </div>
       </div>
-
-      <div className="button-container">
-        <button
-          className="secondary-button"
-          onClick={() => {
-            logout()
-            navigate('/')
-          }}
-        >
-          Logout
-        </button>
-      </div>
-
-      <Footer />
     </>
   )
 }
