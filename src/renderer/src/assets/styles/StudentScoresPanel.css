@@ -1,0 +1,86 @@
+/* StudentScoresPanel.css */
+
+.student-scores-panel {
+  margin-top: 1rem;
+}
+
+.student-scores-title {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--ev-c-gray-1);
+}
+
+.student-scores-description {
+  margin: 0 0 1rem 0;
+  color: var(--ev-c-text-3);
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.student-scores-grid {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.student-scores-filter-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.student-scores-filter-label {
+  color: var(--ev-c-gray-1);
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+
+.student-scores-filter-select {
+  min-width: 220px;
+  border: 1px solid #d9e2ec;
+  border-radius: 10px;
+  padding: 0.4rem 0.55rem;
+  background: #ffffff;
+  color: var(--ev-c-gray-1);
+}
+
+.student-scores-filter-select:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+}
+
+.student-scores-muted {
+  margin: 0;
+  color: var(--ev-c-text-3);
+  font-size: 0.9rem;
+}
+
+.student-scores-alert {
+  border-radius: 14px;
+  padding: 0.7rem 0.85rem;
+}
+
+.student-scores-alert p {
+  margin: 0;
+}
+
+.student-scores-alert-error {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #b91c1c;
+}
+
+.student-scores-record {
+  border: 1px solid #d9e2ec;
+  border-radius: 14px;
+  padding: 0.7rem 0.85rem;
+  background: #f8fbff;
+  color: var(--ev-c-gray-1);
+}
+
+.student-scores-record p {
+  margin: 0.28rem 0;
+  font-size: 0.88rem;
+}
