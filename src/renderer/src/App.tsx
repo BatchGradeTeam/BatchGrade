@@ -79,18 +79,12 @@ export function App(): React.JSX.Element {
         <Routes>
           {/* Landing Page */}
           <Route path="/" element={<Login />} />
-          {/* About Page */}
-          <Route path="/about" element={<About />} />
           {/* Login Page */}
           <Route path="/login" element={<Login />} />
           {/* SignUp Page */}
           <Route path="/signup" element={<SignUp />} />
           {/* Guest DashBoard */}
           <Route path="/guestDashboard" element={<GuestDashboard />} />
-          {/* Guest Batch Interface */}
-
-          {/* Guest Student Interface */}
-
           {/* Student Interface */}
           <Route
             path="/studentdashboard"

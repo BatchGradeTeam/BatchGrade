@@ -90,18 +90,6 @@ export function GuestDashboard(): React.JSX.Element {
           )}
         </div>
       </div>
-
-      <div className="button-container">
-        <button
-          className="secondary-button"
-          onClick={() => {
-            logout()
-            navigate('/')
-          }}
-        >
-          Logout
-        </button>
-      </div>
     </>
   )
 }

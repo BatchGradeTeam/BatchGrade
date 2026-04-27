@@ -199,21 +199,6 @@ export function InstructorDashboard(): React.JSX.Element {
           )}
         </div>
       </div>
-
-      {/*-----------------------------------------------------------
-        Logout Button
-      -----------------------------------------------------------*/}
-      <div className="button-container">
-        <button
-          className="secondary-button"
-          onClick={() => {
-            logout()
-            navigate('/')
-          }}
-        >
-          Logout
-        </button>
-      </div>
     </>
   )
 }
