@@ -122,10 +122,7 @@ export function NavBar(): React.JSX.Element {
                   <button className="primary-button" onClick={() => void handleLogout()}>
                     Logout
                   </button>
-                  <button
-                    className="secondary-button"
-                    onClick={() => setIsProfileModalOpen(false)}
-                  >
+                  <button className="secondary-button" onClick={() => setIsProfileModalOpen(false)}>
                     Close
                   </button>
                 </div>
@@ -140,7 +137,6 @@ export function NavBar(): React.JSX.Element {
           </button>
         )}
       </nav>
-
     </div>
   )
 }
