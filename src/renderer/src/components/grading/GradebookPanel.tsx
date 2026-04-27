@@ -224,7 +224,7 @@ export function GradebookPanel({
     ? selectedAssignment
     : (assignmentOptions[0]?.[0] ?? '')
   const defaultScoreSource: GradebookScoreSource =
-    dataMode === 'local' ? 'offline-batch-grade' : 'submission-self-check'
+    dataMode === 'local' ? 'offline-batch-grade' : 'assignment-submission'
 
   const students = buildStudentRecordsFromGradebook(
     gradebookRecords,
