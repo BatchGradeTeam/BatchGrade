@@ -64,8 +64,7 @@ export function getLanguage(id: Language): LanguageConfig {
 
 function getFilename(path: string): string {
   const normalizedPath = path.replaceAll('\\', '/')
-  const segments = normalizedPath.split('/')
-  return segments[segments.length - 1] ?? path
+  return normalizedPath.slice(normalizedPath.lastIndexOf('/') + 1)
 }
 
 export function detectPythonMainFile(files: string[]): string | null {
