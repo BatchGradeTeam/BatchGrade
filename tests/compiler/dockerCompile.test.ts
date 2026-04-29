@@ -1,8 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
-const { spawnMock, mkdtempMock, getCommonWorkingDirectoryMock } = vi.hoisted(() => {
+const { spawnMock, rmSyncMock, mkdtempMock, getCommonWorkingDirectoryMock } = vi.hoisted(() => {
   return {
     spawnMock: vi.fn(),
+    rmSyncMock: vi.fn(),
     mkdtempMock: vi.fn(),
     getCommonWorkingDirectoryMock: vi.fn()
   }
@@ -10,6 +11,10 @@ const { spawnMock, mkdtempMock, getCommonWorkingDirectoryMock } = vi.hoisted(() 
 
 vi.mock('child_process', () => {
   return { spawn: spawnMock }
+})
+
+vi.mock('fs', () => {
+  return { rmSync: rmSyncMock }
 })
 
 vi.mock('fs/promises', () => {
@@ -34,6 +39,7 @@ async function loadDockerCompileModule(): Promise<typeof import('../../src/main/
 beforeEach(() => {
   vi.doUnmock('../../src/main/compiler/languages')
   spawnMock.mockReset()
+  rmSyncMock.mockReset()
   mkdtempMock.mockReset()
   getCommonWorkingDirectoryMock.mockReset()
 
@@ -88,6 +94,7 @@ describe('dockerCompile', () => {
     expect(result.success).toBe(true)
     expect(result.executablePath).toContain('batchgrade-docker-')
     expect(result.message).toBe('Compilation success.')
+    expect(rmSyncMock).not.toHaveBeenCalled()
     if (typeof process.getuid === 'function' && typeof process.getgid === 'function') {
       expect(spawnMock).toHaveBeenCalledWith(
         'docker',
@@ -126,6 +133,10 @@ describe('dockerCompile', () => {
     expect(result.success).toBe(false)
     expect(result.executablePath).toBeNull()
     expect(result.message).toBe('Compilation failed.')
+    expect(rmSyncMock).toHaveBeenCalledWith('/tmp/batchgrade-docker-123', {
+      recursive: true,
+      force: true
+    })
   })
 
   it('Should filter files by language extension', async () => {
@@ -281,6 +292,10 @@ describe('dockerCompile', () => {
 
     expect(result.success).toBe(false)
     expect(result.message).toBe('Compilation timed out.')
+    expect(rmSyncMock).toHaveBeenCalledWith('/tmp/batchgrade-docker-123', {
+      recursive: true,
+      force: true
+    })
     expect(spawnMock).toHaveBeenCalledWith(
       'docker',
       expect.arrayContaining(['kill', expect.stringMatching(/^batchgrade-compile-/)]),
@@ -306,5 +321,9 @@ describe('dockerCompile', () => {
     expect(result.success).toBe(false)
     expect(result.stderr).toBe('docker failed')
     expect(result.message).toBe('Compilation failed to start.')
+    expect(rmSyncMock).toHaveBeenCalledWith('/tmp/batchgrade-docker-123', {
+      recursive: true,
+      force: true
+    })
   })
 })

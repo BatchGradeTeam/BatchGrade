@@ -30,10 +30,13 @@ function rememberDockerCompileOutput(directory: string): void {
 
   cleanupRegistered = true
   process.once('exit', () => {
-    for (const outputDir of dockerCompileOutputDirs) {
-      rmSync(outputDir, { recursive: true, force: true })
-    }
+    for (const outputDir of Array.from(dockerCompileOutputDirs)) cleanupDockerCompileOutput(outputDir)
   })
+}
+
+function cleanupDockerCompileOutput(directory: string): void {
+  dockerCompileOutputDirs.delete(directory)
+  rmSync(directory, { recursive: true, force: true })
 }
 
 function joinWithExistingSeparator(directory: string, filename: string): string {
@@ -172,6 +175,7 @@ async function dockerCompile(request: DockerCompileOptions): Promise<DockerCompi
       clearTimeout(timeout)
       // Determine compilation result timed out, success, or failed
       if (timedOut) {
+        cleanupDockerCompileOutput(tempDirectory)
         resolve(
           buildDockerCompileResult(
             {
@@ -198,6 +202,7 @@ async function dockerCompile(request: DockerCompileOptions): Promise<DockerCompi
           )
         )
       } else {
+        cleanupDockerCompileOutput(tempDirectory)
         resolve(
           buildDockerCompileResult(
             {
@@ -215,6 +220,7 @@ async function dockerCompile(request: DockerCompileOptions): Promise<DockerCompi
 
     child.on('error', (error) => {
       clearTimeout(timeout)
+      cleanupDockerCompileOutput(tempDirectory)
       resolve(
         buildDockerCompileResult(
           {
