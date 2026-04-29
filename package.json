@@ -1,7 +1,7 @@
 {
   "name": "batchgrade",
   "version": "1.0.0",
-  "description": "An Electron application with React and TypeScript",
+  "description": "A  locally hosted automated grading platform for programming assignments.",
   "main": "./out/main/index.js",
   "author": "batchgrade.com",
   "homepage": "https://www.batchgrade.com",
