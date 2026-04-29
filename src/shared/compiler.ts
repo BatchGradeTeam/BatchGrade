@@ -76,7 +76,8 @@ export type DockerInstallationInfo = {
 // Docker Runtime Arguments
 export const DOCKER_RUN_ARGS = [
   'run',
-  '--rm' // Remove the container after it exits
+  '--rm', // Delete the container after it exits
+  '--init' // Use faster init
 ] as const
 
 export const DOCKER_SANDBOX_ARGS = [
