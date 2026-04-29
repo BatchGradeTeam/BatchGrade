@@ -92,6 +92,8 @@ export const DOCKER_SANDBOX_ARGS = [
   '256m', // Limit memory for programs
   '--cpus',
   '1' // Limit CPU to 1 core
+  '--memory-swap',
+  '256m', // Prevent swap from extending the effective memory limit.
 ] as const
 
 // ***********************************************************************
