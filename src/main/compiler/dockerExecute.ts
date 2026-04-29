@@ -6,6 +6,7 @@
 */
 
 import { spawn } from 'child_process'
+import { randomUUID } from 'crypto'
 import { mkdtemp } from 'fs/promises'
 import { tmpdir } from 'os'
 import { dirname, basename, join } from 'path'
@@ -47,6 +48,7 @@ async function dockerExecute(request: DockerExecuteRequest): Promise<DockerExecu
   const execDir = dirname(executablePath)
   const execName = basename(executablePath)
   const outputDirectory = await mkdtemp(join(tmpdir(), 'batchgrade-output-'))
+  const containerName = `batchgrade-execute-${randomUUID()}`
 
   return new Promise((resolve) => {
     const dockerMountArgs = [
@@ -73,6 +75,8 @@ async function dockerExecute(request: DockerExecuteRequest): Promise<DockerExecu
     // Build docker run command
     const dockerArgs = [
       ...DOCKER_RUN_ARGS,
+      '--name',
+      containerName,
       ...DOCKER_SANDBOX_ARGS,
       ...hostUserArgs,
       ...dockerMountArgs,
@@ -85,6 +89,7 @@ async function dockerExecute(request: DockerExecuteRequest): Promise<DockerExecu
     let programTimedOut = false
     const timeout = setTimeout(() => {
       programTimedOut = true
+      spawn('docker', ['kill', containerName], { windowsHide: true }).on('error', () => {})
       child.kill()
     }, timeoutMs)
 

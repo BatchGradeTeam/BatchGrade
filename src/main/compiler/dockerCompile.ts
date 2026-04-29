@@ -6,6 +6,7 @@
 */
 
 import { spawn } from 'child_process'
+import { randomUUID } from 'crypto'
 import { mkdtemp } from 'fs/promises'
 import { tmpdir } from 'os'
 import { join, basename, extname } from 'path'
@@ -78,6 +79,7 @@ async function dockerCompile(request: DockerCompileOptions): Promise<DockerCompi
   }
   const executablePath = joinWithExistingSeparator(tempDirectory, executableName)
   const workingDir = getCommonWorkingDirectory(sourceFilesForLang)
+  const containerName = `batchgrade-compile-${randomUUID()}`
 
   // Get relative paths for compilation
   const relativeFiles = sourceFilesForLang.map((file) => {
@@ -120,6 +122,8 @@ async function dockerCompile(request: DockerCompileOptions): Promise<DockerCompi
     // Build docker run command
     const dockerArgs = [
       ...DOCKER_RUN_ARGS,
+      '--name',
+      containerName,
       ...DOCKER_SANDBOX_ARGS,
       ...hostUserArgs,
       ...dockerMountArgs,
@@ -133,6 +137,7 @@ async function dockerCompile(request: DockerCompileOptions): Promise<DockerCompi
     let timedOut = false
     const timeout = setTimeout(() => {
       timedOut = true
+      spawn('docker', ['kill', containerName], { windowsHide: true }).on('error', () => {})
       child.kill()
     }, 60000)
 
