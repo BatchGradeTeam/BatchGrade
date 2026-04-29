@@ -36,6 +36,21 @@ async function loadDockerCompileModule(): Promise<typeof import('../../src/main/
   return await import('../../src/main/compiler/dockerCompile')
 }
 
+const originalPlatform = Object.getOwnPropertyDescriptor(process, 'platform')
+
+function mockPlatform(platform: NodeJS.Platform): void {
+  Object.defineProperty(process, 'platform', {
+    value: platform,
+    configurable: true
+  })
+}
+
+function restorePlatform(): void {
+  if (originalPlatform) {
+    Object.defineProperty(process, 'platform', originalPlatform)
+  }
+}
+
 beforeEach(() => {
   vi.doUnmock('../../src/main/compiler/languages')
   spawnMock.mockReset()
@@ -101,6 +116,50 @@ describe('dockerCompile', () => {
         expect.arrayContaining(['--user', `${process.getuid()}:${process.getgid()}`]),
         expect.any(Object)
       )
+    }
+  })
+
+  it('Should clean successful compile output directories on process exit', async () => {
+    let exitHandler: ((code: number) => void) | undefined
+    const onceSpy = vi.spyOn(process, 'once').mockImplementation((event, listener) => {
+      if (event === 'exit') exitHandler = listener as (code: number) => void
+      return process
+    })
+
+    spawnMock.mockImplementation(() => {
+      return {
+        stdout: { on: () => {} },
+        stderr: { on: () => {} },
+        on: (event, callback) => {
+          if (event === 'close') setTimeout(() => callback(0), 10)
+        },
+        kill: () => {}
+      }
+    })
+    mkdtempMock
+      .mockResolvedValueOnce('/tmp/batchgrade-docker-1')
+      .mockResolvedValueOnce('/tmp/batchgrade-docker-2')
+
+    try {
+      const { dockerCompile } = await loadDockerCompileModule()
+      await dockerCompile({ sourceFiles: ['/project/main.cpp'], language: 'cpp' })
+      await dockerCompile({ sourceFiles: ['/project/main.cpp'], language: 'cpp' })
+
+      expect(onceSpy).toHaveBeenCalledTimes(1)
+      expect(rmSyncMock).not.toHaveBeenCalled()
+
+      exitHandler?.(0)
+
+      expect(rmSyncMock).toHaveBeenCalledWith('/tmp/batchgrade-docker-1', {
+        recursive: true,
+        force: true
+      })
+      expect(rmSyncMock).toHaveBeenCalledWith('/tmp/batchgrade-docker-2', {
+        recursive: true,
+        force: true
+      })
+    } finally {
+      onceSpy.mockRestore()
     }
   })
 
@@ -217,6 +276,25 @@ describe('dockerCompile', () => {
     )
   })
 
+  it('Should preserve Windows separators for Docker output paths', async () => {
+    mkdtempMock.mockResolvedValue('C:\\Temp\\batchgrade-docker-123')
+    spawnMock.mockImplementation(() => {
+      return {
+        stdout: { on: () => {} },
+        stderr: { on: () => {} },
+        on: (event, callback) => {
+          if (event === 'close') setTimeout(() => callback(0), 10)
+        },
+        kill: () => {}
+      }
+    })
+
+    const { dockerCompile } = await loadDockerCompileModule()
+    const result = await dockerCompile({ sourceFiles: ['/project/main.cpp'], language: 'cpp' })
+
+    expect(result.executablePath).toBe('C:\\Temp\\batchgrade-docker-123\\batchgrade-program')
+  })
+
   it('Should use fallback stderr when compilation fails without stderr output', async () => {
     spawnMock.mockImplementation(() => {
       return {
@@ -273,7 +351,15 @@ describe('dockerCompile', () => {
   it('Should return timeout result when Docker compilation times out', async () => {
     vi.useFakeTimers()
     let closeHandler: ((code: number | null) => void) | undefined
-    spawnMock.mockImplementation(() => {
+    spawnMock.mockImplementation((cmd, args) => {
+      if (args[0] === 'kill') {
+        return {
+          on: (event, callback) => {
+            if (event === 'error') callback(new Error('docker kill failed'))
+          }
+        }
+      }
+
       return {
         stdout: { on: () => {} },
         stderr: { on: () => {} },
@@ -301,6 +387,29 @@ describe('dockerCompile', () => {
       expect.arrayContaining(['kill', expect.stringMatching(/^batchgrade-compile-/)]),
       expect.any(Object)
     )
+  })
+
+  it('Should skip host user args on Windows', async () => {
+    mockPlatform('win32')
+    spawnMock.mockImplementation(() => {
+      return {
+        stdout: { on: () => {} },
+        stderr: { on: () => {} },
+        on: (event, callback) => {
+          if (event === 'close') setTimeout(() => callback(0), 10)
+        },
+        kill: () => {}
+      }
+    })
+
+    try {
+      const { dockerCompile } = await loadDockerCompileModule()
+      await dockerCompile({ sourceFiles: ['/project/main.cpp'], language: 'cpp' })
+
+      expect(spawnMock.mock.calls[0][1]).not.toContain('--user')
+    } finally {
+      restorePlatform()
+    }
   })
 
   it('Should handle Docker spawn errors', async () => {
