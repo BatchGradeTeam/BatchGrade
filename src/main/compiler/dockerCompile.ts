@@ -7,6 +7,7 @@
 
 import { spawn } from 'child_process'
 import { randomUUID } from 'crypto'
+import { rmSync } from 'fs'
 import { mkdtemp } from 'fs/promises'
 import { tmpdir } from 'os'
 import { join, basename, extname } from 'path'
@@ -18,6 +19,21 @@ import type { Language } from './languages'
 
 type DockerCompileOptions = DockerCompileRequest & {
   language?: Language
+}
+
+const dockerCompileOutputDirs = new Set<string>()
+let cleanupRegistered = false
+
+function rememberDockerCompileOutput(directory: string): void {
+  dockerCompileOutputDirs.add(directory)
+  if (cleanupRegistered) return
+
+  cleanupRegistered = true
+  process.once('exit', () => {
+    for (const outputDir of dockerCompileOutputDirs) {
+      rmSync(outputDir, { recursive: true, force: true })
+    }
+  })
 }
 
 function joinWithExistingSeparator(directory: string, filename: string): string {
@@ -73,6 +89,7 @@ async function dockerCompile(request: DockerCompileOptions): Promise<DockerCompi
 
   // No need to store it long term so use a temp directory
   const tempDirectory = await mkdtemp(join(tmpdir(), 'batchgrade-docker-'))
+  rememberDockerCompileOutput(tempDirectory)
   let executableName = 'batchgrade-program'
   if (config.exeExtension) {
     executableName += config.exeExtension
