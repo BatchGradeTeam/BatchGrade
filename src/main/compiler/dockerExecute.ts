@@ -7,6 +7,7 @@
 
 import { spawn } from 'child_process'
 import { randomUUID } from 'crypto'
+import { rmSync } from 'fs'
 import { mkdtemp } from 'fs/promises'
 import { tmpdir } from 'os'
 import { dirname, basename, join } from 'path'
@@ -14,6 +15,21 @@ import { dirname, basename, join } from 'path'
 import { DOCKER_RUN_ARGS, DOCKER_SANDBOX_ARGS } from '../../shared/compiler'
 import type { Language } from './languages'
 import { getLanguage } from './languages'
+
+const dockerExecuteOutputDirs = new Set<string>()
+let cleanupRegistered = false
+
+function rememberDockerExecuteOutput(directory: string): void {
+  dockerExecuteOutputDirs.add(directory)
+  if (cleanupRegistered) return
+
+  cleanupRegistered = true
+  process.once('exit', () => {
+    for (const outputDir of dockerExecuteOutputDirs) {
+      rmSync(outputDir, { recursive: true, force: true })
+    }
+  })
+}
 
 // This is used when requesting a compiled program to be executed.
 interface DockerExecuteRequest {
@@ -48,6 +64,7 @@ async function dockerExecute(request: DockerExecuteRequest): Promise<DockerExecu
   const execDir = dirname(executablePath)
   const execName = basename(executablePath)
   const outputDirectory = await mkdtemp(join(tmpdir(), 'batchgrade-output-'))
+  rememberDockerExecuteOutput(outputDirectory)
   const containerName = `batchgrade-execute-${randomUUID()}`
 
   return new Promise((resolve) => {
