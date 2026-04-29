@@ -292,7 +292,9 @@ describe('dockerCompile', () => {
     const { dockerCompile } = await loadDockerCompileModule()
     const result = await dockerCompile({ sourceFiles: ['/project/main.cpp'], language: 'cpp' })
 
-    expect(result.executablePath).toBe('C:\\Temp\\batchgrade-docker-123\\batchgrade-program')
+    const expectedExecutableName =
+      process.platform === 'win32' ? 'batchgrade-program.exe' : 'batchgrade-program'
+    expect(result.executablePath).toBe(`C:\\Temp\\batchgrade-docker-123\\${expectedExecutableName}`)
   })
 
   it('Should use fallback stderr when compilation fails without stderr output', async () => {
