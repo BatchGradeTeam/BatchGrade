@@ -1,13 +1,18 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
-const { spawnMock } = vi.hoisted(() => {
+const { spawnMock, rmSyncMock } = vi.hoisted(() => {
   return {
-    spawnMock: vi.fn()
+    spawnMock: vi.fn(),
+    rmSyncMock: vi.fn()
   }
 })
 
 vi.mock('child_process', () => {
   return { spawn: spawnMock }
+})
+
+vi.mock('fs', () => {
+  return { rmSync: rmSyncMock }
 })
 
 vi.mock('../../src/main/compiler/languages', () => {
@@ -30,6 +35,7 @@ async function loadDockerExecuteModule(): Promise<typeof import('../../src/main/
 
 beforeEach(() => {
   spawnMock.mockReset()
+  rmSyncMock.mockReset()
 })
 
 describe('dockerExecute', () => {
@@ -65,6 +71,8 @@ describe('dockerExecute', () => {
     expect(result.success).toBe(true)
     expect(result.stdout).toBe('Hello, World!\n')
     expect(result.message).toBe('Program execution success.')
+    expect(result.outputDirectory).toContain('batchgrade-output-')
+    expect(rmSyncMock).not.toHaveBeenCalled()
   })
 
   it('Should pass stdin to the program', async () => {
