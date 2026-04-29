@@ -33,6 +33,21 @@ async function loadDockerExecuteModule(): Promise<typeof import('../../src/main/
   return await import('../../src/main/compiler/dockerExecute')
 }
 
+const originalPlatform = Object.getOwnPropertyDescriptor(process, 'platform')
+
+function mockPlatform(platform: NodeJS.Platform): void {
+  Object.defineProperty(process, 'platform', {
+    value: platform,
+    configurable: true
+  })
+}
+
+function restorePlatform(): void {
+  if (originalPlatform) {
+    Object.defineProperty(process, 'platform', originalPlatform)
+  }
+}
+
 beforeEach(() => {
   spawnMock.mockReset()
   rmSyncMock.mockReset()
@@ -73,6 +88,58 @@ describe('dockerExecute', () => {
     expect(result.message).toBe('Program execution success.')
     expect(result.outputDirectory).toContain('batchgrade-output-')
     expect(rmSyncMock).not.toHaveBeenCalled()
+  })
+
+  it('Should clean execution output directories on process exit', async () => {
+    let exitHandler: ((code: number) => void) | undefined
+    const onceSpy = vi.spyOn(process, 'once').mockImplementation((event, listener) => {
+      if (event === 'exit') exitHandler = listener as (code: number) => void
+      return process
+    })
+
+    spawnMock.mockImplementation(() => {
+      return {
+        stdout: { on: () => {} },
+        stderr: { on: () => {} },
+        on: (event, callback) => {
+          if (event === 'close') setTimeout(() => callback(0), 10)
+        },
+        stdin: { write: () => {}, end: () => {} },
+        kill: () => {}
+      }
+    })
+
+    try {
+      const { dockerExecute } = await loadDockerExecuteModule()
+      const result = await dockerExecute({
+        executablePath: '/tmp/program',
+        stdin: '',
+        timeoutMs: 5000,
+        language: 'cpp'
+      })
+      const secondResult = await dockerExecute({
+        executablePath: '/tmp/program',
+        stdin: '',
+        timeoutMs: 5000,
+        language: 'cpp'
+      })
+
+      expect(onceSpy).toHaveBeenCalledTimes(1)
+      expect(rmSyncMock).not.toHaveBeenCalled()
+
+      exitHandler?.(0)
+
+      expect(rmSyncMock).toHaveBeenCalledWith(result.outputDirectory, {
+        recursive: true,
+        force: true
+      })
+      expect(rmSyncMock).toHaveBeenCalledWith(secondResult.outputDirectory, {
+        recursive: true,
+        force: true
+      })
+    } finally {
+      onceSpy.mockRestore()
+    }
   })
 
   it('Should pass stdin to the program', async () => {
@@ -169,7 +236,15 @@ describe('dockerExecute', () => {
 
   it('Should kill the named container when execution times out', async () => {
     let closeHandler: ((code: number | null) => void) | undefined
-    spawnMock.mockImplementation(() => {
+    spawnMock.mockImplementation((cmd, args) => {
+      if (args[0] === 'kill') {
+        return {
+          on: (event, callback) => {
+            if (event === 'error') callback(new Error('docker kill failed'))
+          }
+        }
+      }
+
       return {
         stdout: { on: () => {} },
         stderr: { on: () => {} },
@@ -195,6 +270,35 @@ describe('dockerExecute', () => {
       expect.arrayContaining(['kill', expect.stringMatching(/^batchgrade-execute-/)]),
       expect.any(Object)
     )
+  })
+
+  it('Should skip host user args on Windows', async () => {
+    mockPlatform('win32')
+    spawnMock.mockImplementation(() => {
+      return {
+        stdout: { on: () => {} },
+        stderr: { on: () => {} },
+        on: (event, callback) => {
+          if (event === 'close') setTimeout(() => callback(0), 10)
+        },
+        stdin: { write: () => {}, end: () => {} },
+        kill: () => {}
+      }
+    })
+
+    try {
+      const { dockerExecute } = await loadDockerExecuteModule()
+      await dockerExecute({
+        executablePath: '/tmp/program',
+        stdin: '',
+        timeoutMs: 5000,
+        language: 'cpp'
+      })
+
+      expect(spawnMock.mock.calls[0][1]).not.toContain('--user')
+    } finally {
+      restorePlatform()
+    }
   })
 
   it('Should support Python execution', async () => {
