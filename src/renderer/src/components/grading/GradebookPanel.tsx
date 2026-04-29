@@ -144,6 +144,7 @@ const buildStudentRecordsFromGradebook = (
     groupedRecords.set(record.studentId, [...existing, record])
   })
 
+  // Get the highest score of a student's submission
   const submittedStudents: StudentRecord[] = Array.from(groupedRecords.values()).map((studentRecords) => {
     const highestRecord = studentRecords.reduce((best, current) =>
       current.score > best.score ? current : best
@@ -159,8 +160,9 @@ const buildStudentRecordsFromGradebook = (
       name: latestRecord.studentName,
       score: `${highestRecord.score}%`,
       scoreSource: formatScoreSource(effectiveScoreSource),
+      // Get submission time of highest score rather than latest
       lastSubmitted: formatSubmittedTime(highestRecord.submittedAt),
-      status: formatStudentStatus({ ...latestRecord, scoreSource: effectiveScoreSource })
+      status: formatStudentStatus({ ...highestRecord, scoreSource: effectiveScoreSource })
     }
   })
 
@@ -168,6 +170,7 @@ const buildStudentRecordsFromGradebook = (
   if (dataMode === 'server' && allStudents.length > 0) {
     const submittedStudentIds = new Set(submittedStudents.map((s) => s.id))
     
+    // Students who have not made a submission have a status of Missing
     const nonSubmittedStudents: StudentRecord[] = allStudents
       .filter((student) => !submittedStudentIds.has(student.id))
       .map((student) => ({
