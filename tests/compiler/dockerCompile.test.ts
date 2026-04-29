@@ -281,6 +281,11 @@ describe('dockerCompile', () => {
 
     expect(result.success).toBe(false)
     expect(result.message).toBe('Compilation timed out.')
+    expect(spawnMock).toHaveBeenCalledWith(
+      'docker',
+      expect.arrayContaining(['kill', expect.stringMatching(/^batchgrade-compile-/)]),
+      expect.any(Object)
+    )
   })
 
   it('Should handle Docker spawn errors', async () => {

@@ -159,6 +159,36 @@ describe('dockerExecute', () => {
     expect(result.message).toBe('Program execution failed.')
   })
 
+  it('Should kill the named container when execution times out', async () => {
+    let closeHandler: ((code: number | null) => void) | undefined
+    spawnMock.mockImplementation(() => {
+      return {
+        stdout: { on: () => {} },
+        stderr: { on: () => {} },
+        on: (event, callback) => {
+          if (event === 'close') closeHandler = callback
+        },
+        stdin: { write: () => {}, end: () => {} },
+        kill: () => closeHandler?.(null)
+      }
+    })
+
+    const { dockerExecute } = await loadDockerExecuteModule()
+    const result = await dockerExecute({
+      executablePath: '/tmp/program',
+      stdin: '',
+      timeoutMs: 1,
+      language: 'cpp'
+    })
+
+    expect(result.timedOut).toBe(true)
+    expect(spawnMock).toHaveBeenCalledWith(
+      'docker',
+      expect.arrayContaining(['kill', expect.stringMatching(/^batchgrade-execute-/)]),
+      expect.any(Object)
+    )
+  })
+
   it('Should support Python execution', async () => {
     spawnMock.mockImplementation(() => {
       return {
