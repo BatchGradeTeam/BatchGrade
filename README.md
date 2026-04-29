@@ -84,7 +84,6 @@ VARIABLE_NAME=value
 
 The `.env` file is included in `.gitignore` and must not be committed. **Never commit sensitive credentials or secrets to the repository.**
 
-
 ### Development
 
 Starts the app in development mode with hot-reloading.

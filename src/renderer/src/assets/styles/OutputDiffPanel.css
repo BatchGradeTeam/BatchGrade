@@ -247,12 +247,7 @@
   max-height: 320px;
   overflow-y: auto;
   font-size: 12px;
-  font-family:
-    'JetBrains Mono',
-    'Fira Code',
-    'Cascadia Code',
-    Consolas,
-    monospace;
+  font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', Consolas, monospace;
 }
 
 .output-diff-line {

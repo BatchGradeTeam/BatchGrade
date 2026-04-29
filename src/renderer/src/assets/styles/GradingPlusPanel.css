@@ -176,11 +176,11 @@
   cursor: pointer;
 }
 
-.grading-plus-radio-option input[type="radio"] {
+.grading-plus-radio-option input[type='radio'] {
   cursor: pointer;
 }
 
-.grading-plus-radio-option input[type="radio"]:disabled {
+.grading-plus-radio-option input[type='radio']:disabled {
   cursor: not-allowed;
   opacity: 0.55;
 }
