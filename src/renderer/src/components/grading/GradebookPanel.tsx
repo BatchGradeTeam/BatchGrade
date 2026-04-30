@@ -29,7 +29,7 @@ type GradeStats = {
  * Converts a score string into a numeric value.
  */
 const parseScore = (score: string): number | null => {
-  return score === '--' ? null : parseInt(score)
+  return score === '-' ? null : parseFloat(score)
 }
 
 /**
@@ -72,9 +72,9 @@ const calculateStats = (students: StudentRecord[]): GradeStats => {
 
   if (validScores.length === 0) {
     return {
-      averageScore: '--',
-      highestScore: '--',
-      lowestScore: '--'
+      averageScore: '-',
+      highestScore: '-',
+      lowestScore: '-'
     }
   }
 
@@ -158,7 +158,7 @@ const buildStudentRecordsFromGradebook = (
     return {
       id: latestRecord.studentId,
       name: latestRecord.studentName,
-      score: `${highestRecord.score}%`,
+      score: `${highestRecord.score}`,
       scoreSource: formatScoreSource(effectiveScoreSource),
       // Get submission time of highest score rather than latest
       lastSubmitted: formatSubmittedTime(highestRecord.submittedAt),
@@ -176,9 +176,9 @@ const buildStudentRecordsFromGradebook = (
       .map((student) => ({
         id: student.id,
         name: student.name,
-        score: '--',
-        scoreSource: '--',
-        lastSubmitted: '--',
+        score: '-',
+        scoreSource: '-',
+        lastSubmitted: '-',
         status: 'Missing'
       }))
 
@@ -220,7 +220,7 @@ export function GradebookPanel({
   const [selectedAssignment, setSelectedAssignment] = useState('')
   const [allStudents, setAllStudents] = useState<{ id: string; name: string }[]>([])
   const [gradebookRecords, setGradebookRecords] = useState<GradebookRecord[]>([])
-  const [allAssignments, setAllAssignments] = useState<{ id: string; name: string }[]>([])
+  const [allAssignments, setAllAssignments] = useState<{ id: string; name: string;gradingCriteria?: string }[]>([])
   const [searchTerm, setSearchTerm] = useState('')
   const [sortOption, setSortOption] = useState('name-asc')
   const canClearRecords = allowClear ?? dataMode === 'local'
@@ -245,7 +245,7 @@ export function GradebookPanel({
         try {
           // Load all assignments made by instructor
           const assignments = await loadServerAssignments()
-          setAllAssignments(assignments.map(a => ({ id: a.uuid, name: a.name })))
+          setAllAssignments(assignments.map(a => ({ id: a.uuid, name: a.name, gradingCriteria: a.gradingCriteria})))
         } catch (error) {
           console.error('Failed to load all assignments', error)
         }
@@ -276,6 +276,10 @@ export function GradebookPanel({
     : (assignmentOptions[0]?.[0] ?? '')
   const defaultScoreSource: GradebookScoreSource =
     dataMode === 'local' ? 'offline-batch-grade' : 'assignment-submission'
+  
+  // Get assignment's grading criteria (total available points)
+  //const effectiveSelectedCriteria = 
+  //  allAssignments.find((a) => a.id === effectiveSelectedAssignment)?.gradingCriteria ?? '100'
 
   const students = buildStudentRecordsFromGradebook(
     gradebookRecords,
