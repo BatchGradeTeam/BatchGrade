@@ -48,6 +48,6 @@ If a box cannot be checked, **explain why there should be an exception**.
 - - No, the PR refactors code that already has relevant tests (example of an exception)
 - [ ] If the PR adds code, is it well-documented? (**useful, descriptive names & comments, function & class documentation**)
 - [ ] If the PR includes **AI generated code**, is it properly documented? (TODOs don’t count)
-- [ ] Does the PR uphold >= 79% **statement coverage** & pass CI?
+- [ ] Does the PR uphold >= 90% **statement coverage** & pass CI?
 - [ ] After testing the PR branch, does the app still work as intended?
 - [ ] Is the PR **small** and focused?
