@@ -92,10 +92,11 @@ const calculateStats = (students: StudentRecord[]): GradeStats => {
  * Builds CSV-formatted string content for gradebook export.
  */
 const buildCSVContent = (students: StudentRecord[]): string => {
-  const headers = ['Student Name', 'Score']
+  const headers = ['Last Name', 'First Name', 'Score']
 
   const rows = students.map((student) => [
-    student.name,
+    (student.name).split(' ')[1],
+    (student.name).split(' ')[0],
     student.score // highest score or '-' if not submitted
   ])
 
@@ -353,12 +354,12 @@ export function GradebookPanel({
 
           <div style={{ display: 'flex', gap: '24px', margin: '20px 0', fontWeight: 'bold' }}>
             <div>
-              <span>Average Score: {averageScore === '--' ? '--' : `${averageScore}%`}</span>
+              <span>Average Score: {averageScore === '' ? '-' : `${averageScore}%`}</span>
               <span style={{ marginLeft: '24px' }}>
-                Highest Score: {highestScore === '--' ? '--' : `${highestScore}%`}
+                Highest Score: {highestScore === '-' ? '-' : `${highestScore}%`}
               </span>
               <span style={{ marginLeft: '24px' }}>
-                Lowest Score: {lowestScore === '--' ? '--' : `${lowestScore}%`}
+                Lowest Score: {lowestScore === '-' ? '-' : `${lowestScore}%`}
               </span>
             </div>
           </div>
