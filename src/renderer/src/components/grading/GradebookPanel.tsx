@@ -158,7 +158,7 @@ const buildStudentRecordsFromGradebook = (
       return {
         id: latestRecord.studentId,
         name: latestRecord.studentName,
-        score: `${highestRecord.score}%`,
+        score: `${highestRecord.score}`,
         scoreSource: formatScoreSource(effectiveScoreSource),
         // Get submission time of highest score rather than latest
         lastSubmitted: formatSubmittedTime(highestRecord.submittedAt),
@@ -424,7 +424,7 @@ export function GradebookPanel({
                   sortedStudents.map((student) => (
                     <tr key={student.id}>
                       <td style={cellStyle}>{student.name}</td>
-                      <td style={cellStyle}>{student.score}</td>
+                      <td style={cellStyle}>{`${student.score}%`}</td>
                       <td style={cellStyle}>
                         <span style={sourceTagStyle}>{student.scoreSource}</span>
                       </td>
