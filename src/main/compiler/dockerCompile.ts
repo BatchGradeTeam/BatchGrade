@@ -6,6 +6,8 @@
 */
 
 import { spawn } from 'child_process'
+import { randomUUID } from 'crypto'
+import { rmSync } from 'fs'
 import { mkdtemp } from 'fs/promises'
 import { tmpdir } from 'os'
 import { join, basename, extname } from 'path'
@@ -17,6 +19,24 @@ import type { Language } from './languages'
 
 type DockerCompileOptions = DockerCompileRequest & {
   language?: Language
+}
+
+const dockerCompileOutputDirs = new Set<string>()
+let cleanupRegistered = false
+
+function rememberDockerCompileOutput(directory: string): void {
+  dockerCompileOutputDirs.add(directory)
+  if (cleanupRegistered) return
+
+  cleanupRegistered = true
+  process.once('exit', () => {
+    for (const outputDir of Array.from(dockerCompileOutputDirs)) cleanupDockerCompileOutput(outputDir)
+  })
+}
+
+function cleanupDockerCompileOutput(directory: string): void {
+  dockerCompileOutputDirs.delete(directory)
+  rmSync(directory, { recursive: true, force: true })
 }
 
 function joinWithExistingSeparator(directory: string, filename: string): string {
@@ -72,12 +92,14 @@ async function dockerCompile(request: DockerCompileOptions): Promise<DockerCompi
 
   // No need to store it long term so use a temp directory
   const tempDirectory = await mkdtemp(join(tmpdir(), 'batchgrade-docker-'))
+  rememberDockerCompileOutput(tempDirectory)
   let executableName = 'batchgrade-program'
   if (config.exeExtension) {
     executableName += config.exeExtension
   }
   const executablePath = joinWithExistingSeparator(tempDirectory, executableName)
   const workingDir = getCommonWorkingDirectory(sourceFilesForLang)
+  const containerName = `batchgrade-compile-${randomUUID()}`
 
   // Get relative paths for compilation
   const relativeFiles = sourceFilesForLang.map((file) => {
@@ -120,6 +142,8 @@ async function dockerCompile(request: DockerCompileOptions): Promise<DockerCompi
     // Build docker run command
     const dockerArgs = [
       ...DOCKER_RUN_ARGS,
+      '--name',
+      containerName,
       ...DOCKER_SANDBOX_ARGS,
       ...hostUserArgs,
       ...dockerMountArgs,
@@ -133,6 +157,7 @@ async function dockerCompile(request: DockerCompileOptions): Promise<DockerCompi
     let timedOut = false
     const timeout = setTimeout(() => {
       timedOut = true
+      spawn('docker', ['kill', containerName], { windowsHide: true }).on('error', () => {})
       child.kill()
     }, 60000)
 
@@ -150,6 +175,7 @@ async function dockerCompile(request: DockerCompileOptions): Promise<DockerCompi
       clearTimeout(timeout)
       // Determine compilation result timed out, success, or failed
       if (timedOut) {
+        cleanupDockerCompileOutput(tempDirectory)
         resolve(
           buildDockerCompileResult(
             {
@@ -176,6 +202,7 @@ async function dockerCompile(request: DockerCompileOptions): Promise<DockerCompi
           )
         )
       } else {
+        cleanupDockerCompileOutput(tempDirectory)
         resolve(
           buildDockerCompileResult(
             {
@@ -193,6 +220,7 @@ async function dockerCompile(request: DockerCompileOptions): Promise<DockerCompi
 
     child.on('error', (error) => {
       clearTimeout(timeout)
+      cleanupDockerCompileOutput(tempDirectory)
       resolve(
         buildDockerCompileResult(
           {

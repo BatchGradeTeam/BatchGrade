@@ -23,6 +23,21 @@ beforeEach(() => {
   execFileAsyncMock.mockReset()
 })
 
+const originalPlatform = Object.getOwnPropertyDescriptor(process, 'platform')
+
+function mockPlatform(platform: NodeJS.Platform): void {
+  Object.defineProperty(process, 'platform', {
+    value: platform,
+    configurable: true
+  })
+}
+
+function restorePlatform(): void {
+  if (originalPlatform) {
+    Object.defineProperty(process, 'platform', originalPlatform)
+  }
+}
+
 describe('detectDockerInstallation', () => {
   it('Should return ready status when Docker is available', async () => {
     execFileAsyncMock.mockImplementation((cmd, args) => {
@@ -52,6 +67,42 @@ describe('detectDockerInstallation', () => {
     expect(result.message).toContain('not installed')
   })
 
+  it('Should return missing status when Docker version output cannot be parsed', async () => {
+    execFileAsyncMock.mockImplementation((cmd, args) => {
+      if (args[0] === '--version') {
+        return Promise.resolve({ stdout: 'Docker version unknown', stderr: '' })
+      }
+      if (args[0] === 'ps') {
+        return Promise.resolve({ stdout: '', stderr: '' })
+      }
+      return Promise.reject(new Error('Unknown command'))
+    })
+
+    const { detectDockerInstallation } = await loadDockerDetectionModule()
+    const result = await detectDockerInstallation()
+
+    expect(result.status).toBe('missing')
+    expect(result.version).toBeNull()
+  })
+
+  it('Should read Docker version from stderr', async () => {
+    execFileAsyncMock.mockImplementation((cmd, args) => {
+      if (args[0] === '--version') {
+        return Promise.resolve({ stdout: '', stderr: 'Docker version 25.1.2, build abc123' })
+      }
+      if (args[0] === 'ps') {
+        return Promise.resolve({ stdout: '', stderr: '' })
+      }
+      return Promise.reject(new Error('Unknown command'))
+    })
+
+    const { detectDockerInstallation } = await loadDockerDetectionModule()
+    const result = await detectDockerInstallation()
+
+    expect(result.status).toBe('ready')
+    expect(result.version).toBe('25.1.2')
+  })
+
   it('Should return not-running status when Docker daemon is not running', async () => {
     execFileAsyncMock.mockImplementation((cmd, args) => {
       if (args[0] === '--version') {
@@ -67,5 +118,47 @@ describe('detectDockerInstallation', () => {
     const result = await detectDockerInstallation()
 
     expect(result.status).toBe('not-running')
+  })
+
+  it('Should detect Windows platform', async () => {
+    mockPlatform('win32')
+    execFileAsyncMock.mockResolvedValue({ stdout: '', stderr: '' })
+
+    try {
+      const { detectDockerInstallation } = await loadDockerDetectionModule()
+      const result = await detectDockerInstallation()
+
+      expect(result.platform).toBe('win32')
+    } finally {
+      restorePlatform()
+    }
+  })
+
+  it('Should detect macOS platform', async () => {
+    mockPlatform('darwin')
+    execFileAsyncMock.mockResolvedValue({ stdout: '', stderr: '' })
+
+    try {
+      const { detectDockerInstallation } = await loadDockerDetectionModule()
+      const result = await detectDockerInstallation()
+
+      expect(result.platform).toBe('darwin')
+    } finally {
+      restorePlatform()
+    }
+  })
+
+  it('Should handle unknown platforms', async () => {
+    mockPlatform('freebsd')
+    execFileAsyncMock.mockResolvedValue({ stdout: '', stderr: '' })
+
+    try {
+      const { detectDockerInstallation } = await loadDockerDetectionModule()
+      const result = await detectDockerInstallation()
+
+      expect(result.platform).toBe('unknown')
+    } finally {
+      restorePlatform()
+    }
   })
 })

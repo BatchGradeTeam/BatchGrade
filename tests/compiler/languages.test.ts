@@ -8,6 +8,21 @@ import {
   javaConfig
 } from '../../src/main/compiler/languages'
 
+const originalPlatform = Object.getOwnPropertyDescriptor(process, 'platform')
+
+function mockPlatform(platform: NodeJS.Platform): void {
+  Object.defineProperty(process, 'platform', {
+    value: platform,
+    configurable: true
+  })
+}
+
+function restorePlatform(): void {
+  if (originalPlatform) {
+    Object.defineProperty(process, 'platform', originalPlatform)
+  }
+}
+
 describe('Language Configurations', () => {
   describe('getLanguage', () => {
     it('Should return C++ configuration', () => {
@@ -61,6 +76,53 @@ describe('Language Configurations', () => {
       expect(result).toBe('Main')
     })
 
+    it('Should return null when no Java files are selected', async () => {
+      const result = await detectJavaMainClass(['main.py', 'README.md'])
+      expect(result).toBeNull()
+    })
+
+    it('Should continue after unreadable Java files', async () => {
+      vi.doMock('fs/promises', () => {
+        return {
+          readFile: async (path: string): Promise<string> => {
+            if (path.includes('Broken.java')) {
+              throw new Error('File not found')
+            }
+            return 'class Runner { public static void main(String[] args) {} }'
+          }
+        }
+      })
+
+      const result = await detectJavaMainClass(['/project/Broken.java', '/project/Runner.java'])
+      expect(result).toBe('Runner')
+    })
+
+    it('Should skip Java files without a main method', async () => {
+      vi.doMock('fs/promises', () => {
+        return {
+          readFile: async (): Promise<string> => {
+            return 'class Helper { void run() {} }'
+          }
+        }
+      })
+
+      const result = await detectJavaMainClass(['/project/Helper.java'])
+      expect(result).toBeNull()
+    })
+
+    it('Should skip Java files without a class declaration', async () => {
+      vi.doMock('fs/promises', () => {
+        return {
+          readFile: async (): Promise<string> => {
+            return 'public static void main(String[] args) {}'
+          }
+        }
+      })
+
+      const result = await detectJavaMainClass(['/project/Main.java'])
+      expect(result).toBeNull()
+    })
+
     it('Should return null if no main class found', async () => {
       const result = await detectJavaMainClass(['nonexistent.java', 'test.txt'])
       expect(result).toBeNull()
@@ -101,6 +163,12 @@ describe('Language Configurations', () => {
       const result = detectPythonMainFile(files)
       expect(result).toBe('/project/subdir/main.py')
     })
+
+    it('Should handle Windows paths correctly', () => {
+      const files = ['C:\\project\\utils.py', 'C:\\project\\main.py']
+      const result = detectPythonMainFile(files)
+      expect(result).toBe('C:\\project\\main.py')
+    })
   })
 
   describe('Language configurations validation', () => {
@@ -127,6 +195,20 @@ describe('Language Configurations', () => {
       expect(cppConfig.needsCompilation).toBe(true)
       expect(pythonConfig.needsCompilation).toBe(false)
       expect(javaConfig.needsCompilation).toBe(true)
+    })
+
+    it('Should use exe extension for C++ on Windows', async () => {
+      mockPlatform('win32')
+
+      try {
+        vi.resetModules()
+        const { cppConfig: windowsCppConfig } = await import('../../src/main/compiler/languages')
+
+        expect(windowsCppConfig.exeExtension).toBe('.exe')
+      } finally {
+        restorePlatform()
+        vi.resetModules()
+      }
     })
   })
 })

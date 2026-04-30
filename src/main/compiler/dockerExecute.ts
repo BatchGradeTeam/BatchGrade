@@ -6,11 +6,30 @@
 */
 
 import { spawn } from 'child_process'
-import { dirname, basename } from 'path'
+import { randomUUID } from 'crypto'
+import { rmSync } from 'fs'
+import { mkdtemp } from 'fs/promises'
+import { tmpdir } from 'os'
+import { dirname, basename, join } from 'path'
 
 import { DOCKER_RUN_ARGS, DOCKER_SANDBOX_ARGS } from '../../shared/compiler'
 import type { Language } from './languages'
 import { getLanguage } from './languages'
+
+const dockerExecuteOutputDirs = new Set<string>()
+let cleanupRegistered = false
+
+function rememberDockerExecuteOutput(directory: string): void {
+  dockerExecuteOutputDirs.add(directory)
+  if (cleanupRegistered) return
+
+  cleanupRegistered = true
+  process.once('exit', () => {
+    for (const outputDir of dockerExecuteOutputDirs) {
+      rmSync(outputDir, { recursive: true, force: true })
+    }
+  })
+}
 
 // This is used when requesting a compiled program to be executed.
 interface DockerExecuteRequest {
@@ -27,6 +46,7 @@ interface DockerExecuteResult {
   stdout: string
   stderr: string
   message: string
+  outputDirectory: string
 }
 
 /**
@@ -43,13 +63,18 @@ async function dockerExecute(request: DockerExecuteRequest): Promise<DockerExecu
   // Set up Docker command arguments
   const execDir = dirname(executablePath)
   const execName = basename(executablePath)
+  const outputDirectory = await mkdtemp(join(tmpdir(), 'batchgrade-output-'))
+  rememberDockerExecuteOutput(outputDirectory)
+  const containerName = `batchgrade-execute-${randomUUID()}`
 
   return new Promise((resolve) => {
     const dockerMountArgs = [
       '-v',
       `${execDir}:/app:ro`, // Mount compiled program read-only
+      '-v',
+      `${outputDirectory}:/work`,
       '-w',
-      '/app', // Execute from the mounted program directory
+      '/work', // Keep student-created output files in a host-controlled folder
       '-i' // Keep stdin open so test input can be passed through
     ]
 
@@ -67,6 +92,8 @@ async function dockerExecute(request: DockerExecuteRequest): Promise<DockerExecu
     // Build docker run command
     const dockerArgs = [
       ...DOCKER_RUN_ARGS,
+      '--name',
+      containerName,
       ...DOCKER_SANDBOX_ARGS,
       ...hostUserArgs,
       ...dockerMountArgs,
@@ -79,6 +106,7 @@ async function dockerExecute(request: DockerExecuteRequest): Promise<DockerExecu
     let programTimedOut = false
     const timeout = setTimeout(() => {
       programTimedOut = true
+      spawn('docker', ['kill', containerName], { windowsHide: true }).on('error', () => {})
       child.kill()
     }, timeoutMs)
 
@@ -106,7 +134,8 @@ async function dockerExecute(request: DockerExecuteRequest): Promise<DockerExecu
         timedOut: programTimedOut,
         stdout,
         stderr,
-        message
+        message,
+        outputDirectory
       })
     })
 
@@ -118,7 +147,8 @@ async function dockerExecute(request: DockerExecuteRequest): Promise<DockerExecu
         timedOut: programTimedOut,
         stdout,
         stderr: error.message,
-        message: 'Program execution failed to start.'
+        message: 'Program execution failed to start.',
+        outputDirectory
       })
     })
 
