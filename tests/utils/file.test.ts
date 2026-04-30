@@ -1,9 +1,17 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { materializeServerSubmissions, selectFile, selectCppFiles } from '../../src/main/utils/file'
+import {
+  selectFile,
+  stringifyFile,
+  selectCppFiles,
+  selectSubmissionFolder,
+  selectFilesFromFolder,
+  materializeServerSubmissions
+} from '../../src/main/utils/file'
 import { dialog } from 'electron'
 import * as fs from 'fs/promises'
+import * as path from 'path'
 
-// ai-gen start (Gemini-3, 2)
+// ai-gen start (Gemini-3, 1)
 
 // Mock Electron and fs
 vi.mock('electron', () => ({
@@ -18,12 +26,14 @@ vi.mock('fs/promises', () => ({
   mkdir: vi.fn(),
   readFile: vi.fn(),
   writeFile: vi.fn(),
-  default: {
-    mkdir: vi.fn(),
-    readFile: vi.fn(),
-    writeFile: vi.fn(),
-  },
+  readdir: vi.fn(),
 }))
+
+// Mock path for consistency across different OS's
+vi.mock('path', async () => {
+  const actual = await vi.importActual('path') as any
+  return { ...actual }
+})
 
 beforeEach(() => {
   vi.clearAllMocks()
@@ -58,6 +68,55 @@ describe('Test file.ts', () => {
 
       const result = await selectCppFiles()
       expect(result).toEqual([])
+  })
+
+  it('readFileContents_stringifyFile_returnsStringContent', async () => {
+    vi.mocked(fs.readFile).mockResolvedValue('hello, hello, hello')
+    const result = await stringifyFile('/dummy/path.txt')
+    
+    expect(result).toBe('hello, hello, hello')
+    expect(fs.readFile).toHaveBeenCalledWith('/dummy/path.txt', 'utf-8')
+  })
+
+  it('multipleFilesSelected_selectCppFiles_returnsPaths', async () => {
+    const paths = ['/a.cpp', '/b.hpp']
+    vi.mocked(dialog.showOpenDialog).mockResolvedValue({ canceled: false, filePaths: paths })
+    const result = await selectCppFiles()
+    
+    expect(result).toEqual(paths)
+  })
+
+  it('fileInFolderSelected_selectFilesFromFolder_returnsFile', async () => {
+    vi.mocked(dialog.showOpenDialog).mockResolvedValue({ canceled: false, filePaths: ['/folder'] })
+    
+    // Mock readdir to return one file and one directory
+    vi.mocked(fs.readdir).mockResolvedValue([
+      { name: 'file1.txt', isFile: () => true, isDirectory: () => false },
+      { name: 'subfolder', isFile: () => false, isDirectory: () => true }
+    ] as any)
+
+    const result = await selectFilesFromFolder()
+    expect(result).toHaveLength(1)
+    expect(result[0]).toContain('file1.txt')
+  })
+
+  it('folderSubmissionSelected_selectSubmissionFolder_returnsCorrectSubmissions', async () => {
+    vi.mocked(dialog.showOpenDialog).mockResolvedValue({ canceled: false, filePaths: ['/root'] })
+    
+    // Mock root folder with one student folder
+    vi.mocked(fs.readdir)
+      .mockResolvedValueOnce([
+        { name: 'student1', isFile: () => false, isDirectory: () => true }
+      ] as any)
+      // Mock student folder with one cpp file
+      .mockResolvedValueOnce([
+        { name: 'main.cpp', isFile: () => true, isDirectory: () => false }
+      ] as any)
+
+    const result = await selectSubmissionFolder()
+    expect(result).toHaveLength(1)
+    expect(result[0].folderName).toBe('student1')
+    expect(result[0].cppFiles[0]).toContain('main.cpp')
   })
 
   it('serverBundles_materializeServerSubmissions_writesFilesAndReturnsGroups', async () => {
