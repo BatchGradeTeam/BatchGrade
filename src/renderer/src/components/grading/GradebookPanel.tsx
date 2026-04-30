@@ -94,14 +94,36 @@ const calculateStats = (students: StudentRecord[]): GradeStats => {
 const buildCSVContent = (students: StudentRecord[]): string => {
   const headers = ['Last Name', 'First Name', 'Score']
 
-  const rows = students.map((student) => [
-    (student.name).split(' ')[1],
-    (student.name).split(' ')[0],
-    student.score // highest score or '-' if not submitted
-  ])
+  const rows = students.map((student) => {
+    // Assume last name is only one name
+    // & split the name at the last space using a regular expression
+    const splitName = (student.name).split(/ (?!.* )/)
+    let firstName = ''
+    let lastName = ''
+
+    if (splitName.length == 2) {
+      [firstName, lastName] = splitName
+    } else {
+      // If the full name has no spaces, show as first name only for CSV
+      // since the gradebook sorts by full name
+      firstName = splitName[0] || ''
+      lastName = ''
+    }
+  
+    return [lastName, firstName, student.score] // highest score or '-' if not submitted
+  })
 
   return [headers, ...rows].map((row) => row.join(',')).join('\n')
 }
+
+/**
+ * Formats the score displayed on gradebook rows as a percentage
+ * or '-' for Missing scores (Jerome's contribution)
+ */
+const formatDisplayScore = (score: string | number): string => {
+  return score === '-' ? '-' : `${score}%`
+}
+
 
 /**
  * Formats a saved timestamp into a readable local date/time string.
@@ -354,12 +376,12 @@ export function GradebookPanel({
 
           <div style={{ display: 'flex', gap: '24px', margin: '20px 0', fontWeight: 'bold' }}>
             <div>
-              <span>Average Score: {averageScore === '' ? '-' : `${averageScore}%`}</span>
+              <span>Average Score: {formatDisplayScore(averageScore)}</span>
               <span style={{ marginLeft: '24px' }}>
-                Highest Score: {highestScore === '-' ? '-' : `${highestScore}%`}
+                Highest Score: {formatDisplayScore(highestScore)}
               </span>
               <span style={{ marginLeft: '24px' }}>
-                Lowest Score: {lowestScore === '-' ? '-' : `${lowestScore}%`}
+                Lowest Score: {formatDisplayScore(lowestScore)}
               </span>
             </div>
           </div>
@@ -425,7 +447,7 @@ export function GradebookPanel({
                   sortedStudents.map((student) => (
                     <tr key={student.id}>
                       <td style={cellStyle}>{student.name}</td>
-                      <td style={cellStyle}>{`${student.score}%`}</td>
+                      <td style={cellStyle}>{formatDisplayScore(student.score)}</td>
                       <td style={cellStyle}>
                         <span style={sourceTagStyle}>{student.scoreSource}</span>
                       </td>

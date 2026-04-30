@@ -1138,7 +1138,7 @@ export async function loadAllStudents(): Promise<{ id: string; name: string }[]>
 
   return (data ?? []).map((student) => {
     const name = [student.first_name, student.last_name].filter(Boolean).join(' ').trim()
-    return { id: student.student_id, name: name || student.student_id || student.id }
+    return { id: student.id, name: name || student.student_id || student.id }
   })
 }
 
