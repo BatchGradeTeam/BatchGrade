@@ -24,7 +24,6 @@ import { HashRouter, Route, Routes } from 'react-router-dom'
 import { INSTRUCTOR_ROLE, STUDENT_ROLE } from '../../shared/types'
 import { AuthProvider } from './components/AuthContext'
 import { ProtectedRoute } from './components/ProtectedRoute'
-import { About } from './pages/About'
 //import { GuestBatchGradeInterface } from './pages/GuestBatchGradeInterface'
 import { GuestDashboard } from './pages/GuestDashboard'
 //import { GuestStudentInterface } from './pages/GuestStudentInterface'
@@ -79,18 +78,12 @@ export function App(): React.JSX.Element {
         <Routes>
           {/* Landing Page */}
           <Route path="/" element={<Login />} />
-          {/* About Page */}
-          <Route path="/about" element={<About />} />
           {/* Login Page */}
           <Route path="/login" element={<Login />} />
           {/* SignUp Page */}
           <Route path="/signup" element={<SignUp />} />
           {/* Guest DashBoard */}
           <Route path="/guestDashboard" element={<GuestDashboard />} />
-          {/* Guest Batch Interface */}
-
-          {/* Guest Student Interface */}
-
           {/* Student Interface */}
           <Route
             path="/studentdashboard"

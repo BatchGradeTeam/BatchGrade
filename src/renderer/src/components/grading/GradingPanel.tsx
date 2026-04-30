@@ -16,11 +16,15 @@ export function GradingPanel({
 
   return (
     <div className="panel-shell">
-      <h1>Grading Page</h1>
-      <p>
-        Instructor workflow for compiling and running submissions. Execution remains a separate step
-        so it can move behind a sandbox boundary later.
-      </p>
+      <div className="panel-header">
+        <div>
+          <h2>Grading</h2>
+          <p>
+            Instructor workflow for compiling and running submissions. Execution remains a separate
+            step so it can move behind a sandbox boundary later.
+          </p>
+        </div>
+      </div>
 
       <CppWorkflowPanel
         title="Instructor Compilation Workspace"
@@ -33,18 +37,7 @@ export function GradingPanel({
       <CppJudgePanel compileResult={compileResult} />
 
       {showHomeButton && onGoHome && (
-        <button
-          onClick={onGoHome}
-          style={{
-            padding: '9px 14px',
-            backgroundColor: '#2563eb',
-            color: 'white',
-            border: '2px solid #93c5fd',
-            borderRadius: '6px',
-            fontWeight: 'bold',
-            cursor: 'pointer'
-          }}
-        >
+        <button onClick={onGoHome} className="primary-button compact-button">
           Go to home
         </button>
       )}

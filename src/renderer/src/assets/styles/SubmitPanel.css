@@ -1,0 +1,116 @@
+/* SubmitPanel.css */
+
+.submit-panel {
+  margin-top: 1rem;
+}
+
+.submit-panel-title {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--ev-c-gray-1);
+}
+
+.submit-panel-description {
+  margin: 0 0 1rem 0;
+  color: var(--ev-c-text-3);
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.submit-panel-alert {
+  padding: 0.75rem 0.85rem;
+  border-radius: 14px;
+  margin-bottom: 1rem;
+}
+
+.submit-panel-alert p {
+  margin: 0;
+}
+
+.submit-panel-alert-error {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #b91c1c;
+}
+
+.submit-panel-alert-success {
+  background: #f0fdf4;
+  border: 1px solid #86efac;
+  color: #166534;
+}
+
+.submit-panel-assignment-details {
+  margin-bottom: 1rem;
+  font-size: 0.88rem;
+  line-height: 1.6;
+  color: var(--ev-c-gray-1);
+  border: 1px solid #d9e2ec;
+  border-radius: 14px;
+  background: #f8fbff;
+  padding: 0.75rem 0.85rem;
+}
+
+.submit-panel-assignment-details p {
+  margin: 0.25rem 0;
+}
+
+.submit-panel-self-check-note {
+  margin: 0 0 1rem 0;
+  font-size: 0.88rem;
+  line-height: 1.5;
+  color: var(--ev-c-text-3);
+}
+
+.submit-panel-submit-button {
+  width: 100%;
+  min-height: 52px;
+  border: none;
+  border-radius: 14px;
+  font-size: 0.95rem;
+  font-weight: 650;
+  cursor: pointer;
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease,
+    background 0.18s ease,
+    opacity 0.18s ease;
+}
+
+.submit-panel-submit-button:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.submit-panel-submit-button-primary {
+  color: #ffffff;
+  background: var(--ev-c-blue-3);
+  box-shadow: 0 8px 20px rgba(47, 102, 144, 0.24);
+}
+
+.submit-panel-submit-button-primary:hover:not(:disabled) {
+  background: var(--ev-c-blue-2);
+}
+
+.submit-panel-submit-button-disabled {
+  color: var(--ev-c-text-3);
+  background: #e2e8f0;
+  border: 1px solid #d9e2ec;
+}
+
+.submit-panel-submit-button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.submit-panel-result {
+  margin-top: 1rem;
+  border-top: 1px solid #d9e2ec;
+  padding-top: 1rem;
+  font-size: 0.88rem;
+  color: var(--ev-c-gray-1);
+}
+
+.submit-panel-result p {
+  margin: 0.3rem 0;
+}

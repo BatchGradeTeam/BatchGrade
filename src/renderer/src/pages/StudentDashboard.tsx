@@ -14,9 +14,7 @@
  *  - Accessing submission history
  */
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { NavBar } from '../components/Navbar'
-import { Footer } from '../components/Footer'
 import { useAuth } from '../components/AuthContext'
 import { CppWorkflowPanel } from '../components/compiler/CppWorkflowPanel'
 import { OutputDiffPanel, type OutputComparisonCase } from '../components/OutputDiffPanel'
@@ -40,8 +38,7 @@ type StudentWorkspace = 'none' | 'compile' | 'scores' | 'about'
  * @returns StudentDashboard(): React.JSX.Element
  */
 export function StudentDashboard(): React.JSX.Element {
-  const navigate = useNavigate()
-  const { logout, user } = useAuth()
+  const { user } = useAuth()
 
   const [activeWorkspace, setActiveWorkspace] = useState<StudentWorkspace>('none')
   const [selectedFiles, setSelectedFiles] = useState<string[]>([])
@@ -305,20 +302,6 @@ export function StudentDashboard(): React.JSX.Element {
           )}
         </div>
       </div>
-
-      <div className="button-container">
-        <button
-          className="secondary-button"
-          onClick={() => {
-            logout()
-            navigate('/')
-          }}
-        >
-          Logout
-        </button>
-      </div>
-
-      <Footer />
     </>
   )
 }

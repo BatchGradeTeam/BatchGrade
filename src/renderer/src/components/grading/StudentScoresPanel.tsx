@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import type { GradebookRecord, GradebookScoreSource } from '../../../../shared/gradebookTypes'
 import { loadServerStudentGradebookRecords } from '../../lib/serverData'
+import '../../assets/styles/StudentScoresPanel.css'
 
 function formatSubmittedTime(timestamp: number): string {
   return new Date(timestamp).toLocaleString()
@@ -77,44 +78,31 @@ export function StudentScoresPanel(): React.JSX.Element {
     })
 
   return (
-    <div
-      style={{
-        border: '1px solid gray',
-        padding: '1rem',
-        marginTop: '1rem',
-        backgroundColor: '#2b2b2b'
-      }}
-    >
-      <h2 style={{ marginBottom: '0.5rem' }}>Submission Scores & Feedback</h2>
-      <p style={{ marginTop: 0, marginBottom: '1rem', color: '#cbd5e1' }}>
+    <section className="student-scores-panel panel-shell">
+      <h2 className="student-scores-title">Submission Scores & Feedback</h2>
+      <p className="student-scores-description">
         These scores come from the self-check that runs when you submit your assignment.
       </p>
 
       {isLoading ? (
-        <p>Loading scores...</p>
+        <p className="student-scores-muted">Loading scores...</p>
       ) : errorMessage ? (
-        <div
-          style={{
-            backgroundColor: '#5a1f1f',
-            border: '1px solid red',
-            padding: '10px'
-          }}
-        >
+        <div className="student-scores-alert student-scores-alert-error">
           <p>{errorMessage}</p>
         </div>
       ) : records.length === 0 ? (
-        <p>No submission scores are available yet.</p>
+        <p className="student-scores-muted">No submission scores are available yet.</p>
       ) : (
-        <div style={{ display: 'grid', gap: '12px' }}>
-          <div>
-            <label htmlFor="student-score-assignment" style={{ marginRight: '8px' }}>
+        <div className="student-scores-grid">
+          <div className="student-scores-filter-row">
+            <label htmlFor="student-score-assignment" className="student-scores-filter-label">
               Assignment:
             </label>
             <select
               id="student-score-assignment"
               value={effectiveSelectedAssignmentId}
               onChange={(event) => setSelectedAssignmentId(event.target.value)}
-              style={{ padding: '6px', minWidth: '220px' }}
+              className="student-scores-filter-select"
             >
               {assignmentOptions.map(([assignmentId, assignmentName]) => (
                 <option key={assignmentId} value={assignmentId}>
@@ -125,12 +113,14 @@ export function StudentScoresPanel(): React.JSX.Element {
           </div>
 
           {selectedAssignmentRecords.length === 0 ? (
-            <p>No submission score is available for this assignment yet.</p>
+            <p className="student-scores-muted">
+              No submission score is available for this assignment yet.
+            </p>
           ) : (
             selectedAssignmentRecords.map((record) => (
               <div
                 key={record.submissionId ?? `${record.assignmentId}-${record.submittedAt}`}
-                style={{ border: '1px solid #555', padding: '10px', backgroundColor: '#1f1f1f' }}
+                className="student-scores-record"
               >
                 <p>
                   <strong>{record.assignmentName ?? record.assignmentId}</strong>
@@ -145,6 +135,6 @@ export function StudentScoresPanel(): React.JSX.Element {
           )}
         </div>
       )}
-    </div>
+    </section>
   )
 }

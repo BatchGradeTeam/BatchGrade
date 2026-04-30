@@ -15,10 +15,7 @@
  *  - Gradebook access
  */
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { useAuth } from '../components/AuthContext'
 import { NavBar } from '../components/Navbar'
-import { Footer } from '../components/Footer'
 import AssignmentConfigPanel from '../components/AssignmentConfigPanel'
 import { AboutPanel } from '../components/AboutPanel'
 import { GradebookPanel } from '../components/grading/GradebookPanel'
@@ -47,9 +44,6 @@ export function InstructorDashboard(): React.JSX.Element {
   // -----------------------------------------------------------
   // Navigation Hook
   // -----------------------------------------------------------
-  // Enables programmatic navigation between routes
-  const navigate = useNavigate()
-  const { logout } = useAuth()
 
   /**
    * @brief Tracks which workspace panel is currently visible.
@@ -181,7 +175,7 @@ export function InstructorDashboard(): React.JSX.Element {
             <GradingPanel />
           ) : activeWorkspace === 'gradingPlus' ? (
             <GradingPlusPanel
-              title="Grading+ Page"
+              title="Grading+"
               description="Instructor batch grading workflow for compiling and judging multiple student submissions."
               dataSourceMode="server"
               gradebookMode="local"
@@ -200,26 +194,6 @@ export function InstructorDashboard(): React.JSX.Element {
           )}
         </div>
       </div>
-
-      {/*-----------------------------------------------------------
-        Logout Button
-      -----------------------------------------------------------*/}
-      <div className="button-container">
-        <button
-          className="secondary-button"
-          onClick={() => {
-            logout()
-            navigate('/')
-          }}
-        >
-          Logout
-        </button>
-      </div>
-
-      {/*-----------------------------------------------------------
-        Application Footer
-      -----------------------------------------------------------*/}
-      <Footer />
     </>
   )
 }

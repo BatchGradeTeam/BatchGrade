@@ -1,0 +1,443 @@
+/* CppJudgePanel.css - Pure semantic CSS matching CppWorkflowPanel */
+
+.cpp-judge-panel {
+  color: var(--ev-c-gray-1);
+}
+
+/* Header Section */
+.judge-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-bottom: 1.5rem;
+}
+
+.judge-title {
+  margin: 0;
+  font-size: 1.45rem;
+  font-weight: 700;
+  color: var(--ev-c-gray-1);
+}
+
+.judge-description {
+  margin: 0;
+  color: var(--ev-c-text-3);
+  font-size: 0.95rem;
+  line-height: 1.5;
+  max-width: 100%;
+}
+
+/* Error Alert */
+.judge-error-alert {
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  border-radius: 16px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #b91c1c;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+/* Grid Layout */
+.judge-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+/* Section Cards */
+.judge-section-card {
+  background: var(--ev-c-white);
+  border: 1px solid #d9e2ec;
+  border-radius: 30px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  padding: 1.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.judge-section-card-output {
+  background: var(--ev-c-white);
+}
+
+.judge-section-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.judge-section-title {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--ev-c-gray-1);
+}
+
+.judge-section-description {
+  margin: 0;
+  color: var(--ev-c-text-3);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+/* Button Group */
+.judge-button-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.judge-button-group .primary-button,
+.judge-button-group .secondary-button,
+.judge-button-group .cancel-button {
+  min-height: 52px;
+  border-radius: 14px;
+  font-size: 0.95rem;
+  font-weight: 650;
+  border: none;
+  cursor: pointer;
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease,
+    background 0.18s ease,
+    opacity 0.18s ease;
+}
+
+.judge-button-group .primary-button {
+  color: white;
+  background: var(--ev-c-blue-3);
+  box-shadow: 0 8px 20px rgba(47, 102, 144, 0.24);
+  padding: 0.95rem 1.25rem;
+}
+
+.judge-button-group .primary-button:hover:not(:disabled) {
+  background: var(--ev-c-blue-2);
+  transform: translateY(-1px);
+}
+
+.judge-button-group .primary-button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.judge-button-group .secondary-button {
+  background: white;
+  border: 1px solid #d9e2ec;
+  color: var(--ev-c-gray-1);
+  padding: 0.9rem 1rem;
+}
+
+.judge-button-group .secondary-button:hover:not(:disabled) {
+  background: #f8fbff;
+  transform: translateY(-1px);
+}
+
+.judge-button-group .secondary-button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.judge-button-group .cancel-button {
+  background: #e2e8f0;
+  border: 1px solid #d9e2ec;
+  color: var(--ev-c-text-3);
+  padding: 0.9rem 1rem;
+}
+
+.judge-button-group .cancel-button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* File Count Display */
+.judge-file-count {
+  padding: 0.9rem 1rem;
+  border-radius: 14px;
+  background: #f8fbff;
+  border: 1px solid #d9e2ec;
+  color: var(--ev-c-gray-1);
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+/* File List */
+.judge-file-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  max-height: 240px;
+  overflow-y: auto;
+  margin-top: 0.5rem;
+}
+
+.judge-file-list-item {
+  padding: 0.9rem 1rem;
+  border-radius: 14px;
+  background: #f8fbff;
+  border: 1px solid #d9e2ec;
+  color: var(--ev-c-gray-1);
+  font-size: 0.95rem;
+  overflow-wrap: anywhere;
+  line-height: 1.4;
+}
+
+/* Execution Card */
+.judge-execution-card {
+  background: var(--ev-c-white);
+  border: 1px solid #d9e2ec;
+  border-radius: 30px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  padding: 1.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.judge-execution-path {
+  margin: 0.5rem 0 0 0;
+  color: var(--ev-c-text-3);
+  font-size: 0.9rem;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.judge-execution-label {
+  font-weight: 600;
+  color: var(--ev-c-gray-1);
+}
+
+.judge-execution-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1.5rem;
+  margin-top: 1rem;
+}
+
+.judge-execution-controls .primary-button,
+.judge-execution-controls .cancel-button {
+  min-height: 52px;
+  border-radius: 14px;
+  font-size: 0.95rem;
+  font-weight: 650;
+  border: none;
+  cursor: pointer;
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease,
+    background 0.18s ease,
+    opacity 0.18s ease;
+}
+
+.judge-execution-controls .primary-button {
+  color: white;
+  background: var(--ev-c-blue-3);
+  box-shadow: 0 8px 20px rgba(47, 102, 144, 0.24);
+  padding: 0.95rem 1.25rem;
+}
+
+.judge-execution-controls .primary-button:hover:not(:disabled) {
+  background: var(--ev-c-blue-2);
+  transform: translateY(-1px);
+}
+
+.judge-execution-controls .primary-button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.judge-execution-controls .cancel-button {
+  background: #e2e8f0;
+  border: 1px solid #d9e2ec;
+  color: var(--ev-c-text-3);
+  padding: 0.95rem 1.25rem;
+}
+
+.judge-execution-controls .cancel-button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* Summary Pill */
+.judge-summary-pill {
+  padding: 0.6rem 1rem;
+  border-radius: 16px;
+  background: #dbeafe;
+  border: 1px solid #93c5fd;
+  color: #1d4ed8;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+/* Results Grid */
+.judge-results-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* Result Card */
+.judge-result-card {
+  background: var(--ev-c-white);
+  border: 1px solid #d9e2ec;
+  border-radius: 30px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.judge-result-card-pass {
+  border-color: #bbf7d0;
+}
+
+.judge-result-card-fail {
+  border-color: #fdba74;
+}
+
+/* Result Header */
+.judge-result-header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.judge-result-title {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--ev-c-gray-1);
+}
+
+.judge-result-status-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 0.5rem;
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  border: 1px solid transparent;
+}
+
+.judge-result-status-pass {
+  background: #dcfce7;
+  color: #15803d;
+  border-color: #bbf7d0;
+}
+
+.judge-result-status-fail {
+  background: #ffedd5;
+  color: #c2410c;
+  border-color: #fdba74;
+}
+
+/* Result Metadata */
+.judge-result-metadata {
+  color: var(--ev-c-text-3);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.judge-result-metadata-value {
+  font-weight: 600;
+  color: var(--ev-c-gray-1);
+}
+
+/* Result Details */
+.judge-result-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 1rem;
+  background: #f8fbff;
+  border-radius: 16px;
+  border: 1px solid #d9e2ec;
+  font-size: 0.9rem;
+}
+
+.judge-result-detail-item {
+  margin: 0;
+  color: var(--ev-c-text-3);
+  overflow-wrap: anywhere;
+  line-height: 1.4;
+}
+
+.judge-result-detail-label {
+  font-weight: 600;
+  color: var(--ev-c-gray-1);
+}
+
+/* Output Grid */
+.judge-result-output-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1rem;
+}
+
+/* Output Section */
+.judge-output-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.judge-output-title {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--ev-c-gray-1);
+}
+
+.judge-output-content {
+  margin: 0;
+  padding: 1rem;
+  max-height: 240px;
+  overflow-y: auto;
+  border-radius: 16px;
+  background: #f8fbff;
+  border: 1px solid #d9e2ec;
+  font-size: 0.85rem;
+  line-height: 1.6;
+  color: var(--ev-c-gray-1);
+  font-family:
+    'JetBrains Mono',
+    'Fira Code',
+    'Cascadia Code',
+    Consolas,
+    monospace;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+/* Responsive Layout */
+@media (max-width: 1100px) {
+  .judge-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 700px) {
+  .judge-result-header {
+    flex-direction: column;
+  }
+
+  .judge-result-output-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .judge-execution-controls {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .judge-execution-controls .primary-button,
+  .judge-execution-controls .cancel-button {
+    width: 100%;
+  }
+}

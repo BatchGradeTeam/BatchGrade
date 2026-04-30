@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import type { BatchJudgeCaseResult, BatchStudentSubmission } from '../../../../shared/batchGrading'
 import type { GradebookRecord } from '../../../../shared/gradebookTypes'
 import type { Assignment, AssignmentTestCase } from '../../../../shared/types'
+import '../../assets/styles/GradingPlusPanel.css'
 import { saveGradebookRecord, type GradebookStorageMode } from '../../lib/gradebookStorage'
 import {
   loadAssignmentTestCases,
@@ -85,7 +86,7 @@ function buildGradebookRecord(
 }
 
 export function GradingPlusPanel({
-  title = 'Grading+ Page',
+  title = 'Grading+',
   description = 'Batch grading workflow for compiling and judging multiple student submissions.',
   dataSourceMode = 'server',
   gradebookMode = 'local',
@@ -720,44 +721,33 @@ export function GradingPlusPanel({
   ).length
 
   return (
-    <div className="mt-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-      <div className="mb-6">
-        <h1 className="text-2xl font-semibold text-slate-900">{title}</h1>
+    <div className="panel-shell grading-plus-panel">
+      <div className="grading-plus-header">
+        <h1 className="grading-plus-title">{title}</h1>
 
-        <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">{description}</p>
+        <p className="grading-plus-description">{description}</p>
 
-        <p className="mt-2 text-sm text-slate-500">
+        <p className="grading-plus-note">
           Completed batch grading runs save to the {gradebookDestinationLabel}.
         </p>
       </div>
 
-      {batchError && (
-        <div className="mb-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-          {batchError}
-        </div>
-      )}
+      {batchError && <div className="grading-plus-error-alert">{batchError}</div>}
 
-      {batchMessage && (
-        <div className="mb-5 rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">
-          {batchMessage}
-        </div>
-      )}
+      {batchMessage && <div className="grading-plus-success-alert">{batchMessage}</div>}
 
-      <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
-        <div className="mb-5">
-          <h2 className="text-lg font-semibold text-slate-900">Batch Setup</h2>
+      <div className="grading-plus-setup-card">
+        <div className="grading-plus-setup-header">
+          <h2 className="grading-plus-section-title">Batch Setup</h2>
 
-          <p className="mt-1 text-sm text-slate-600">
+          <p className="grading-plus-section-description">
             Import submissions, add judge files, and run grading across multiple students.
           </p>
         </div>
 
         {isServerMode && (
-          <div className="mb-5 rounded-2xl border border-slate-200 bg-white p-4">
-            <label
-              htmlFor="batch-assignment-select"
-              className="mb-2 block text-sm font-medium text-slate-900"
-            >
+          <div className="grading-plus-assignment-card">
+            <label htmlFor="batch-assignment-select" className="grading-plus-label">
               Assignment
             </label>
 
@@ -766,7 +756,7 @@ export function GradingPlusPanel({
               value={selectedAssignmentId}
               onChange={(e) => setSelectedAssignmentId(e.target.value)}
               disabled={assignments.length === 0 || isBatchGrading}
-              className="w-full max-w-md rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+              className="grading-plus-select"
             >
               {assignments.length === 0 ? (
                 <option value="">No assignments available</option>
@@ -779,23 +769,23 @@ export function GradingPlusPanel({
               )}
             </select>
 
-            <div className="mt-3 text-sm">
+            <div className="grading-plus-status">
               {isLoadingAssignmentTestCases ? (
-                <span className="text-amber-700">Loading test cases...</span>
+                <span className="grading-plus-status-loading">Loading test cases...</span>
               ) : assignmentTestCases.length > 0 ? (
-                <span className="text-green-700">
+                <span className="grading-plus-status-success">
                   Loaded {assignmentTestCases.length} saved test case
                   {assignmentTestCases.length === 1 ? '' : 's'}.
                 </span>
               ) : (
-                <span className="text-amber-700">
+                <span className="grading-plus-status-warning">
                   No saved test cases. Manual files will be used.
                 </span>
               )}
             </div>
 
-            <div className="mt-4 flex flex-wrap gap-4 text-sm text-slate-700">
-              <label className="inline-flex items-center gap-2">
+            <div className="grading-plus-radio-group">
+              <label className="grading-plus-radio-option">
                 <input
                   type="radio"
                   name="grading-test-case-mode"
@@ -806,7 +796,7 @@ export function GradingPlusPanel({
                 Saved assignment cases
               </label>
 
-              <label className="inline-flex items-center gap-2">
+              <label className="grading-plus-radio-option">
                 <input
                   type="radio"
                   name="grading-test-case-mode"
@@ -820,8 +810,8 @@ export function GradingPlusPanel({
           </div>
         )}
 
-        <div className="flex flex-wrap gap-3">
-          <div className="relative">
+        <div className="grading-plus-button-group">
+          <div className="grading-plus-dropdown-container">
             <button
               onClick={(e) => {
                 e.stopPropagation()
@@ -833,13 +823,13 @@ export function GradingPlusPanel({
             </button>
 
             {showModeMenu && (
-              <div className="absolute left-0 top-full z-20 mt-2 min-w-[180px] rounded-xl border border-slate-200 bg-white p-2 shadow-lg">
+              <div className="grading-plus-dropdown-menu">
                 <button
                   onClick={() => {
                     setGradingMode('local')
                     setShowModeMenu(false)
                   }}
-                  className="secondary-button block w-full"
+                  className="grading-plus-dropdown-item"
                 >
                   Local Compiler
                 </button>
@@ -849,7 +839,7 @@ export function GradingPlusPanel({
                     setGradingMode('docker')
                     setShowModeMenu(false)
                   }}
-                  className="secondary-button mt-2 block w-full"
+                  className="grading-plus-dropdown-item"
                 >
                   Docker
                 </button>
@@ -877,7 +867,7 @@ export function GradingPlusPanel({
             Select Student C++ Files
           </button>
 
-          <div className="relative">
+          <div className="grading-plus-dropdown-container">
             <button
               onClick={(e) => {
                 e.stopPropagation()
@@ -889,13 +879,13 @@ export function GradingPlusPanel({
             </button>
 
             {showInputMenu && (
-              <div className="absolute left-0 top-full z-20 mt-2 min-w-[180px] rounded-xl border border-slate-200 bg-white p-2 shadow-lg">
+              <div className="grading-plus-dropdown-menu">
                 <button
                   onClick={() => {
                     setShowInputMenu(false)
                     void handleSelectInputFile()
                   }}
-                  className="secondary-button block w-full"
+                  className="grading-plus-dropdown-item"
                 >
                   Select File
                 </button>
@@ -905,7 +895,7 @@ export function GradingPlusPanel({
                     setShowInputMenu(false)
                     void handleSelectInputFolder()
                   }}
-                  className="secondary-button mt-2 block w-full"
+                  className="grading-plus-dropdown-item"
                 >
                   Select Folder
                 </button>
@@ -913,7 +903,7 @@ export function GradingPlusPanel({
             )}
           </div>
 
-          <div className="relative">
+          <div className="grading-plus-dropdown-container">
             <button
               onClick={(e) => {
                 e.stopPropagation()
@@ -925,13 +915,13 @@ export function GradingPlusPanel({
             </button>
 
             {showOutputMenu && (
-              <div className="absolute left-0 top-full z-20 mt-2 min-w-[180px] rounded-xl border border-slate-200 bg-white p-2 shadow-lg">
+              <div className="grading-plus-dropdown-menu">
                 <button
                   onClick={() => {
                     setShowOutputMenu(false)
                     void handleSelectOutputFile()
                   }}
-                  className="secondary-button block w-full"
+                  className="grading-plus-dropdown-item"
                 >
                   Select File
                 </button>
@@ -941,7 +931,7 @@ export function GradingPlusPanel({
                     setShowOutputMenu(false)
                     void handleSelectOutputFolder()
                   }}
-                  className="secondary-button mt-2 block w-full"
+                  className="grading-plus-dropdown-item"
                 >
                   Select Folder
                 </button>
@@ -958,71 +948,70 @@ export function GradingPlusPanel({
           </button>
         </div>
 
-        <div className="mt-5 grid gap-3">
-          <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+        <div className="grading-plus-alert-group">
+          <div className="grading-plus-warning-alert">
             If the program requires user input, add input files before grading. Otherwise, test
             cases may fail due to missing input.
           </div>
 
-          <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+          <div className="grading-plus-warning-alert">
             Input and output files are paired by alphabetical order. Make sure filenames follow the
             same naming pattern.
           </div>
         </div>
 
-        <div className="mt-5 grid gap-4 lg:grid-cols-2">
-          <div className="rounded-2xl border border-slate-200 bg-white p-4">
-            <h3 className="text-base font-semibold text-slate-900">Overview</h3>
+        <div className="grading-plus-info-grid">
+          <div className="grading-plus-info-card">
+            <h3 className="grading-plus-card-title">Overview</h3>
 
-            <div className="mt-3 grid gap-2 text-sm text-slate-700">
+            <div className="grading-plus-card-content">
               <p>
-                <span className="font-medium text-slate-900">Total Students:</span>{' '}
-                {students.length}
+                <span className="grading-plus-card-label">Total Students:</span> {students.length}
               </p>
 
               <p>
-                <span className="font-medium text-slate-900">Active Test Case Mode:</span>{' '}
+                <span className="grading-plus-card-label">Active Test Case Mode:</span>{' '}
                 {useSavedTestCases ? 'Saved assignment cases' : 'Manual files'}
               </p>
 
               <p>
-                <span className="font-medium text-slate-900">Saved Test Cases:</span>{' '}
+                <span className="grading-plus-card-label">Saved Test Cases:</span>{' '}
                 {assignmentTestCases.length}
               </p>
 
               <p>
-                <span className="font-medium text-slate-900">Manual Input Files:</span>{' '}
+                <span className="grading-plus-card-label">Manual Input Files:</span>{' '}
                 {selectedInputFiles.length}
               </p>
 
               <p>
-                <span className="font-medium text-slate-900">Manual Output Files:</span>{' '}
+                <span className="grading-plus-card-label">Manual Output Files:</span>{' '}
                 {selectedOutputFiles.length}
               </p>
 
               <p>
-                <span className="font-medium text-slate-900">Completed:</span> {completedCount}
+                <span className="grading-plus-card-label">Completed:</span> {completedCount}
               </p>
 
               <p>
-                <span className="font-medium text-slate-900">Current Student:</span>{' '}
+                <span className="grading-plus-card-label">Current Student:</span>{' '}
                 {currentStudentIndex !== null ? students[currentStudentIndex]?.studentName : 'None'}
               </p>
             </div>
           </div>
 
-          <div className="rounded-2xl border border-slate-200 bg-white p-4">
-            <h3 className="text-base font-semibold text-slate-900">Test Case Pairing</h3>
+          <div className="grading-plus-info-card">
+            <h3 className="grading-plus-card-title">Test Case Pairing</h3>
 
             {judgeFilePairPreview.length > 0 ? (
-              <div className="mt-3">
-                <ul className="grid gap-2">
+              <div className="grading-plus-card-content-list">
+                <ul className="grading-plus-pair-list">
                   {judgeFilePairPreview.map((pair, index) => (
                     <li
                       key={`${pair.inputFile ?? 'no-input'}-${pair.outputFile}-${index}`}
-                      className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700 [overflow-wrap:anywhere]"
+                      className="grading-plus-pair-item"
                     >
-                      <span className="font-medium text-slate-900">Test {index + 1}:</span>{' '}
+                      <span className="grading-plus-pair-label">Test {index + 1}:</span>{' '}
                       {pair.inputFile ? getFileName(pair.inputFile) : 'No input'} →{' '}
                       {getFileName(pair.outputFile)}
                     </li>
@@ -1032,13 +1021,13 @@ export function GradingPlusPanel({
                 {!useSavedTestCases &&
                   selectedInputFiles.length > 0 &&
                   selectedInputFiles.length !== selectedOutputFiles.length && (
-                    <p className="mt-3 text-sm text-red-600">
+                    <p className="grading-plus-warning-text">
                       Warning: Input and output file counts do not match yet.
                     </p>
                   )}
               </div>
             ) : (
-              <p className="mt-3 text-sm text-slate-600">
+              <p className="grading-plus-placeholder-text">
                 Add input and output files to preview pairings.
               </p>
             )}
@@ -1046,7 +1035,7 @@ export function GradingPlusPanel({
         </div>
       </div>
 
-      <div className="mt-6 grid gap-4">
+      <div className="grading-plus-students-grid">
         {students.map((student, index) => {
           return (
             <div
@@ -1068,7 +1057,7 @@ export function GradingPlusPanel({
       </div>
 
       {showHomeButton && onGoHome && (
-        <button onClick={onGoHome} className="primary-button mt-6">
+        <button onClick={onGoHome} className="primary-button grading-plus-home-button">
           Go to Home
         </button>
       )}
