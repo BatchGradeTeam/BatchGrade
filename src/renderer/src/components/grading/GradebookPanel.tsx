@@ -158,7 +158,7 @@ const buildStudentRecordsFromGradebook = (
     return {
       id: latestRecord.studentId,
       name: latestRecord.studentName,
-      score: `${highestRecord.score}`,
+      score: `${highestRecord.score}%`,
       scoreSource: formatScoreSource(effectiveScoreSource),
       // Get submission time of highest score rather than latest
       lastSubmitted: formatSubmittedTime(highestRecord.submittedAt),
@@ -280,7 +280,8 @@ export function GradebookPanel({
   // Get assignment's grading criteria (total available points)
   //const effectiveSelectedCriteria = 
   //  allAssignments.find((a) => a.id === effectiveSelectedAssignment)?.gradingCriteria ?? '100'
-
+  //const criteria = parseInt(effectiveSelectedCriteria, 10)
+  
   const students = buildStudentRecordsFromGradebook(
     gradebookRecords,
     effectiveSelectedAssignment,
