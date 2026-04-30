@@ -1,6 +1,6 @@
 import { useEffect, useState, type CSSProperties } from 'react'
 import type { GradebookRecord, GradebookScoreSource } from '../../../../shared/gradebookTypes'
-import { loadAllStudents, loadServerAssignments} from '../../lib/serverData'
+import { loadAllStudents, loadServerAssignments } from '../../lib/serverData'
 import {
   clearGradebookRecords,
   loadGradebookRecords,
@@ -39,8 +39,7 @@ const filterStudents = (students: StudentRecord[], searchTerm: string): StudentR
   const normalizedSearch = searchTerm.toLowerCase()
 
   return students.filter(
-    (student) =>
-      student.name.toLowerCase().includes(normalizedSearch) //|| student.id.includes(searchTerm)
+    (student) => student.name.toLowerCase().includes(normalizedSearch) //|| student.id.includes(searchTerm)
   )
 }
 
@@ -97,7 +96,7 @@ const buildCSVContent = (students: StudentRecord[]): string => {
 
   const rows = students.map((student) => [
     student.name,
-    student.score,  // highest score or '-' if not submitted
+    student.score.split(' ')[0] // highest score or '-' if not submitted
   ])
 
   return [headers, ...rows].map((row) => row.join(',')).join('\n')
@@ -132,6 +131,7 @@ function formatStudentStatus(record: GradebookRecord): string {
 const buildStudentRecordsFromGradebook = (
   records: GradebookRecord[],
   assignmentId: string,
+  effectiveSelectedCriteria: string,
   defaultScoreSource: GradebookScoreSource,
   dataMode: GradebookStorageMode,
   allStudents: { id: string; name: string }[]
@@ -144,41 +144,47 @@ const buildStudentRecordsFromGradebook = (
     groupedRecords.set(record.studentId, [...existing, record])
   })
 
+  const criteria = parseInt(effectiveSelectedCriteria, 10)
+
   // Get the highest score of a student's submission
-  const submittedStudents: StudentRecord[] = Array.from(groupedRecords.values()).map((studentRecords) => {
-    const highestRecord = studentRecords.reduce((best, current) =>
-      current.score > best.score ? current : best
-    )
+  const submittedStudents: StudentRecord[] = Array.from(groupedRecords.values()).map(
+    (studentRecords) => {
+      const highestRecord = studentRecords.reduce((best, current) =>
+        current.score > best.score ? current : best
+      )
 
-    const latestRecord = studentRecords.reduce((latest, current) =>
-      current.submittedAt > latest.submittedAt ? current : latest
-    )
-    const effectiveScoreSource = highestRecord.scoreSource ?? defaultScoreSource
+      const latestRecord = studentRecords.reduce((latest, current) =>
+        current.submittedAt > latest.submittedAt ? current : latest
+      )
+      const effectiveScoreSource = highestRecord.scoreSource ?? defaultScoreSource
+      const effectiveScore = (highestRecord.score / 100) * criteria
 
-    return {
-      id: latestRecord.studentId,
-      name: latestRecord.studentName,
-      score: `${highestRecord.score}%`,
-      scoreSource: formatScoreSource(effectiveScoreSource),
-      // Get submission time of highest score rather than latest
-      lastSubmitted: formatSubmittedTime(highestRecord.submittedAt),
-      status: formatStudentStatus({ ...highestRecord, scoreSource: effectiveScoreSource })
+      return {
+        id: latestRecord.studentId,
+        name: latestRecord.studentName,
+        // Multiply score percentage by the assignment's gradingCriteria
+        score: `${effectiveScore.toFixed(2)} / ${effectiveSelectedCriteria}`,
+        scoreSource: formatScoreSource(effectiveScoreSource),
+        // Get submission time of highest score rather than latest
+        lastSubmitted: formatSubmittedTime(highestRecord.submittedAt),
+        status: formatStudentStatus({ ...highestRecord, scoreSource: effectiveScoreSource })
+      }
     }
-  })
+  )
 
   // For server mode, show all students in Student Name column
   if (dataMode === 'server' && allStudents.length > 0) {
     const submittedStudentIds = new Set(submittedStudents.map((s) => s.id))
-    
+
     // Students who have not made a submission have a status of Missing
     const nonSubmittedStudents: StudentRecord[] = allStudents
       .filter((student) => !submittedStudentIds.has(student.id))
       .map((student) => ({
         id: student.id,
         name: student.name,
-        score: '--',
-        scoreSource: '--',
-        lastSubmitted: '--',
+        score: '-',
+        scoreSource: '-',
+        lastSubmitted: '-',
         status: 'Missing'
       }))
 
@@ -220,14 +226,15 @@ export function GradebookPanel({
   const [selectedAssignment, setSelectedAssignment] = useState('')
   const [allStudents, setAllStudents] = useState<{ id: string; name: string }[]>([])
   const [gradebookRecords, setGradebookRecords] = useState<GradebookRecord[]>([])
-  const [allAssignments, setAllAssignments] = useState<{ id: string; name: string }[]>([])
+  const [allAssignments, setAllAssignments] = useState<
+    { id: string; name: string; gradingCriteria?: string }[]
+  >([])
   const [searchTerm, setSearchTerm] = useState('')
   const [sortOption, setSortOption] = useState('name-asc')
   const canClearRecords = allowClear ?? dataMode === 'local'
 
   useEffect(() => {
     async function fetchGradebookRecords(): Promise<void> {
-
       // Load grades
       const records = await loadGradebookRecords(dataMode)
       setGradebookRecords(records)
@@ -245,7 +252,13 @@ export function GradebookPanel({
         try {
           // Load all assignments made by instructor
           const assignments = await loadServerAssignments()
-          setAllAssignments(assignments.map(a => ({ id: a.uuid, name: a.name })))
+          setAllAssignments(
+            assignments.map((a) => ({
+              id: a.uuid,
+              name: a.name,
+              gradingCriteria: a.gradingCriteria
+            }))
+          )
         } catch (error) {
           console.error('Failed to load all assignments', error)
         }
@@ -258,16 +271,17 @@ export function GradebookPanel({
     void fetchGradebookRecords()
   }, [dataMode])
 
-  const assignmentOptions: [string, string][] = dataMode === 'server'
-    ? allAssignments.map((a) => [a.id, a.name]) :
-      Array.from(
-        new Map(
-          gradebookRecords.map((record) => [
-            record.assignmentId,
-            record.assignmentName ?? record.assignmentId
-          ])
-        ).entries()
-  )
+  const assignmentOptions: [string, string][] =
+    dataMode === 'server'
+      ? allAssignments.map((a) => [a.id, a.name])
+      : Array.from(
+          new Map(
+            gradebookRecords.map((record) => [
+              record.assignmentId,
+              record.assignmentName ?? record.assignmentId
+            ])
+          ).entries()
+        )
   const hasAssignments = assignmentOptions.length > 0
 
   const assignmentIds = assignmentOptions.map(([assignmentId]) => assignmentId)
@@ -277,9 +291,14 @@ export function GradebookPanel({
   const defaultScoreSource: GradebookScoreSource =
     dataMode === 'local' ? 'offline-batch-grade' : 'assignment-submission'
 
+  // Get assignment's grading criteria (total available points)
+  const effectiveSelectedCriteria =
+    allAssignments.find((a) => a.id === effectiveSelectedAssignment)?.gradingCriteria ?? '100'
+
   const students = buildStudentRecordsFromGradebook(
     gradebookRecords,
     effectiveSelectedAssignment,
+    effectiveSelectedCriteria,
     defaultScoreSource,
     dataMode,
     allStudents
