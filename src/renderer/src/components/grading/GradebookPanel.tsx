@@ -97,19 +97,19 @@ const buildCSVContent = (students: StudentRecord[]): string => {
   const rows = students.map((student) => {
     // Assume last name is only one name
     // & split the name at the last space using a regular expression
-    const splitName = (student.name).split(/ (?!.* )/)
+    const splitName = student.name.split(/ (?!.* )/)
     let firstName = ''
     let lastName = ''
 
     if (splitName.length == 2) {
-      [firstName, lastName] = splitName
+      ;[firstName, lastName] = splitName
     } else {
       // If the full name has no spaces, show as first name only for CSV
       // since the gradebook sorts by full name
       firstName = splitName[0] || ''
       lastName = ''
     }
-  
+
     return [lastName, firstName, student.score] // highest score or '-' if not submitted
   })
 
@@ -123,7 +123,6 @@ const buildCSVContent = (students: StudentRecord[]): string => {
 const formatDisplayScore = (score: string | number): string => {
   return score === '-' ? '-' : `${score}%`
 }
-
 
 /**
  * Formats a saved timestamp into a readable local date/time string.
