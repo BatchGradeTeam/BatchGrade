@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="app.diagrams.net">
+  <diagram name="Page-1" id="ClGeexbfEOOZwUC3wqOn">
+    <mxGraphModel dx="860" dy="586" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="0N1dbscpaQJN9VIbeagF-1" parent="1" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;container=1;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0};size=65;fillColor=light-dark(#eeeeee,#1f2020);strokeColor=light-dark(#000000,#CCCCCC);fontColor=light-dark(#333333,#cccccc);" value="Student Dashboard / SubmitPanel" vertex="1">
+          <mxGeometry height="983" width="259" x="20" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="0N1dbscpaQJN9VIbeagF-2" parent="1" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;container=1;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0};size=65;fillColor=light-dark(#eeeeee,#1f2020);strokeColor=light-dark(#000000,#CCCCCC);fontColor=light-dark(#333333,#cccccc);" value="Local Judge / Self-Check" vertex="1">
+          <mxGeometry height="983" width="194" x="467" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="0N1dbscpaQJN9VIbeagF-3" parent="1" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;container=1;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0};size=65;fillColor=light-dark(#eeeeee,#1f2020);strokeColor=light-dark(#000000,#CCCCCC);fontColor=light-dark(#333333,#cccccc);" value="Main Process (submitCpp)" vertex="1">
+          <mxGeometry height="983" width="204" x="711" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="0N1dbscpaQJN9VIbeagF-4" parent="1" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;container=1;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0};size=65;fillColor=light-dark(#eeeeee,#1f2020);strokeColor=light-dark(#000000,#CCCCCC);fontColor=light-dark(#333333,#cccccc);" value="serverData.ts" vertex="1">
+          <mxGeometry height="983" width="150" x="965" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="0N1dbscpaQJN9VIbeagF-5" parent="1" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;container=1;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0};size=65;fillColor=light-dark(#eeeeee,#1f2020);strokeColor=light-dark(#000000,#CCCCCC);fontColor=light-dark(#333333,#cccccc);" value="Supabase Storage (Submissions bucket)" vertex="1">
+          <mxGeometry height="983" width="300" x="1314" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="0N1dbscpaQJN9VIbeagF-6" parent="1" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;container=1;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0};size=65;fillColor=light-dark(#eeeeee,#1f2020);strokeColor=light-dark(#000000,#CCCCCC);fontColor=light-dark(#333333,#cccccc);" value="Supabase submissions table&#xa;and grades table" vertex="1">
+          <mxGeometry height="983" width="217" x="1664" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="0N1dbscpaQJN9VIbeagF-7" parent="1" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;container=1;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0};size=65;fillColor=light-dark(#eeeeee,#1f2020);strokeColor=light-dark(#000000,#CCCCCC);fontColor=light-dark(#333333,#cccccc);" value="Assignment Gradebook / Student Scores" vertex="1">
+          <mxGeometry height="983" width="270" x="2037" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="0N1dbscpaQJN9VIbeagF-8" edge="1" parent="1" source="0N1dbscpaQJN9VIbeagF-1" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;endArrow=block;strokeColor=light-dark(#000000,#CCCCCC);" target="0N1dbscpaQJN9VIbeagF-2" value="Execute saved assignment test cases">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="365" y="127" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="0N1dbscpaQJN9VIbeagF-9" edge="1" parent="1" source="0N1dbscpaQJN9VIbeagF-2" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;dashed=1;dashPattern=2 3;endArrow=block;strokeColor=light-dark(#000000,#CCCCCC);" target="0N1dbscpaQJN9VIbeagF-1" value="Return passedCount, totalCount, score, feedback">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="368" y="179" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="0N1dbscpaQJN9VIbeagF-10" edge="1" parent="1" source="0N1dbscpaQJN9VIbeagF-1" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;endArrow=block;strokeColor=light-dark(#000000,#CCCCCC);" target="0N1dbscpaQJN9VIbeagF-3" value="submitCpp(request)">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="490" y="280" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="0N1dbscpaQJN9VIbeagF-11" edge="1" parent="1" source="0N1dbscpaQJN9VIbeagF-3" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;dashed=1;dashPattern=2 3;endArrow=block;strokeColor=light-dark(#000000,#CCCCCC);" target="0N1dbscpaQJN9VIbeagF-1" value="SubmitCppResult&#xa;(submissionId, submittedAt, local manifest)">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="493" y="332" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="0N1dbscpaQJN9VIbeagF-12" edge="1" parent="1" source="0N1dbscpaQJN9VIbeagF-1" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;endArrow=block;strokeColor=light-dark(#000000,#CCCCCC);" target="0N1dbscpaQJN9VIbeagF-4" value="publishServerSubmission(result, compileSnapshot, selfCheckSummary)">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="603" y="384" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="0N1dbscpaQJN9VIbeagF-13" edge="1" parent="1" source="0N1dbscpaQJN9VIbeagF-4" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;endArrow=block;strokeColor=light-dark(#000000,#CCCCCC);" target="0N1dbscpaQJN9VIbeagF-5" value="Upload source bundle + submission-manifest.json">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1260" y="436" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="0N1dbscpaQJN9VIbeagF-14" edge="1" parent="1" source="0N1dbscpaQJN9VIbeagF-4" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=horizontal;curved=0;rounded=0;endArrow=block;strokeColor=light-dark(#000000,#CCCCCC);" target="0N1dbscpaQJN9VIbeagF-6" value="Upsert submission row&#xa;(submission_id, assignment_id, student_id,&#xa;file_name, storage_path, status, submitted_at)">
+          <mxGeometry relative="1" x="0.6122" y="67" as="geometry">
+            <mxPoint as="offset" />
+            <Array as="points">
+              <mxPoint x="1455" y="537" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="0N1dbscpaQJN9VIbeagF-15" edge="1" parent="1" source="0N1dbscpaQJN9VIbeagF-6" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;dashed=1;dashPattern=2 3;endArrow=block;strokeColor=light-dark(#000000,#CCCCCC);" target="0N1dbscpaQJN9VIbeagF-4" value="Success">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1417" y="589" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="0N1dbscpaQJN9VIbeagF-16" edge="1" parent="1" source="0N1dbscpaQJN9VIbeagF-4" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;dashed=1;dashPattern=2 3;endArrow=block;strokeColor=light-dark(#000000,#CCCCCC);" target="0N1dbscpaQJN9VIbeagF-1" value="Submission published">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="606" y="641" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="0N1dbscpaQJN9VIbeagF-17" edge="1" parent="1" source="0N1dbscpaQJN9VIbeagF-7" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;endArrow=block;strokeColor=light-dark(#000000,#CCCCCC);" target="0N1dbscpaQJN9VIbeagF-6" value="Load submissions for assignment/student">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1983" y="693" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="0N1dbscpaQJN9VIbeagF-18" edge="1" parent="1" source="0N1dbscpaQJN9VIbeagF-7" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;endArrow=block;strokeColor=light-dark(#000000,#CCCCCC);" target="0N1dbscpaQJN9VIbeagF-5" value="Read submission manifest">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1829" y="745" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="0N1dbscpaQJN9VIbeagF-19" edge="1" parent="1" source="0N1dbscpaQJN9VIbeagF-5" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;dashed=1;dashPattern=2 3;endArrow=block;strokeColor=light-dark(#000000,#CCCCCC);" target="0N1dbscpaQJN9VIbeagF-7" value="selfCheck summary">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1826" y="797" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="0N1dbscpaQJN9VIbeagF-20" edge="1" parent="1" source="0N1dbscpaQJN9VIbeagF-7" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;dashed=1;dashPattern=2 3;endArrow=block;strokeColor=light-dark(#000000,#CCCCCC);" target="0N1dbscpaQJN9VIbeagF-1" value="Show online submission score + feedback">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1172" y="849" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="0N1dbscpaQJN9VIbeagF-21" parent="1" style="fillColor=#ffff88;strokeColor=light-dark(#000000,#CCCCCC);fontColor=light-dark(#333333,#cccccc);" value="Self-check result is computed locally before submit" vertex="1">
+          <mxGeometry height="49" width="464" x="125" y="199" as="geometry" />
+        </mxCell>
+        <mxCell id="0N1dbscpaQJN9VIbeagF-22" parent="1" style="fillColor=#ffff88;strokeColor=light-dark(#000000,#CCCCCC);fontColor=light-dark(#333333,#cccccc);" value="Manifest includes compile snapshot&#xa;and selfCheck summary" vertex="1">
+          <mxGeometry height="49" width="474" x="1015" y="456" as="geometry" />
+        </mxCell>
+        <mxCell id="0N1dbscpaQJN9VIbeagF-23" parent="1" style="fillColor=#ffff88;strokeColor=light-dark(#000000,#CCCCCC);fontColor=light-dark(#333333,#cccccc);" value="Offline batch grading is a separate local-only workflow&#xa;and is not written back in this FR-7 flow" vertex="1">
+          <mxGeometry height="49" width="2072" x="125" y="869" as="geometry" />
+        </mxCell>
+        <mxCell id="3_ONHScCeu0r5r_u-8GK-1" parent="1" style="text;whiteSpace=wrap;html=1;" value="&lt;div style=&quot;text-align: center;&quot;&gt;&lt;span style=&quot;font-size: 11px; white-space: nowrap; background-color: rgb(255, 255, 255);&quot;&gt;Upsert grades row&lt;/span&gt;&lt;/div&gt;&lt;span style=&quot;caret-color: rgb(0, 0, 0); color: rgb(0, 0, 0); font-family: Helvetica; font-size: 11px; font-style: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; text-indent: 0px; text-transform: none; white-space: nowrap; word-spacing: 0px; -webkit-text-stroke-width: 0px; background-color: rgb(255, 255, 255); text-decoration: none; float: none; display: inline !important;&quot;&gt;&lt;div style=&quot;text-align: center;&quot;&gt;(grade_id, submission_id, score, feedback,&amp;nbsp;&lt;/div&gt;&lt;/span&gt;&lt;div&gt;&lt;div style=&quot;text-align: center;&quot;&gt;&lt;span style=&quot;white-space: nowrap; font-size: 11px; background-color: rgb(255, 255, 255); float: none; display: inline !important; caret-color: rgb(0, 0, 0); color: rgb(0, 0, 0);&quot;&gt;graded_by, graded_at&lt;/span&gt;&lt;span style=&quot;white-space: nowrap; font-size: 11px; background-color: rgb(255, 255, 255); float: none; display: inline !important; caret-color: rgb(0, 0, 0); color: rgb(0, 0, 0);&quot;&gt;)&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;caret-color: rgb(0, 0, 0); color: rgb(0, 0, 0); font-family: Helvetica; font-size: 11px; font-style: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; text-indent: 0px; text-transform: none; white-space: nowrap; word-spacing: 0px; -webkit-text-stroke-width: 0px; background-color: rgb(255, 255, 255); text-decoration: none; float: none; display: inline !important;&quot;&gt;&lt;p style=&quot;margin: 0px; font-style: normal; font-variant-caps: normal; font-stretch: normal; font-size: 13px; line-height: normal; font-family: &amp;quot;Helvetica Neue&amp;quot;; font-size-adjust: none; font-kerning: auto; font-variant-alternates: normal; font-variant-ligatures: normal; font-variant-numeric: normal; font-variant-east-asian: normal; font-variant-position: normal; font-variant-emoji: normal; font-feature-settings: normal; font-optical-sizing: auto; font-variation-settings: normal;&quot;&gt;&lt;br&gt;&lt;/p&gt;&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="70" width="260" x="1520" y="476.5" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

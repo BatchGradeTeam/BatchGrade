@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="app.diagrams.net">
+  <diagram name="Page-1" id="PiSLcAAP_uksnqxMEPUd">
+    <mxGraphModel dx="774" dy="527" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="UlVpGwq3M5aJbQ29IxaD-1" parent="1" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;container=1;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0};size=65;fillColor=light-dark(#eeeeee,#1f2020);strokeColor=light-dark(#000000,#CCCCCC);fontColor=light-dark(#333333,#cccccc);" value="Instructor Dashboard" vertex="1">
+          <mxGeometry height="986" width="169" x="20" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="UlVpGwq3M5aJbQ29IxaD-2" parent="1" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;container=1;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0};size=65;fillColor=light-dark(#eeeeee,#1f2020);strokeColor=light-dark(#000000,#CCCCCC);fontColor=light-dark(#333333,#cccccc);" value="Assignment Gradebook Panel" vertex="1">
+          <mxGeometry height="986" width="191" x="253" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="UlVpGwq3M5aJbQ29IxaD-3" parent="1" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;container=1;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0};size=65;fillColor=light-dark(#eeeeee,#1f2020);strokeColor=light-dark(#000000,#CCCCCC);fontColor=light-dark(#333333,#cccccc);" value="Offline Gradebook Panel" vertex="1">
+          <mxGeometry height="986" width="192" x="561" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="UlVpGwq3M5aJbQ29IxaD-4" parent="1" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;container=1;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0};size=65;fillColor=light-dark(#eeeeee,#1f2020);strokeColor=light-dark(#000000,#CCCCCC);fontColor=light-dark(#333333,#cccccc);" value="gradebookStorage.ts" vertex="1">
+          <mxGeometry height="986" width="167" x="858" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="UlVpGwq3M5aJbQ29IxaD-5" parent="1" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;container=1;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0};size=65;fillColor=light-dark(#eeeeee,#1f2020);strokeColor=light-dark(#000000,#CCCCCC);fontColor=light-dark(#333333,#cccccc);" value="serverData.ts" vertex="1">
+          <mxGeometry height="986" width="150" x="1156" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="UlVpGwq3M5aJbQ29IxaD-6" parent="1" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;container=1;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0};size=65;fillColor=light-dark(#eeeeee,#1f2020);strokeColor=light-dark(#000000,#CCCCCC);fontColor=light-dark(#333333,#cccccc);" value="Supabase submissions table&#xa;and grades table" vertex="1">
+          <mxGeometry height="986" width="217" x="1505" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="UlVpGwq3M5aJbQ29IxaD-7" parent="1" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;container=1;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0};size=65;fillColor=light-dark(#eeeeee,#1f2020);strokeColor=light-dark(#000000,#CCCCCC);fontColor=light-dark(#333333,#cccccc);" value="Supabase Storage" vertex="1">
+          <mxGeometry height="986" width="150" x="1772" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="UlVpGwq3M5aJbQ29IxaD-8" parent="1" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;container=1;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0};size=65;fillColor=light-dark(#eeeeee,#1f2020);strokeColor=light-dark(#000000,#CCCCCC);fontColor=light-dark(#333333,#cccccc);" value="Local SQLite database&#xa;via Drizzle ORM&#xa;(previously localStorage)" vertex="1">
+          <mxGeometry height="986" width="150" x="1980" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="UlVpGwq3M5aJbQ29IxaD-9" edge="1" parent="1" source="UlVpGwq3M5aJbQ29IxaD-1" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;endArrow=block;strokeColor=light-dark(#000000,#CCCCCC);" target="UlVpGwq3M5aJbQ29IxaD-2" value="Open Assignment Gradebook">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="235" y="127" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="UlVpGwq3M5aJbQ29IxaD-10" edge="1" parent="1" source="UlVpGwq3M5aJbQ29IxaD-2" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;endArrow=block;strokeColor=light-dark(#000000,#CCCCCC);" target="UlVpGwq3M5aJbQ29IxaD-4" value="loadGradebookRecords(&#39;server&#39;)">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="654" y="179" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="UlVpGwq3M5aJbQ29IxaD-11" edge="1" parent="1" source="UlVpGwq3M5aJbQ29IxaD-4" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;endArrow=block;strokeColor=light-dark(#000000,#CCCCCC);" target="UlVpGwq3M5aJbQ29IxaD-5" value="loadServerGradebookRecords()">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1095" y="231" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="UlVpGwq3M5aJbQ29IxaD-12" edge="1" parent="1" source="UlVpGwq3M5aJbQ29IxaD-5" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;endArrow=block;strokeColor=light-dark(#000000,#CCCCCC);" target="UlVpGwq3M5aJbQ29IxaD-6" value="Load submissions and grades for instructor assignments">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1431" y="283" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="UlVpGwq3M5aJbQ29IxaD-13" edge="1" parent="1" source="UlVpGwq3M5aJbQ29IxaD-6" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;dashed=1;dashPattern=2 3;endArrow=block;strokeColor=light-dark(#000000,#CCCCCC);" target="UlVpGwq3M5aJbQ29IxaD-5" value="Submission rows (DOES NOT include grade rows)">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1434" y="335" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="UlVpGwq3M5aJbQ29IxaD-14" edge="1" parent="1" source="UlVpGwq3M5aJbQ29IxaD-5" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;endArrow=block;strokeColor=light-dark(#000000,#CCCCCC);" target="UlVpGwq3M5aJbQ29IxaD-7" value="Read submission manifests">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1547" y="387" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="UlVpGwq3M5aJbQ29IxaD-15" edge="1" parent="1" source="UlVpGwq3M5aJbQ29IxaD-7" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;dashed=1;dashPattern=2 3;endArrow=block;strokeColor=light-dark(#000000,#CCCCCC);" target="UlVpGwq3M5aJbQ29IxaD-5" value="selfCheck summaries">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1550" y="439" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="UlVpGwq3M5aJbQ29IxaD-16" edge="1" parent="1" source="UlVpGwq3M5aJbQ29IxaD-5" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;dashed=1;dashPattern=2 3;endArrow=block;strokeColor=light-dark(#000000,#CCCCCC);" target="UlVpGwq3M5aJbQ29IxaD-4" value="Assignment gradebook records">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1098" y="491" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="UlVpGwq3M5aJbQ29IxaD-17" edge="1" parent="1" source="UlVpGwq3M5aJbQ29IxaD-4" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;dashed=1;dashPattern=2 3;endArrow=block;strokeColor=light-dark(#000000,#CCCCCC);" target="UlVpGwq3M5aJbQ29IxaD-2" value="Render student submission scores">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="657" y="543" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="UlVpGwq3M5aJbQ29IxaD-18" edge="1" parent="1" source="UlVpGwq3M5aJbQ29IxaD-1" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;endArrow=block;strokeColor=light-dark(#000000,#CCCCCC);" target="UlVpGwq3M5aJbQ29IxaD-3" value="Open Offline Gradebook">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="389" y="595" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="UlVpGwq3M5aJbQ29IxaD-19" edge="1" parent="1" source="UlVpGwq3M5aJbQ29IxaD-3" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;endArrow=block;strokeColor=light-dark(#000000,#CCCCCC);" target="UlVpGwq3M5aJbQ29IxaD-4" value="loadGradebookRecords(&#39;local&#39;)">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="808" y="647" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="UlVpGwq3M5aJbQ29IxaD-20" edge="1" parent="1" source="UlVpGwq3M5aJbQ29IxaD-4" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;endArrow=block;strokeColor=light-dark(#000000,#CCCCCC);" target="UlVpGwq3M5aJbQ29IxaD-8" value="Read saved batch-grade records">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1503" y="699" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="UlVpGwq3M5aJbQ29IxaD-21" edge="1" parent="1" source="UlVpGwq3M5aJbQ29IxaD-8" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;dashed=1;dashPattern=2 3;endArrow=block;strokeColor=light-dark(#000000,#CCCCCC);" target="UlVpGwq3M5aJbQ29IxaD-4" value="Offline gradebook records">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1506" y="751" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="UlVpGwq3M5aJbQ29IxaD-22" edge="1" parent="1" source="UlVpGwq3M5aJbQ29IxaD-4" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;dashed=1;dashPattern=2 3;endArrow=block;strokeColor=light-dark(#000000,#CCCCCC);" target="UlVpGwq3M5aJbQ29IxaD-3" value="Render offline batch grades">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="811" y="803" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="UlVpGwq3M5aJbQ29IxaD-23" parent="1" style="fillColor=#ffff88;strokeColor=light-dark(#000000,#CCCCCC);fontColor=light-dark(#333333,#cccccc);" value="Assignment gradebook shows submission self-check scores from Supabase." vertex="1">
+          <mxGeometry height="49" width="420" x="280" y="823" as="geometry" />
+        </mxCell>
+        <mxCell id="UlVpGwq3M5aJbQ29IxaD-24" parent="1" style="fillColor=#ffff88;strokeColor=light-dark(#000000,#CCCCCC);fontColor=light-dark(#333333,#cccccc);" value="Offline gradebook shows local Grading+ batch-grade results only." vertex="1">
+          <mxGeometry height="49" width="420" x="280" y="872" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
