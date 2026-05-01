@@ -23,6 +23,7 @@ interface GradingPlusPanelProps {
   description?: string
   dataSourceMode?: GradebookStorageMode
   gradebookMode?: GradebookStorageMode
+  showServerSubmissionsButton?: boolean
   showHomeButton?: boolean
   onGoHome?: () => void
 }
@@ -116,6 +117,7 @@ export function GradingPlusPanel({
   description = 'Batch grading workflow for compiling and judging multiple student submissions.',
   dataSourceMode = 'server',
   gradebookMode = 'local',
+  showServerSubmissionsButton = false,
   showHomeButton = false,
   onGoHome
 }: GradingPlusPanelProps): React.JSX.Element {
@@ -1016,8 +1018,9 @@ export function GradingPlusPanel({
           <button onClick={() => void handleImportSubmissionFolder()} className="primary-button">
             Import Submission Folder
           </button>
-
-          {isServerMode && (
+          {/* officially hiding server submission loading for now since it's not fully polished and may cause confusion - can re-enable later when it's more robust */}
+          
+          {isServerMode && showServerSubmissionsButton && (
             <button
               onClick={() => void handleLoadServerSubmissions()}
               className="primary-button"
@@ -1028,7 +1031,7 @@ export function GradingPlusPanel({
                 : 'Load Server Submissions'}
             </button>
           )}
-
+          
           <button onClick={() => void handleSelectStudentFiles()} className="primary-button">
             Select Student C++ Files
           </button>

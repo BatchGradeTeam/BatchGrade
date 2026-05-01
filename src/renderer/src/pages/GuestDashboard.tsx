@@ -70,7 +70,7 @@ export function GuestDashboard(): React.JSX.Element {
               title="Grading+"
               description="Batch grade multiple local submissions"
               dataSourceMode="local"
-              gradebookMode="guest"
+              gradebookMode="local"
             />
           ) : activeWorkspace === 'about' ? (
             <AboutPanel />

@@ -176,9 +176,9 @@ export function InstructorDashboard(): React.JSX.Element {
           ) : activeWorkspace === 'gradingPlus' ? (
             <GradingPlusPanel
               title="Grading+"
-              description="Instructor batch grading workflow for compiling and judging multiple student submissions."
+              description="Batch grading system for processing multiple student submissions at scale. Automatically compiles, judges, and records scores in the gradebook."
               dataSourceMode="server"
-              gradebookMode="local"
+              gradebookMode="server"
             />
           ) : activeWorkspace === 'about' ? (
             <AboutPanel />
