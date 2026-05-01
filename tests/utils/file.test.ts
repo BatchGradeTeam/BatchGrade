@@ -9,7 +9,7 @@ import {
 } from '../../src/main/utils/file'
 import { dialog } from 'electron'
 import * as fs from 'fs/promises'
-import * as path from 'path'
+type ReaddirResult = Awaited<ReturnType<typeof fs.readdir>>
 
 // ai-gen start (Gemini-3, 1)
 
@@ -31,7 +31,7 @@ vi.mock('fs/promises', () => ({
 
 // Mock path for consistency across different OS's
 vi.mock('path', async () => {
-  const actual = await vi.importActual('path') as any
+  const actual = await vi.importActual<typeof import('path')>('path')
   return { ...actual }
 })
 
@@ -93,7 +93,7 @@ describe('Test file.ts', () => {
     vi.mocked(fs.readdir).mockResolvedValue([
       { name: 'file1.txt', isFile: () => true, isDirectory: () => false },
       { name: 'subfolder', isFile: () => false, isDirectory: () => true }
-    ] as any)
+    ] as unknown as ReaddirResult)
 
     const result = await selectFilesFromFolder()
     expect(result).toHaveLength(1)
@@ -107,11 +107,11 @@ describe('Test file.ts', () => {
     vi.mocked(fs.readdir)
       .mockResolvedValueOnce([
         { name: 'student1', isFile: () => false, isDirectory: () => true }
-      ] as any)
+      ] as unknown as ReaddirResult)
       // Mock student folder with one cpp file
       .mockResolvedValueOnce([
         { name: 'main.cpp', isFile: () => true, isDirectory: () => false }
-      ] as any)
+      ] as unknown as ReaddirResult)
 
     const result = await selectSubmissionFolder()
     expect(result).toHaveLength(1)
