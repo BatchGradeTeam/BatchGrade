@@ -17,7 +17,6 @@
 import { useState } from 'react'
 import { NavBar } from '../components/Navbar'
 import AssignmentConfigPanel from '../components/AssignmentConfigPanel'
-import { AboutPanel } from '../components/AboutPanel'
 import { GradebookPanel } from '../components/grading/GradebookPanel'
 import { GradingPanel } from '../components/grading/GradingPanel'
 import { GradingPlusPanel } from '../components/grading/GradingPlusPanel'
@@ -84,10 +83,6 @@ export function InstructorDashboard(): React.JSX.Element {
     setActiveWorkspace('gradingPlus')
   }
 
-  function openAboutWorkspace(): void {
-    setActiveWorkspace('about')
-  }
-
   function getWorkspaceButtonClass(workspace: Exclude<InstructorWorkspace, 'none'>): string {
     return `primary-button dashboard-tab-button${activeWorkspace === workspace ? ' active' : ''}`
   }
@@ -152,9 +147,6 @@ export function InstructorDashboard(): React.JSX.Element {
             <button className={getWorkspaceButtonClass('gradingPlus')} onClick={openGradingPlus}>
               Grading+
             </button>
-            <button className={getWorkspaceButtonClass('about')} onClick={openAboutWorkspace}>
-              About
-            </button>
           </div>
           {activeWorkspace === 'assignment' ? (
             <AssignmentConfigPanel />
@@ -176,12 +168,10 @@ export function InstructorDashboard(): React.JSX.Element {
           ) : activeWorkspace === 'gradingPlus' ? (
             <GradingPlusPanel
               title="Grading+"
-              description="Instructor batch grading workflow for compiling and judging multiple student submissions."
+              description="Batch grading system for processing multiple student submissions at scale. Automatically compiles, judges, and records scores in the gradebook."
               dataSourceMode="server"
               gradebookMode="local"
             />
-          ) : activeWorkspace === 'about' ? (
-            <AboutPanel />
           ) : (
             <div className="dashboard-empty-state">
               <h2>Get started</h2>

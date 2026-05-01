@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import type { CompileCppResult } from '../../../../shared/compiler'
+import '../../assets/styles/GradingPlusPanel.css'
 import { CppJudgePanel } from '../CppJudgePanel'
 import { CppWorkflowPanel } from '../compiler/CppWorkflowPanel'
 
@@ -15,19 +16,20 @@ export function GradingPanel({
   const [compileResult, setCompileResult] = useState<CompileCppResult | null>(null)
 
   return (
-    <div className="panel-shell">
-      <div className="panel-header">
-        <div>
-          <h2>Grading</h2>
-          <p>
-            Instructor workflow for compiling and running submissions. Execution remains a separate
-            step so it can move behind a sandbox boundary later.
-          </p>
-        </div>
+    <div className="panel-shell grading-plus-panel">
+      <div className="grading-plus-header">
+        <h1 className="grading-plus-title">Grading</h1>
+
+        <p className="grading-plus-description">Single-submission interactive grading workspace.</p>
+
+        <p className="grading-plus-note">
+          Compile and execute C++ files on demand with immediate feedback and judge output
+          validation.
+        </p>
       </div>
 
       <CppWorkflowPanel
-        title="Instructor Compilation Workspace"
+        title="Compilation Workspace"
         description="Compile selected C++ files and optionally run the compiled program for grading checks."
         allowExecution={true}
         autoCompileOnSelection={true}

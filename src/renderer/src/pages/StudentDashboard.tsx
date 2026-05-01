@@ -19,7 +19,6 @@ import { useAuth } from '../components/AuthContext'
 import { CppWorkflowPanel } from '../components/compiler/CppWorkflowPanel'
 import { OutputDiffPanel, type OutputComparisonCase } from '../components/OutputDiffPanel'
 import { SubmitPanel } from '../components/submission/SubmitPanel'
-import { AboutPanel } from '../components/AboutPanel'
 import { StudentScoresPanel } from '../components/grading/StudentScoresPanel'
 import { summarizeComparisonCases } from '../lib/submissionSelfCheck'
 import type { CompileCppResult, RunCppResult } from 'src/shared/compiler'
@@ -67,10 +66,6 @@ export function StudentDashboard(): React.JSX.Element {
 
   function closeCompileWorkspace(): void {
     setActiveWorkspace('none')
-  }
-
-  function openAboutWorkspace(): void {
-    setActiveWorkspace('about')
   }
 
   function getWorkspaceButtonClass(workspace: Exclude<StudentWorkspace, 'none'>): string {
@@ -242,13 +237,10 @@ export function StudentDashboard(): React.JSX.Element {
               </button>
             )}
             <button className={getWorkspaceButtonClass('compile')} onClick={openCompileWorkspace}>
-              Compile
+              Compile & Submit
             </button>
             <button className={getWorkspaceButtonClass('scores')} onClick={openScoresWorkspace}>
               Scores
-            </button>
-            <button className={getWorkspaceButtonClass('about')} onClick={openAboutWorkspace}>
-              About
             </button>
           </div>
 
@@ -289,13 +281,11 @@ export function StudentDashboard(): React.JSX.Element {
             </>
           ) : activeWorkspace === 'scores' ? (
             <StudentScoresPanel />
-          ) : activeWorkspace === 'about' ? (
-            <AboutPanel />
           ) : (
             <div className="dashboard-empty-state">
               <h2>Get started</h2>
               <p>
-                Select <strong>Compile</strong> to open the student workflow. You can compile,
+                Select <strong>Compile & Submit</strong> to open the student workflow. You can compile,
                 execute, compare output against an assignment expectation, and submit in one panel.
               </p>
             </div>
