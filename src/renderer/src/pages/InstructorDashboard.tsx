@@ -170,7 +170,7 @@ export function InstructorDashboard(): React.JSX.Element {
               title="Grading+"
               description="Batch grading system for processing multiple student submissions at scale. Automatically compiles, judges, and records scores in the gradebook."
               dataSourceMode="server"
-              gradebookMode="server"
+              gradebookMode="local"
             />
           ) : (
             <div className="dashboard-empty-state">
