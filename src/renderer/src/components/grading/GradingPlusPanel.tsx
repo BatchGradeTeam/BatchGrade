@@ -893,7 +893,9 @@ export function GradingPlusPanel({
         <p className="grading-plus-description">{description}</p>
 
         <p className="grading-plus-note">
-          Completed batch grading runs save to the {gradebookDestinationLabel}.
+          {gradebookMode === 'guest'
+            ? 'Completed batch grading runs remain on this page until cleared.'
+            : `Completed batch grading runs save to the ${gradebookDestinationLabel}.`}
         </p>
       </div>
 
