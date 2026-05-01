@@ -4,11 +4,11 @@ import {
   deleteAssignment,
   getAllAssignments,
   updateAssignment
-} from '../src/main/database/queries/assignment'
+} from '../../src/main/database/queries/assignment'
 
 beforeEach(async () => {
-  const { getDb } = await import('../src/main/database/index')
-  const { assignmentsInstrc } = await import('../src/main/database/schema')
+  const { getDb } = await import('../../src/main/database/index')
+  const { assignmentsInstrc } = await import('../../src/main/database/schema')
   getDb().delete(assignmentsInstrc).run()
 })
 

@@ -11,12 +11,12 @@ export default defineConfig({
       provider: 'v8',
       reporter: ['text', 'html', 'json-summary'],
       enabled: true,
-      // Enforce 79% statement coverage (for now)
+      // Enforce 90% global statement coverage
       thresholds: { 
         perFile: false, // Will likely hinder development too much if true
-        statements: 79,
+        statements: 90,
       },
-      // for all source files
+      // for all source files in main
       // Note: .sql files are excluded from the coverage report
       // even when explicitly added to the include
       include: [ './src/main/**/*.ts', './src/main/**/**/*.ts'],
