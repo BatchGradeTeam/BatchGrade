@@ -29,7 +29,7 @@ export function GradingPanel({
       </div>
 
       <CppWorkflowPanel
-        title="Instructor Compilation Workspace"
+        title="Compilation Workspace"
         description="Compile selected C++ files and optionally run the compiled program for grading checks."
         allowExecution={true}
         autoCompileOnSelection={true}
