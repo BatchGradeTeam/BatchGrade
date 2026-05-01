@@ -30,7 +30,8 @@ function rememberDockerCompileOutput(directory: string): void {
 
   cleanupRegistered = true
   process.once('exit', () => {
-    for (const outputDir of Array.from(dockerCompileOutputDirs)) cleanupDockerCompileOutput(outputDir)
+    for (const outputDir of Array.from(dockerCompileOutputDirs))
+      cleanupDockerCompileOutput(outputDir)
   })
 }
 

@@ -96,7 +96,6 @@ export function SignUp(): React.JSX.Element {
 
   return (
     <>
-
       {/*-----------------------------------------------------------
         Hero Section
           Main landing content and registration controls
@@ -105,9 +104,7 @@ export function SignUp(): React.JSX.Element {
         <div className="signup-item">
           {/* Application Title */}
           <header className="header">
-            <h1 className="title hover-underline">
-              BatchGrade  
-            </h1>
+            <h1 className="title hover-underline">BatchGrade</h1>
           </header>
 
           {/*-----------------------------------------------------------
@@ -122,9 +119,8 @@ export function SignUp(): React.JSX.Element {
         </div>
 
         <div className="signup-item">
-
-            <h1 className="title">Sign Up</h1>
-            <p className="subtitle">Register & Connect with BatchGrade</p>
+          <h1 className="title">Sign Up</h1>
+          <p className="subtitle">Register & Connect with BatchGrade</p>
           {/*-----------------------------------------------------------
             Registration Form
               Creates a server-backed account through AuthContext

@@ -1019,7 +1019,7 @@ export function GradingPlusPanel({
             Import Submission Folder
           </button>
           {/* officially hiding server submission loading for now since it's not fully polished and may cause confusion - can re-enable later when it's more robust */}
-          
+
           {isServerMode && showServerSubmissionsButton && (
             <button
               onClick={() => void handleLoadServerSubmissions()}
@@ -1031,7 +1031,7 @@ export function GradingPlusPanel({
                 : 'Load Server Submissions'}
             </button>
           )}
-          
+
           <button onClick={() => void handleSelectStudentFiles()} className="primary-button">
             Select Student C++ Files
           </button>
@@ -1141,7 +1141,10 @@ export function GradingPlusPanel({
                 at that same root level. Alphabetical order is recommended for consistency.
               </p>
 
-              <div className="grading-plus-structure-tree" aria-label="Submission folder structure example">
+              <div
+                className="grading-plus-structure-tree"
+                aria-label="Submission folder structure example"
+              >
                 <ul className="grading-plus-tree-root">
                   <li className="grading-plus-tree-node grading-plus-tree-node-folder">
                     <span className="grading-plus-tree-label">submission-root</span>
