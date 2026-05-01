@@ -1131,6 +1131,80 @@ export function GradingPlusPanel({
 
         <div className="grading-plus-alert-group">
           <div className="grading-plus-warning-alert">
+            <details className="grading-plus-structure-details">
+              <summary className="grading-plus-structure-summary">
+                Folder Structure Example for Import Submission Folder
+              </summary>
+
+              <p className="grading-plus-structure-copy">
+                Keep student folders at the submission root, then include input and output folders
+                at that same root level. Alphabetical order is recommended for consistency.
+              </p>
+
+              <div className="grading-plus-structure-tree" aria-label="Submission folder structure example">
+                <ul className="grading-plus-tree-root">
+                  <li className="grading-plus-tree-node grading-plus-tree-node-folder">
+                    <span className="grading-plus-tree-label">submission-root</span>
+
+                    <ul className="grading-plus-tree-children">
+                      <li className="grading-plus-tree-node grading-plus-tree-node-folder">
+                        <span className="grading-plus-tree-label">Amelia Baker</span>
+                        <ul className="grading-plus-tree-children">
+                          <li className="grading-plus-tree-node grading-plus-tree-node-file">
+                            <span className="grading-plus-tree-label">helloworld.cpp</span>
+                          </li>
+                        </ul>
+                      </li>
+
+                      <li className="grading-plus-tree-node grading-plus-tree-node-folder">
+                        <span className="grading-plus-tree-label">Brian Campbell</span>
+                        <ul className="grading-plus-tree-children">
+                          <li className="grading-plus-tree-node grading-plus-tree-node-file">
+                            <span className="grading-plus-tree-label">helloworld.cpp</span>
+                          </li>
+                        </ul>
+                      </li>
+
+                      <li className="grading-plus-tree-node grading-plus-tree-node-folder">
+                        <span className="grading-plus-tree-label">John Doe</span>
+                        <ul className="grading-plus-tree-children">
+                          <li className="grading-plus-tree-node grading-plus-tree-node-file">
+                            <span className="grading-plus-tree-label">helloworld.cpp</span>
+                          </li>
+                        </ul>
+                      </li>
+
+                      <li className="grading-plus-tree-node grading-plus-tree-node-folder">
+                        <span className="grading-plus-tree-label">input</span>
+                        <ul className="grading-plus-tree-children">
+                          <li className="grading-plus-tree-node grading-plus-tree-node-file">
+                            <span className="grading-plus-tree-label">input1.txt</span>
+                          </li>
+                          <li className="grading-plus-tree-node grading-plus-tree-node-file">
+                            <span className="grading-plus-tree-label">input2.txt</span>
+                          </li>
+                        </ul>
+                      </li>
+
+                      <li className="grading-plus-tree-node grading-plus-tree-node-folder">
+                        <span className="grading-plus-tree-label">output</span>
+                        <ul className="grading-plus-tree-children">
+                          <li className="grading-plus-tree-node grading-plus-tree-node-file">
+                            <span className="grading-plus-tree-label">output1.txt</span>
+                          </li>
+                          <li className="grading-plus-tree-node grading-plus-tree-node-file">
+                            <span className="grading-plus-tree-label">output2.txt</span>
+                          </li>
+                        </ul>
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+              </div>
+            </details>
+          </div>
+
+          <div className="grading-plus-warning-alert">
             If the program requires user input, add input files before grading. Otherwise, test
             cases may fail due to missing input.
           </div>
