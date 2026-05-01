@@ -242,7 +242,7 @@ export function StudentDashboard(): React.JSX.Element {
               </button>
             )}
             <button className={getWorkspaceButtonClass('compile')} onClick={openCompileWorkspace}>
-              Compile
+              Compile & Submit
             </button>
             <button className={getWorkspaceButtonClass('scores')} onClick={openScoresWorkspace}>
               Scores
