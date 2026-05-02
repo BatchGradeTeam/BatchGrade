@@ -102,6 +102,8 @@ Simply quit the Electron window or use `ctrl + c` or `cmd + c` to end the dev ap
 
 Compiles and packages the app for your target platform. It will be built to the `/dist` folder. There will be an unpacked folder for the OS you built to, you can run the application using the executable there. You must be using the OS you build to for it to work properly. Windows can build to Windows, Linux to Linux, Mac to Mac.
 
+> **Windows note:** If you are building the project from the repository on Windows, you will likely need to run the build commands from PowerShell opened as an administrator.
+
 ```bash
 # For general
 npm run build
