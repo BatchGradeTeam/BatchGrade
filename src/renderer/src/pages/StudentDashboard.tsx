@@ -285,8 +285,9 @@ export function StudentDashboard(): React.JSX.Element {
             <div className="dashboard-empty-state">
               <h2>Get started</h2>
               <p>
-                Select <strong>Compile & Submit</strong> to open the student workflow. You can compile,
-                execute, compare output against an assignment expectation, and submit in one panel.
+                Select <strong>Compile & Submit</strong> to open the student workflow. You can
+                compile, execute, compare output against an assignment expectation, and submit in
+                one panel.
               </p>
             </div>
           )}

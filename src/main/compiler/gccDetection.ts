@@ -1,4 +1,3 @@
-/* eslint-disable prettier/prettier */
 // Compiler Detection Service
 
 import { execFile } from 'node:child_process'
