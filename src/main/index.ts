@@ -23,7 +23,6 @@ import {
   clearGradebookRecords
 } from './database/queries'
 
-/* TEST ONLY DELETE WHEN DONE */
 import {
   selectFile,
   stringifyFile,
@@ -32,7 +31,6 @@ import {
   selectFilesFromFolder,
   materializeServerSubmissions
 } from './utils/file'
-/* TEST ONLY DELETE WHEN DONE */
 
 // @ Issue 9: Implement Automated Build & Compilation
 import { detectGccInstallation, validateGccPath } from './compiler/gccDetection'
@@ -256,7 +254,6 @@ app.whenReady().then(() => {
     // Docker Detection
     ipcMain.handle('compiler:getDockerStatus', () => detectDockerInstallation())
 
-    /* TEST ONLY DELETE WHEN DONE */
     // File selection
     ipcMain.handle('file:select', () => selectFile())
     ipcMain.handle('file:selectCppFiles', () => selectCppFiles())
@@ -266,7 +263,6 @@ app.whenReady().then(() => {
     ipcMain.handle('file:materializeServerSubmissions', (_e, bundles) =>
       materializeServerSubmissions(bundles)
     )
-    /* TEST ONLY DELETE WHEN DONE */
 
     // Compilation
     ipcMain.handle('compiler:compileCpp', async (_e, request) => {
