@@ -1,7 +1,7 @@
 {
-  "name": "batchgrade",
+  "name": "BatchGrade",
   "version": "1.0.0",
-  "description": "A  locally hosted automated grading platform for programming assignments.",
+  "description": "A locally hosted automated grading platform for programming assignments.",
   "main": "./out/main/index.js",
   "author": "batchgrade.com",
   "homepage": "https://www.batchgrade.com",

@@ -1,5 +1,5 @@
 appId: com.batchgrade.app
-productName: batchgrade
+productName: BatchGrade
 directories:
   buildResources: build
 files:
@@ -20,7 +20,7 @@ asarUnpack:
   # the rebuilt binary that matches the packaged runtime.
   - node_modules/better-sqlite3/**
 win:
-  executableName: batchgrade
+  executableName: BatchGrade
 nsis:
   artifactName: ${name}-${version}-setup.${ext}
   shortcutName: ${productName}
