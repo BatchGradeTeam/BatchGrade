@@ -14,7 +14,11 @@
 
 ---
 
-BatchGrade is a locally hosted automated grading platform designed to streamline the evaluation of source code in academia. The system enables educators to batch test submissions, manage grades through an integrated database, and provide structured feedback, while students can receive immediate results to improve their work. Built with a web-based frontend, backend services, and database support, BatchGrade prioritizes affordability and institutional flexibility by allowing deployment on existing infrastructure or local machines. By reducing grading time and improving feedback quality, the project aims to increase instructional efficiency and student confidence without reliance on costly third-party software as a service (SaaS) solutions.
+BatchGrade is a locally hosted automated grading platform designed to streamline the evaluation of source code in academia. It also has server-based functionality that conveniently hosts instructor-defined assignments for student submissions and an automated gradebook. 
+
+The system enables educators to batch test submissions, manage grades through an integrated database, and provide structured feedback, while students can receive immediate results to improve their work. 
+
+Built with a web-based frontend, backend services, and database support, BatchGrade prioritizes affordability and institutional flexibility by allowing deployment on existing infrastructure or local machines. By reducing grading time and improving feedback quality, the project aims to increase instructional efficiency and student confidence without reliance on costly third-party software as a service (SaaS) solutions.
 
 ## Table of Contents
 
@@ -61,15 +65,15 @@ If you encounter native build issues (for example with `better-sqlite3` or other
 
 ### Install
 
-If needed, install Docker Desktop from here: <https://www.docker.com/get-started/>
-
-Note: You may not need to do this step if you are NOT using windows, so I would try first.
-
-If needed, install Node.js for your appropriate Operating System from here: <https://nodejs.org/en/download>
-
 ```bash
 npm install
 ```
+
+If needed, install Node.js for your appropriate Operating System from here: <https://nodejs.org/en/download>
+
+To use Docker, install Docker Desktop from here: <https://www.docker.com/get-started/>
+
+Note: Docker should be open and running, alongside BatchGrade.
 
 ### Environment Variables
 
@@ -92,13 +96,16 @@ Starts the app in development mode with hot-reloading.
 npm run dev
 ```
 
-Simply close the electron window or use `ctrl + c` or `cmd + c` to end the dev app.
+Simply quit the Electron window or use `ctrl + c` or `cmd + c` to end the dev app.
 
 ### Build
 
 Compiles and packages the app for your target platform. It will be built to the `/dist` folder. There will be an unpacked folder for the OS you built to, you can run the application using the executable there. You must be using the OS you build to for it to work properly. Windows can build to Windows, Linux to Linux, Mac to Mac.
 
 ```bash
+# For general
+npm run build
+
 # For Windows
 npm run build:win
 
@@ -192,20 +199,15 @@ Organize Vitest tests into folders that match the structure of the source code:
 tests/
 ├── compiler/
 │   ├── compileCppFiles.test.ts
-│   ├── executeCppFiles.test.ts
-│   ├── gccDetection.test.ts
-│   └── judgeCppFiles.test.ts
+│   └── ...
 ├── database/
-│   ├── academic.test.ts
-│   ├── gradebook.test.ts
-│   ├── log.test.ts
-│   └── users.test.ts
-├── assignment/
-│   └── assignment.test.ts
+│   ├── assignment.test.ts
+│   └── ...
 ├── submission/
 │   └── submitCppSubmission.test.ts
 └── utils/
-    └── sourceFiles.test.ts
+    ├── file.test.ts
+    └── ...
 ```
 
 ### Add a new test
@@ -290,3 +292,4 @@ This document lists the project's primary technologies with links to their offic
 - ESLint: <https://eslint.org/>
 - Prettier: <https://prettier.io/>
 - Docker: <https://www.docker.com/get-started/>
+- Supabase: <https://supabase.com/>

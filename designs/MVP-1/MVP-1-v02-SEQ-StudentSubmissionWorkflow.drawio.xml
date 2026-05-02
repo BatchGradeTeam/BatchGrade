@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="app.diagrams.net">
+  <diagram name="Page-1" id="PiSLcAAP_uksnqxMEPUd">
+    <mxGraphModel dx="968" dy="659" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="UlVpGwq3M5aJbQ29IxaD-68" parent="1" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;container=1;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0};size=65;fillColor=light-dark(#eeeeee,#1f2020);strokeColor=light-dark(#000000,#CCCCCC);fontColor=light-dark(#333333,#cccccc);" value="Student" vertex="1">
+          <mxGeometry height="1022" width="150" x="20" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="UlVpGwq3M5aJbQ29IxaD-69" parent="1" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;container=1;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0};size=65;fillColor=light-dark(#eeeeee,#1f2020);strokeColor=light-dark(#000000,#CCCCCC);fontColor=light-dark(#333333,#cccccc);" value="React UI" vertex="1">
+          <mxGeometry height="1022" width="150" x="301" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="UlVpGwq3M5aJbQ29IxaD-70" parent="1" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;container=1;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0};size=65;fillColor=light-dark(#eeeeee,#1f2020);strokeColor=light-dark(#000000,#CCCCCC);fontColor=light-dark(#333333,#cccccc);" value="Main Process" vertex="1">
+          <mxGeometry height="1022" width="150" x="527" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="UlVpGwq3M5aJbQ29IxaD-71" parent="1" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;container=1;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0};size=65;fillColor=light-dark(#eeeeee,#1f2020);strokeColor=light-dark(#000000,#CCCCCC);fontColor=light-dark(#333333,#cccccc);" value="Submission Service" vertex="1">
+          <mxGeometry height="1022" width="155" x="1014" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="UlVpGwq3M5aJbQ29IxaD-72" parent="1" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;container=1;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0};size=65;fillColor=light-dark(#eeeeee,#1f2020);strokeColor=light-dark(#000000,#CCCCCC);fontColor=light-dark(#333333,#cccccc);" value="serverData.ts" vertex="1">
+          <mxGeometry height="1022" width="150" x="1219" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="UlVpGwq3M5aJbQ29IxaD-73" parent="1" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;container=1;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0};size=65;fillColor=light-dark(#eeeeee,#1f2020);strokeColor=light-dark(#000000,#CCCCCC);fontColor=light-dark(#333333,#cccccc);" value="Supabase Storage" vertex="1">
+          <mxGeometry height="1022" width="150" x="1668" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="UlVpGwq3M5aJbQ29IxaD-74" parent="1" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;container=1;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0};size=65;fillColor=light-dark(#eeeeee,#1f2020);strokeColor=light-dark(#000000,#CCCCCC);fontColor=light-dark(#333333,#cccccc);" value="Supabase submissions table&#xa;and grades table" vertex="1">
+          <mxGeometry height="1022" width="217" x="1868" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="UlVpGwq3M5aJbQ29IxaD-75" edge="1" parent="1" source="UlVpGwq3M5aJbQ29IxaD-68" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;endArrow=block;strokeColor=light-dark(#000000,#CCCCCC);" target="UlVpGwq3M5aJbQ29IxaD-69" value="1. Upload source files">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="244" y="127" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="UlVpGwq3M5aJbQ29IxaD-76" edge="1" parent="1" source="UlVpGwq3M5aJbQ29IxaD-69" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;endArrow=block;strokeColor=light-dark(#000000,#CCCCCC);" target="UlVpGwq3M5aJbQ29IxaD-70" value="2. selectCppFiles()">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="498" y="179" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="UlVpGwq3M5aJbQ29IxaD-77" edge="1" parent="1" source="UlVpGwq3M5aJbQ29IxaD-70" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;dashed=1;dashPattern=2 3;endArrow=block;strokeColor=light-dark(#000000,#CCCCCC);" target="UlVpGwq3M5aJbQ29IxaD-69" value="3. selected file paths">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="501" y="231" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="UlVpGwq3M5aJbQ29IxaD-78" edge="1" parent="1" source="UlVpGwq3M5aJbQ29IxaD-68" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;endArrow=block;strokeColor=light-dark(#000000,#CCCCCC);" target="UlVpGwq3M5aJbQ29IxaD-69" value="4. Compile and run self-check">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="244" y="283" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="UlVpGwq3M5aJbQ29IxaD-79" edge="1" parent="1" source="UlVpGwq3M5aJbQ29IxaD-69" style="curved=1;dashed=1;dashPattern=2 3;endArrow=block;rounded=0;strokeColor=light-dark(#000000,#CCCCCC);" target="UlVpGwq3M5aJbQ29IxaD-69" value="5. Compute passedCount, totalCount, score">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="427" y="335" />
+              <mxPoint x="427" y="365" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="UlVpGwq3M5aJbQ29IxaD-80" edge="1" parent="1" source="UlVpGwq3M5aJbQ29IxaD-68" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;endArrow=block;strokeColor=light-dark(#000000,#CCCCCC);" target="UlVpGwq3M5aJbQ29IxaD-69" value="6. Click Submit">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="244" y="417" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="UlVpGwq3M5aJbQ29IxaD-81" edge="1" parent="1" source="UlVpGwq3M5aJbQ29IxaD-69" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;endArrow=block;strokeColor=light-dark(#000000,#CCCCCC);" target="UlVpGwq3M5aJbQ29IxaD-70" value="7. submitCpp(request)">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="498" y="469" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="UlVpGwq3M5aJbQ29IxaD-82" edge="1" parent="1" source="UlVpGwq3M5aJbQ29IxaD-70" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;endArrow=block;strokeColor=light-dark(#000000,#CCCCCC);" target="UlVpGwq3M5aJbQ29IxaD-71" value="8. createSubmission()">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="855" y="521" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="UlVpGwq3M5aJbQ29IxaD-83" edge="1" parent="1" source="UlVpGwq3M5aJbQ29IxaD-71" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;dashed=1;dashPattern=2 3;endArrow=block;strokeColor=light-dark(#000000,#CCCCCC);" target="UlVpGwq3M5aJbQ29IxaD-70" value="9. SubmitCppResult&#xa;(submissionId, submittedAt, manifest)">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="858" y="573" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="UlVpGwq3M5aJbQ29IxaD-84" edge="1" parent="1" source="UlVpGwq3M5aJbQ29IxaD-70" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;dashed=1;dashPattern=2 3;endArrow=block;strokeColor=light-dark(#000000,#CCCCCC);" target="UlVpGwq3M5aJbQ29IxaD-69" value="10. submission result">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="501" y="625" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="UlVpGwq3M5aJbQ29IxaD-85" edge="1" parent="1" source="UlVpGwq3M5aJbQ29IxaD-69" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;endArrow=block;strokeColor=light-dark(#000000,#CCCCCC);" target="UlVpGwq3M5aJbQ29IxaD-72" value="11. publishServerSubmission(result, compileSnapshot, selfCheckSummary)">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="843" y="677" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="UlVpGwq3M5aJbQ29IxaD-86" edge="1" parent="1" source="UlVpGwq3M5aJbQ29IxaD-72" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;endArrow=block;strokeColor=light-dark(#000000,#CCCCCC);" target="UlVpGwq3M5aJbQ29IxaD-73" value="12. Upload source bundle + submission-manifest.json">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1527" y="729" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="UlVpGwq3M5aJbQ29IxaD-87" edge="1" parent="1" source="UlVpGwq3M5aJbQ29IxaD-72" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;endArrow=block;strokeColor=light-dark(#000000,#CCCCCC);" target="UlVpGwq3M5aJbQ29IxaD-74" value="13. Upsert submission row, upsert grades row">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1643" y="781" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="UlVpGwq3M5aJbQ29IxaD-88" edge="1" parent="1" source="UlVpGwq3M5aJbQ29IxaD-74" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;dashed=1;dashPattern=2 3;endArrow=block;strokeColor=light-dark(#000000,#CCCCCC);" target="UlVpGwq3M5aJbQ29IxaD-72" value="14. success">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1646" y="833" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="UlVpGwq3M5aJbQ29IxaD-89" edge="1" parent="1" source="UlVpGwq3M5aJbQ29IxaD-72" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;dashed=1;dashPattern=2 3;endArrow=block;strokeColor=light-dark(#000000,#CCCCCC);" target="UlVpGwq3M5aJbQ29IxaD-69" value="15. submission published">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="846" y="885" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="UlVpGwq3M5aJbQ29IxaD-90" edge="1" parent="1" source="UlVpGwq3M5aJbQ29IxaD-69" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;dashed=1;dashPattern=2 3;endArrow=block;strokeColor=light-dark(#000000,#CCCCCC);" target="UlVpGwq3M5aJbQ29IxaD-68" value="16. Show submission success">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="247" y="937" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

@@ -310,6 +310,103 @@
   gap: 0.75rem;
 }
 
+.grading-plus-structure-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.grading-plus-structure-summary {
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.grading-plus-structure-copy {
+  margin: 0.75rem 0 0 0;
+}
+
+.grading-plus-structure-tree {
+  margin: 0.75rem 0 0 0;
+  padding: 1rem;
+  border-radius: 12px;
+  border: 1px solid #fcd34d;
+  background: linear-gradient(180deg, #fff8dc 0%, #fff4c7 100%);
+  color: #78350f;
+  font-size: 0.9rem;
+  line-height: 1.4;
+  overflow-x: auto;
+}
+
+.grading-plus-tree-root,
+.grading-plus-tree-children {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.grading-plus-tree-children {
+  margin-top: 0.5rem;
+  margin-left: 1.2rem;
+  padding-left: 0.9rem;
+  border-left: 1px dashed #d1a845;
+}
+
+.grading-plus-tree-node {
+  position: relative;
+  margin: 0.45rem 0;
+}
+
+.grading-plus-tree-children > .grading-plus-tree-node::before {
+  content: '';
+  position: absolute;
+  left: -0.9rem;
+  top: 0.95rem;
+  width: 0.75rem;
+  border-top: 1px dashed #d1a845;
+}
+
+.grading-plus-tree-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.24rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.84rem;
+  font-weight: 500;
+}
+
+.grading-plus-tree-node-folder > .grading-plus-tree-label {
+  background: rgba(254, 243, 199, 0.8);
+  border: 1px solid rgba(245, 158, 11, 0.55);
+  color: #713f12;
+}
+
+.grading-plus-tree-node-folder > .grading-plus-tree-label::before {
+  content: '';
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 0.1rem;
+  background: #f59e0b;
+  box-shadow: 0 0 0 1px rgba(120, 53, 15, 0.22);
+  flex: 0 0 auto;
+}
+
+.grading-plus-tree-node-file > .grading-plus-tree-label {
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid rgba(251, 191, 36, 0.45);
+  color: #7c2d12;
+}
+
+.grading-plus-tree-node-file > .grading-plus-tree-label::before {
+  content: '';
+  width: 0.45rem;
+  height: 0.45rem;
+  border-radius: 999px;
+  background: #b45309;
+  box-shadow: 0 0 0 1px rgba(124, 45, 18, 0.2);
+  flex: 0 0 auto;
+}
+
 /* Info Grid */
 .grading-plus-info-grid {
   display: grid;
@@ -428,5 +525,20 @@
   .grading-plus-radio-group {
     flex-direction: column;
     gap: 1rem;
+  }
+
+  .grading-plus-structure-tree {
+    font-size: 0.82rem;
+    padding: 0.85rem;
+  }
+
+  .grading-plus-tree-children {
+    margin-left: 0.95rem;
+    padding-left: 0.7rem;
+  }
+
+  .grading-plus-tree-label {
+    font-size: 0.78rem;
+    padding: 0.2rem 0.5rem;
   }
 }

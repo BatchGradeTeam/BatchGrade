@@ -1,5 +1,6 @@
 import { useEffect, useState, type CSSProperties } from 'react'
 import type { GradebookRecord, GradebookScoreSource } from '../../../../shared/gradebookTypes'
+import { loadAllStudents, loadServerAssignments } from '../../lib/serverData'
 import {
   clearGradebookRecords,
   loadGradebookRecords,
@@ -28,7 +29,7 @@ type GradeStats = {
  * Converts a score string into a numeric value.
  */
 const parseScore = (score: string): number | null => {
-  return score === '--' ? null : parseInt(score)
+  return score === '-' ? null : parseFloat(score)
 }
 
 /**
@@ -38,8 +39,7 @@ const filterStudents = (students: StudentRecord[], searchTerm: string): StudentR
   const normalizedSearch = searchTerm.toLowerCase()
 
   return students.filter(
-    (student) =>
-      student.name.toLowerCase().includes(normalizedSearch) || student.id.includes(searchTerm)
+    (student) => student.name.toLowerCase().includes(normalizedSearch) //|| student.id.includes(searchTerm)
   )
 }
 
@@ -71,9 +71,9 @@ const calculateStats = (students: StudentRecord[]): GradeStats => {
 
   if (validScores.length === 0) {
     return {
-      averageScore: '--',
-      highestScore: '--',
-      lowestScore: '--'
+      averageScore: '-',
+      highestScore: '-',
+      lowestScore: '-'
     }
   }
 
@@ -92,16 +92,36 @@ const calculateStats = (students: StudentRecord[]): GradeStats => {
  * Builds CSV-formatted string content for gradebook export.
  */
 const buildCSVContent = (students: StudentRecord[]): string => {
-  const headers = ['Student ID', 'Student Name', 'Highest Score', 'Score Source']
+  const headers = ['Last Name', 'First Name', 'Score']
 
-  const rows = students.map((student) => [
-    student.id,
-    student.name,
-    student.score,
-    student.scoreSource
-  ])
+  const rows = students.map((student) => {
+    // Assume last name is only one name
+    // & split the name at the last space using a regular expression
+    const splitName = student.name.split(/ (?!.* )/)
+    let firstName = ''
+    let lastName = ''
+
+    if (splitName.length == 2) {
+      ;[firstName, lastName] = splitName
+    } else {
+      // If the full name has no spaces, show as first name only for CSV
+      // since the gradebook sorts by full name
+      firstName = splitName[0] || ''
+      lastName = ''
+    }
+
+    return [lastName, firstName, student.score] // highest score or '-' if not submitted
+  })
 
   return [headers, ...rows].map((row) => row.join(',')).join('\n')
+}
+
+/**
+ * Formats the score displayed on gradebook rows as a percentage
+ * or '-' for Missing scores (Jerome's contribution)
+ */
+const formatDisplayScore = (score: string | number): string => {
+  return score === '-' ? '-' : `${score}%`
 }
 
 /**
@@ -113,10 +133,10 @@ const formatSubmittedTime = (timestamp: number): string => {
 
 function formatScoreSource(scoreSource?: GradebookScoreSource): string {
   if (scoreSource === 'offline-batch-grade') {
-    return 'Offline batch grade'
+    return 'Batch Grading'
   }
 
-  return 'Submission self-check'
+  return 'Assignment Submission'
 }
 
 function formatStudentStatus(record: GradebookRecord): string {
@@ -133,36 +153,62 @@ function formatStudentStatus(record: GradebookRecord): string {
 const buildStudentRecordsFromGradebook = (
   records: GradebookRecord[],
   assignmentId: string,
-  defaultScoreSource: GradebookScoreSource
+  defaultScoreSource: GradebookScoreSource,
+  dataMode: GradebookStorageMode,
+  allStudents: { id: string; name: string }[]
 ): StudentRecord[] => {
   const assignmentRecords = records.filter((record) => record.assignmentId === assignmentId)
 
   const groupedRecords = new Map<string, GradebookRecord[]>()
-
   assignmentRecords.forEach((record) => {
     const existing = groupedRecords.get(record.studentId) ?? []
     groupedRecords.set(record.studentId, [...existing, record])
   })
 
-  return Array.from(groupedRecords.values()).map((studentRecords) => {
-    const highestRecord = studentRecords.reduce((best, current) =>
-      current.score > best.score ? current : best
-    )
+  // Get the highest score of a student's submission
+  const submittedStudents: StudentRecord[] = Array.from(groupedRecords.values()).map(
+    (studentRecords) => {
+      const highestRecord = studentRecords.reduce((best, current) =>
+        current.score > best.score ? current : best
+      )
 
-    const latestRecord = studentRecords.reduce((latest, current) =>
-      current.submittedAt > latest.submittedAt ? current : latest
-    )
-    const effectiveScoreSource = latestRecord.scoreSource ?? defaultScoreSource
+      const latestRecord = studentRecords.reduce((latest, current) =>
+        current.submittedAt > latest.submittedAt ? current : latest
+      )
+      const effectiveScoreSource = highestRecord.scoreSource ?? defaultScoreSource
 
-    return {
-      id: latestRecord.studentId,
-      name: latestRecord.studentName,
-      score: `${highestRecord.score}%`,
-      scoreSource: formatScoreSource(effectiveScoreSource),
-      lastSubmitted: formatSubmittedTime(latestRecord.submittedAt),
-      status: formatStudentStatus({ ...latestRecord, scoreSource: effectiveScoreSource })
+      return {
+        id: latestRecord.studentId,
+        name: latestRecord.studentName,
+        score: `${highestRecord.score}`,
+        scoreSource: formatScoreSource(effectiveScoreSource),
+        // Get submission time of highest score rather than latest
+        lastSubmitted: formatSubmittedTime(highestRecord.submittedAt),
+        status: formatStudentStatus({ ...highestRecord, scoreSource: effectiveScoreSource })
+      }
     }
-  })
+  )
+
+  // For server mode, show all students in Student Name column
+  if (dataMode === 'server' && allStudents.length > 0) {
+    const submittedStudentIds = new Set(submittedStudents.map((s) => s.id))
+
+    // Students who have not made a submission have a status of Missing
+    const nonSubmittedStudents: StudentRecord[] = allStudents
+      .filter((student) => !submittedStudentIds.has(student.id))
+      .map((student) => ({
+        id: student.id,
+        name: student.name,
+        score: '-',
+        scoreSource: '-',
+        lastSubmitted: '-',
+        status: 'Missing'
+      }))
+
+    return [...submittedStudents, ...nonSubmittedStudents]
+  }
+
+  return submittedStudents
 }
 
 const cellStyle: CSSProperties = {
@@ -195,28 +241,64 @@ export function GradebookPanel({
   allowClear
 }: GradebookPanelProps): React.JSX.Element {
   const [selectedAssignment, setSelectedAssignment] = useState('')
+  const [allStudents, setAllStudents] = useState<{ id: string; name: string }[]>([])
   const [gradebookRecords, setGradebookRecords] = useState<GradebookRecord[]>([])
+  const [allAssignments, setAllAssignments] = useState<
+    { id: string; name: string; gradingCriteria?: string }[]
+  >([])
   const [searchTerm, setSearchTerm] = useState('')
   const [sortOption, setSortOption] = useState('name-asc')
   const canClearRecords = allowClear ?? dataMode === 'local'
 
   useEffect(() => {
     async function fetchGradebookRecords(): Promise<void> {
+      // Load grades
       const records = await loadGradebookRecords(dataMode)
       setGradebookRecords(records)
+
+      // For server mode,
+      if (dataMode === 'server') {
+        try {
+          // Load all students
+          const students = await loadAllStudents()
+          setAllStudents(students)
+        } catch (error) {
+          console.error('Failed to load all students', error)
+        }
+
+        try {
+          // Load all assignments made by instructor
+          const assignments = await loadServerAssignments()
+          setAllAssignments(
+            assignments.map((a) => ({
+              id: a.uuid,
+              name: a.name,
+              gradingCriteria: a.gradingCriteria
+            }))
+          )
+        } catch (error) {
+          console.error('Failed to load all assignments', error)
+        }
+      } else {
+        setAllStudents([])
+        setAllAssignments([])
+      }
     }
 
     void fetchGradebookRecords()
   }, [dataMode])
 
-  const assignmentOptions = Array.from(
-    new Map(
-      gradebookRecords.map((record) => [
-        record.assignmentId,
-        record.assignmentName ?? record.assignmentId
-      ])
-    ).entries()
-  )
+  const assignmentOptions: [string, string][] =
+    dataMode === 'server'
+      ? allAssignments.map((a) => [a.id, a.name])
+      : Array.from(
+          new Map(
+            gradebookRecords.map((record) => [
+              record.assignmentId,
+              record.assignmentName ?? record.assignmentId
+            ])
+          ).entries()
+        )
   const hasAssignments = assignmentOptions.length > 0
 
   const assignmentIds = assignmentOptions.map(([assignmentId]) => assignmentId)
@@ -224,12 +306,19 @@ export function GradebookPanel({
     ? selectedAssignment
     : (assignmentOptions[0]?.[0] ?? '')
   const defaultScoreSource: GradebookScoreSource =
-    dataMode === 'local' ? 'offline-batch-grade' : 'submission-self-check'
+    dataMode === 'local' ? 'offline-batch-grade' : 'assignment-submission'
+
+  // Get assignment's grading criteria (total available points)
+  //const effectiveSelectedCriteria =
+  //  allAssignments.find((a) => a.id === effectiveSelectedAssignment)?.gradingCriteria ?? '100'
+  //const criteria = parseInt(effectiveSelectedCriteria, 10)
 
   const students = buildStudentRecordsFromGradebook(
     gradebookRecords,
     effectiveSelectedAssignment,
-    defaultScoreSource
+    defaultScoreSource,
+    dataMode,
+    allStudents
   )
   const filteredStudents = filterStudents(students, searchTerm)
   const sortedStudents = sortStudents(filteredStudents, sortOption)
@@ -286,12 +375,12 @@ export function GradebookPanel({
 
           <div style={{ display: 'flex', gap: '24px', margin: '20px 0', fontWeight: 'bold' }}>
             <div>
-              <span>Class Average: {averageScore === '--' ? '--' : `${averageScore}%`}</span>
+              <span>Average Score: {formatDisplayScore(averageScore)}</span>
               <span style={{ marginLeft: '24px' }}>
-                Highest Score: {highestScore === '--' ? '--' : `${highestScore}%`}
+                Highest Score: {formatDisplayScore(highestScore)}
               </span>
               <span style={{ marginLeft: '24px' }}>
-                Lowest Score: {lowestScore === '--' ? '--' : `${lowestScore}%`}
+                Lowest Score: {formatDisplayScore(lowestScore)}
               </span>
             </div>
           </div>
@@ -301,7 +390,7 @@ export function GradebookPanel({
             <input
               id="student-search"
               type="text"
-              placeholder="Enter student name or ID"
+              placeholder="Enter student name"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               style={{ marginLeft: '8px', padding: '6px', width: '260px' }}
@@ -318,8 +407,8 @@ export function GradebookPanel({
             >
               <option value="name-asc">Student Name (A-Z)</option>
               <option value="name-desc">Student Name (Z-A)</option>
-              <option value="score-asc">Highest Score (Low to High)</option>
-              <option value="score-desc">Highest Score (High to Low)</option>
+              <option value="score-asc">Score (Low to High)</option>
+              <option value="score-desc">Score (High to Low)</option>
             </select>
           </div>
 
@@ -327,11 +416,10 @@ export function GradebookPanel({
             <table style={{ borderCollapse: 'collapse', width: '100%' }}>
               <thead>
                 <tr>
-                  <th style={cellStyle}>Student ID</th>
                   <th style={cellStyle}>Student Name</th>
-                  <th style={cellStyle}>Highest Score</th>
+                  <th style={cellStyle}>Score</th>
                   <th style={cellStyle}>Score Source</th>
-                  <th style={cellStyle}>Last Submission Time</th>
+                  <th style={cellStyle}>Submission Time</th>
                   <th style={cellStyle}>Status</th>
                 </tr>
               </thead>
@@ -342,18 +430,23 @@ export function GradebookPanel({
                       No graded assignments available.
                     </td>
                   </tr>
-                ) : sortedStudents.length === 0 ? (
+                ) : dataMode === 'local' && sortedStudents.length === 0 ? (
                   <tr>
                     <td style={cellStyle} colSpan={6}>
                       No records for this assignment.
                     </td>
                   </tr>
+                ) : dataMode === 'server' && sortedStudents.length === 0 ? (
+                  <tr>
+                    <td style={cellStyle} colSpan={6}>
+                      Loading all students...
+                    </td>
+                  </tr>
                 ) : (
                   sortedStudents.map((student) => (
                     <tr key={student.id}>
-                      <td style={cellStyle}>{student.id}</td>
                       <td style={cellStyle}>{student.name}</td>
-                      <td style={cellStyle}>{student.score}</td>
+                      <td style={cellStyle}>{formatDisplayScore(student.score)}</td>
                       <td style={cellStyle}>
                         <span style={sourceTagStyle}>{student.scoreSource}</span>
                       </td>

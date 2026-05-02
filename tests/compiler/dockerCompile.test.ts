@@ -1,8 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
-const { spawnMock, mkdtempMock, getCommonWorkingDirectoryMock } = vi.hoisted(() => {
+const { spawnMock, rmSyncMock, mkdtempMock, getCommonWorkingDirectoryMock } = vi.hoisted(() => {
   return {
     spawnMock: vi.fn(),
+    rmSyncMock: vi.fn(),
     mkdtempMock: vi.fn(),
     getCommonWorkingDirectoryMock: vi.fn()
   }
@@ -10,6 +11,10 @@ const { spawnMock, mkdtempMock, getCommonWorkingDirectoryMock } = vi.hoisted(() 
 
 vi.mock('child_process', () => {
   return { spawn: spawnMock }
+})
+
+vi.mock('fs', () => {
+  return { rmSync: rmSyncMock }
 })
 
 vi.mock('fs/promises', () => {
@@ -31,9 +36,25 @@ async function loadDockerCompileModule(): Promise<typeof import('../../src/main/
   return await import('../../src/main/compiler/dockerCompile')
 }
 
+const originalPlatform = Object.getOwnPropertyDescriptor(process, 'platform')
+
+function mockPlatform(platform: NodeJS.Platform): void {
+  Object.defineProperty(process, 'platform', {
+    value: platform,
+    configurable: true
+  })
+}
+
+function restorePlatform(): void {
+  if (originalPlatform) {
+    Object.defineProperty(process, 'platform', originalPlatform)
+  }
+}
+
 beforeEach(() => {
   vi.doUnmock('../../src/main/compiler/languages')
   spawnMock.mockReset()
+  rmSyncMock.mockReset()
   mkdtempMock.mockReset()
   getCommonWorkingDirectoryMock.mockReset()
 
@@ -88,12 +109,57 @@ describe('dockerCompile', () => {
     expect(result.success).toBe(true)
     expect(result.executablePath).toContain('batchgrade-docker-')
     expect(result.message).toBe('Compilation success.')
+    expect(rmSyncMock).not.toHaveBeenCalled()
     if (typeof process.getuid === 'function' && typeof process.getgid === 'function') {
       expect(spawnMock).toHaveBeenCalledWith(
         'docker',
         expect.arrayContaining(['--user', `${process.getuid()}:${process.getgid()}`]),
         expect.any(Object)
       )
+    }
+  })
+
+  it('Should clean successful compile output directories on process exit', async () => {
+    let exitHandler: ((code: number) => void) | undefined
+    const onceSpy = vi.spyOn(process, 'once').mockImplementation((event, listener) => {
+      if (event === 'exit') exitHandler = listener as (code: number) => void
+      return process
+    })
+
+    spawnMock.mockImplementation(() => {
+      return {
+        stdout: { on: () => {} },
+        stderr: { on: () => {} },
+        on: (event, callback) => {
+          if (event === 'close') setTimeout(() => callback(0), 10)
+        },
+        kill: () => {}
+      }
+    })
+    mkdtempMock
+      .mockResolvedValueOnce('/tmp/batchgrade-docker-1')
+      .mockResolvedValueOnce('/tmp/batchgrade-docker-2')
+
+    try {
+      const { dockerCompile } = await loadDockerCompileModule()
+      await dockerCompile({ sourceFiles: ['/project/main.cpp'], language: 'cpp' })
+      await dockerCompile({ sourceFiles: ['/project/main.cpp'], language: 'cpp' })
+
+      expect(onceSpy).toHaveBeenCalledTimes(1)
+      expect(rmSyncMock).not.toHaveBeenCalled()
+
+      exitHandler?.(0)
+
+      expect(rmSyncMock).toHaveBeenCalledWith('/tmp/batchgrade-docker-1', {
+        recursive: true,
+        force: true
+      })
+      expect(rmSyncMock).toHaveBeenCalledWith('/tmp/batchgrade-docker-2', {
+        recursive: true,
+        force: true
+      })
+    } finally {
+      onceSpy.mockRestore()
     }
   })
 
@@ -126,6 +192,10 @@ describe('dockerCompile', () => {
     expect(result.success).toBe(false)
     expect(result.executablePath).toBeNull()
     expect(result.message).toBe('Compilation failed.')
+    expect(rmSyncMock).toHaveBeenCalledWith('/tmp/batchgrade-docker-123', {
+      recursive: true,
+      force: true
+    })
   })
 
   it('Should filter files by language extension', async () => {
@@ -206,6 +276,27 @@ describe('dockerCompile', () => {
     )
   })
 
+  it('Should preserve Windows separators for Docker output paths', async () => {
+    mkdtempMock.mockResolvedValue('C:\\Temp\\batchgrade-docker-123')
+    spawnMock.mockImplementation(() => {
+      return {
+        stdout: { on: () => {} },
+        stderr: { on: () => {} },
+        on: (event, callback) => {
+          if (event === 'close') setTimeout(() => callback(0), 10)
+        },
+        kill: () => {}
+      }
+    })
+
+    const { dockerCompile } = await loadDockerCompileModule()
+    const result = await dockerCompile({ sourceFiles: ['/project/main.cpp'], language: 'cpp' })
+
+    const expectedExecutableName =
+      process.platform === 'win32' ? 'batchgrade-program.exe' : 'batchgrade-program'
+    expect(result.executablePath).toBe(`C:\\Temp\\batchgrade-docker-123\\${expectedExecutableName}`)
+  })
+
   it('Should use fallback stderr when compilation fails without stderr output', async () => {
     spawnMock.mockImplementation(() => {
       return {
@@ -262,7 +353,15 @@ describe('dockerCompile', () => {
   it('Should return timeout result when Docker compilation times out', async () => {
     vi.useFakeTimers()
     let closeHandler: ((code: number | null) => void) | undefined
-    spawnMock.mockImplementation(() => {
+    spawnMock.mockImplementation((cmd, args) => {
+      if (args[0] === 'kill') {
+        return {
+          on: (event, callback) => {
+            if (event === 'error') callback(new Error('docker kill failed'))
+          }
+        }
+      }
+
       return {
         stdout: { on: () => {} },
         stderr: { on: () => {} },
@@ -281,6 +380,38 @@ describe('dockerCompile', () => {
 
     expect(result.success).toBe(false)
     expect(result.message).toBe('Compilation timed out.')
+    expect(rmSyncMock).toHaveBeenCalledWith('/tmp/batchgrade-docker-123', {
+      recursive: true,
+      force: true
+    })
+    expect(spawnMock).toHaveBeenCalledWith(
+      'docker',
+      expect.arrayContaining(['kill', expect.stringMatching(/^batchgrade-compile-/)]),
+      expect.any(Object)
+    )
+  })
+
+  it('Should skip host user args on Windows', async () => {
+    mockPlatform('win32')
+    spawnMock.mockImplementation(() => {
+      return {
+        stdout: { on: () => {} },
+        stderr: { on: () => {} },
+        on: (event, callback) => {
+          if (event === 'close') setTimeout(() => callback(0), 10)
+        },
+        kill: () => {}
+      }
+    })
+
+    try {
+      const { dockerCompile } = await loadDockerCompileModule()
+      await dockerCompile({ sourceFiles: ['/project/main.cpp'], language: 'cpp' })
+
+      expect(spawnMock.mock.calls[0][1]).not.toContain('--user')
+    } finally {
+      restorePlatform()
+    }
   })
 
   it('Should handle Docker spawn errors', async () => {
@@ -301,5 +432,9 @@ describe('dockerCompile', () => {
     expect(result.success).toBe(false)
     expect(result.stderr).toBe('docker failed')
     expect(result.message).toBe('Compilation failed to start.')
+    expect(rmSyncMock).toHaveBeenCalledWith('/tmp/batchgrade-docker-123', {
+      recursive: true,
+      force: true
+    })
   })
 })

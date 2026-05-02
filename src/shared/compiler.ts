@@ -76,7 +76,8 @@ export type DockerInstallationInfo = {
 // Docker Runtime Arguments
 export const DOCKER_RUN_ARGS = [
   'run',
-  '--rm' // Remove the container after it exits
+  '--rm', // Delete the container after it exits
+  '--init' // Use faster init
 ] as const
 
 export const DOCKER_SANDBOX_ARGS = [
@@ -87,8 +88,13 @@ export const DOCKER_SANDBOX_ARGS = [
   '--security-opt',
   'no-new-privileges', // Help prevent privilege escalation
   '--pids-limit',
-  '5' // Prevent fork bombs. For simple programs this is ok. For more complex programs, this may need to be increased.
-  // More arguments will be added as needed
+  '5', // Limit the number of child processes
+  '--memory',
+  '256m', // Limit memory for programs
+  '--cpus',
+  '1', // Limit CPU to 1 core
+  '--memory-swap',
+  '256m' // Prevent swap from extending the effective memory limit.
 ] as const
 
 // ***********************************************************************

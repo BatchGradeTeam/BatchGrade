@@ -3,7 +3,11 @@ import type { BatchJudgeCaseResult, BatchStudentSubmission } from '../../../../s
 import type { GradebookRecord } from '../../../../shared/gradebookTypes'
 import type { Assignment, AssignmentTestCase } from '../../../../shared/types'
 import '../../assets/styles/GradingPlusPanel.css'
-import { saveGradebookRecord, type GradebookStorageMode } from '../../lib/gradebookStorage'
+import {
+  clearGradebookRecords,
+  saveGradebookRecord,
+  type GradebookStorageMode
+} from '../../lib/gradebookStorage'
 import {
   loadAssignmentTestCases,
   loadServerAssignments,
@@ -11,11 +15,15 @@ import {
 } from '../../lib/serverData'
 import { StudentGradingCard } from './StudentGradingCard'
 
+/**
+ * Props used to configure Grading+ for instructor, guest, local, or server workflows.
+ */
 interface GradingPlusPanelProps {
   title?: string
   description?: string
   dataSourceMode?: GradebookStorageMode
   gradebookMode?: GradebookStorageMode
+  showServerSubmissionsButton?: boolean
   showHomeButton?: boolean
   onGoHome?: () => void
 }
@@ -25,6 +33,10 @@ function getFileName(filePath: string): string {
   return parts[parts.length - 1] || filePath
 }
 
+/**
+ * Returns the file name without its extension.
+ * Used as a fallback student id/name for manual file uploads.
+ */
 function getFileStem(filePath: string): string {
   return getFileName(filePath).replace(/\.[^.]+$/, '')
 }
@@ -46,6 +58,15 @@ type JudgeCaseData = {
 
 type TestCaseMode = 'saved' | 'manual'
 
+/**
+ * Stores the Guest BatchGrade queue and results so they survive route changes.
+ */
+const GUEST_BATCHGRADE_STUDENTS_KEY = 'guestBatchGradeStudents'
+
+/**
+ * Builds a preview list showing how input files and expected output files
+ * will be paired during manual test-case grading.
+ */
 function buildJudgeFilePairPreview(
   inputFiles: string[],
   outputFiles: string[]
@@ -58,10 +79,16 @@ function buildJudgeFilePairPreview(
   }))
 }
 
+/**
+ * Sorts selected judge files so input/output pairing is predictable.
+ */
 function sortFilesAlphabetically(files: string[]): string[] {
   return [...files].sort((a, b) => a.localeCompare(b))
 }
 
+/**
+ * Converts one graded student result into a Gradebook record.
+ */
 function buildGradebookRecord(
   student: BatchStudentSubmission,
   assignmentId: string,
@@ -90,21 +117,45 @@ export function GradingPlusPanel({
   description = 'Batch grading workflow for compiling and judging multiple student submissions.',
   dataSourceMode = 'server',
   gradebookMode = 'local',
+  showServerSubmissionsButton = false,
   showHomeButton = false,
   onGoHome
 }: GradingPlusPanelProps): React.JSX.Element {
-  const [students, setStudents] = useState<BatchStudentSubmission[]>([])
+  /**
+   * Stores the current batch queue. In Guest Mode, saved students are loaded
+   * from localStorage so results remain after navigating away and returning.
+   */
+  const [students, setStudents] = useState<BatchStudentSubmission[]>(() => {
+    if (gradebookMode !== 'guest') {
+      return []
+    }
+
+    try {
+      const savedStudents = localStorage.getItem(GUEST_BATCHGRADE_STUDENTS_KEY)
+
+      return savedStudents ? (JSON.parse(savedStudents) as BatchStudentSubmission[]) : []
+    } catch (error) {
+      console.error('Failed to load Guest BatchGrade results:', error)
+      return []
+    }
+  })
   const [selectedInputFiles, setSelectedInputFiles] = useState<string[]>([])
   const [selectedOutputFiles, setSelectedOutputFiles] = useState<string[]>([])
+
+  // Tracks grading progress and UI feedback during single-student or batch grading.
   const [currentStudentIndex, setCurrentStudentIndex] = useState<number | null>(null)
   const [isBatchGrading, setIsBatchGrading] = useState(false)
   const [batchError, setBatchError] = useState<string | null>(null)
   const [batchMessage, setBatchMessage] = useState<string | null>(null)
   const [expandedStudentIndex, setExpandedStudentIndex] = useState<number | null>(null)
+
+  // Controls dropdown menu visibility for mode/input/output selectors.
   const [showInputMenu, setShowInputMenu] = useState(false)
   const [showOutputMenu, setShowOutputMenu] = useState(false)
   const [gradingMode, setGradingMode] = useState<GradingMode>('local')
   const [showModeMenu, setShowModeMenu] = useState(false)
+
+  // Assignment and test-case data used when grading server/local saved assignments.
   const [assignments, setAssignments] = useState<Assignment[]>([])
   const [selectedAssignmentId, setSelectedAssignmentId] = useState('')
   const [isLoadingServerSubmissions, setIsLoadingServerSubmissions] = useState(false)
@@ -112,11 +163,13 @@ export function GradingPlusPanel({
   const [isLoadingAssignmentTestCases, setIsLoadingAssignmentTestCases] = useState(false)
   const [testCaseMode, setTestCaseMode] = useState<TestCaseMode>('saved')
 
+  // Derived values used to keep rendering and grading logic easier to read.
   const isServerMode = dataSourceMode === 'server'
   const gradebookDestinationLabel =
     gradebookMode === 'local' ? 'offline gradebook on this device' : 'online gradebook'
   const activeAssignmentId = selectedAssignmentId || 'guest-batchgrade'
 
+  // Determines whether grading should use saved assignment cases or manual files.
   const useSavedTestCases = testCaseMode === 'saved' && assignmentTestCases.length > 0
 
   const judgeFilePairPreview = useSavedTestCases
@@ -128,8 +181,27 @@ export function GradingPlusPanel({
       }))
     : buildJudgeFilePairPreview(selectedInputFiles, selectedOutputFiles)
 
+  // Stores references to student cards so the active card can scroll into view.
   const studentCardRefs = useRef<(HTMLDivElement | null)[]>([])
 
+  /**
+   * Persists Guest Mode batch results whenever the student queue changes.
+   */
+  useEffect(() => {
+    if (gradebookMode !== 'guest') {
+      return
+    }
+
+    try {
+      localStorage.setItem(GUEST_BATCHGRADE_STUDENTS_KEY, JSON.stringify(students))
+    } catch (error) {
+      console.error('Failed to save Guest BatchGrade results:', error)
+    }
+  }, [gradebookMode, students])
+
+  /**
+   * Closes open dropdown menus when the user clicks elsewhere on the page.
+   */
   useEffect(() => {
     function handleClickOutside(): void {
       setShowModeMenu(false)
@@ -144,6 +216,10 @@ export function GradingPlusPanel({
     }
   }, [])
 
+  /**
+   * Loads available assignments based on the selected data source mode.
+   * Server mode falls back to local assignments if server loading fails.
+   */
   useEffect(() => {
     let isMounted = true
 
@@ -192,6 +268,9 @@ export function GradingPlusPanel({
     }
   }, [isServerMode])
 
+  /**
+   * Automatically scrolls to the student card currently being graded.
+   */
   useEffect(() => {
     if (currentStudentIndex === null) {
       return
@@ -207,6 +286,10 @@ export function GradingPlusPanel({
     }
   }, [currentStudentIndex])
 
+  /**
+   * Loads test cases for the selected assignment.
+   * Falls back to local test cases if server test cases are unavailable.
+   */
   useEffect(() => {
     let isMounted = true
 
@@ -263,12 +346,18 @@ export function GradingPlusPanel({
     }
   }, [isServerMode, selectedAssignmentId])
 
+  /**
+   * Updates one student in the batch queue without replacing the whole list manually.
+   */
   function updateStudent(index: number, updates: Partial<BatchStudentSubmission>): void {
     setStudents((currentStudents) =>
       currentStudents.map((student, i) => (i === index ? { ...student, ...updates } : student))
     )
   }
 
+  /**
+   * Adds a selected file only if it exists and has not already been selected.
+   */
   function appendUniqueFile(files: string[], nextFile: string | undefined): string[] {
     if (!nextFile || files.includes(nextFile)) {
       return files
@@ -277,6 +366,9 @@ export function GradingPlusPanel({
     return [...files, nextFile]
   }
 
+  /**
+   * Adds individual C++ files as separate student submissions.
+   */
   async function handleSelectStudentFiles(): Promise<void> {
     try {
       const files = await window.api.file.selectCppFiles()
@@ -317,6 +409,9 @@ export function GradingPlusPanel({
     }
   }
 
+  /**
+   * Imports a folder of student submissions, where each subfolder becomes one student.
+   */
   async function handleImportSubmissionFolder(): Promise<void> {
     try {
       const groups = await window.api.file.selectSubmissionFolder()
@@ -355,6 +450,10 @@ export function GradingPlusPanel({
     }
   }
 
+  /**
+   * Loads assignment submissions from the server and materializes them locally
+   * so the existing compiler and judge flow can process them.
+   */
   async function handleLoadServerSubmissions(): Promise<void> {
     if (!isServerMode) {
       setBatchError('Server submissions are only available for signed-in grading.')
@@ -417,6 +516,9 @@ export function GradingPlusPanel({
     }
   }
 
+  /**
+   * Selects one manual input file for judge testing.
+   */
   async function handleSelectInputFile(): Promise<void> {
     try {
       const file = await window.api.file.select()
@@ -433,6 +535,9 @@ export function GradingPlusPanel({
     }
   }
 
+  /**
+   * Imports a folder of manual input files for judge testing.
+   */
   async function handleSelectInputFolder(): Promise<void> {
     try {
       const files = await window.api.file.selectFilesFromFolder()
@@ -445,6 +550,9 @@ export function GradingPlusPanel({
     }
   }
 
+  /**
+   * Selects one expected output file for judge testing.
+   */
   async function handleSelectOutputFile(): Promise<void> {
     try {
       const file = await window.api.file.select()
@@ -461,6 +569,9 @@ export function GradingPlusPanel({
     }
   }
 
+  /**
+   * Imports a folder of expected output files for judge testing.
+   */
   async function handleSelectOutputFolder(): Promise<void> {
     try {
       const files = await window.api.file.selectFilesFromFolder()
@@ -473,6 +584,10 @@ export function GradingPlusPanel({
     }
   }
 
+  /**
+   * Builds the judge test cases from either saved assignment test cases
+   * or manually selected input/output files.
+   */
   async function buildJudgeCases(): Promise<JudgeCaseData[]> {
     if (useSavedTestCases) {
       return assignmentTestCases.map((testCase) => ({
@@ -507,6 +622,10 @@ export function GradingPlusPanel({
     }))
   }
 
+  /**
+   * Grades one student by compiling their C++ files, running judge cases,
+   * updating the UI status, and saving the result to the selected Gradebook mode.
+   */
   async function gradeSingleStudent(index: number): Promise<void> {
     setCurrentStudentIndex(index)
     setExpandedStudentIndex(index)
@@ -521,6 +640,7 @@ export function GradingPlusPanel({
       totalCount: 0
     })
 
+    // Compile with either Docker or the local compiler depending on the selected mode.
     try {
       let compileResult
 
@@ -546,6 +666,7 @@ export function GradingPlusPanel({
         compileResult
       })
 
+      // Save failed compile attempts so they still appear in the Gradebook.
       if (!compileResult.compileSuccess || !compileResult.executablePath) {
         const failedRecord = buildGradebookRecord(student, activeAssignmentId, 0, 0, 'failed')
         await saveGradebookRecord(failedRecord, gradebookMode)
@@ -559,6 +680,7 @@ export function GradingPlusPanel({
         return
       }
 
+      // Switch the student status from compiling to judging before running tests.
       updateStudent(index, {
         status: 'judging'
       })
@@ -566,6 +688,7 @@ export function GradingPlusPanel({
       const judgeCases = await buildJudgeCases()
       const judgeResults: BatchJudgeCaseResult[] = []
 
+      // Run every judge case and collect detailed pass/fail results.
       for (const judgeCase of judgeCases) {
         const result =
           gradingMode === 'docker'
@@ -590,6 +713,7 @@ export function GradingPlusPanel({
         })
       }
 
+      // Save completed grading results and update the visible student card.
       const passedCount = judgeResults.filter((test) => test.result.passed).length
       const totalCount = judgeResults.length
 
@@ -624,6 +748,9 @@ export function GradingPlusPanel({
     }
   }
 
+  /**
+   * Validates setup requirements before grading a single selected student.
+   */
   async function handleGradeStudent(index: number): Promise<void> {
     if (isServerMode && !selectedAssignmentId) {
       setBatchError('Select an assignment before grading.')
@@ -648,17 +775,22 @@ export function GradingPlusPanel({
       return
     }
 
+    // Start grading mode and clear previous messages before running.
     setIsBatchGrading(true)
     setBatchError(null)
     setBatchMessage(null)
 
     try {
+      // Run the grading workflow for the selected student.
       await gradeSingleStudent(index)
     } finally {
       setIsBatchGrading(false)
     }
   }
 
+  /**
+   * Grades all students that are still pending or previously failed.
+   */
   async function handleGradeAllStudents(): Promise<void> {
     if (students.length === 0) {
       setBatchError('No students available to grade.')
@@ -684,6 +816,7 @@ export function GradingPlusPanel({
       return
     }
 
+    // Build a list of students that still need grading.
     const pendingIndexes = students
       .map((student, index) => ({ student, index }))
       .filter(({ student }) => student.status === 'pending' || student.status === 'failed')
@@ -694,11 +827,13 @@ export function GradingPlusPanel({
       return
     }
 
+    // Start batch grading and clear previous status messages.
     setIsBatchGrading(true)
     setBatchError(null)
     setBatchMessage(null)
 
     try {
+      // Grade each pending student one by one in sequence.
       for (const index of pendingIndexes) {
         await gradeSingleStudent(index)
       }
@@ -712,10 +847,40 @@ export function GradingPlusPanel({
     }
   }
 
+  /**
+   * Clears Guest Mode batch results from both the visible queue and localStorage.
+   */
+  async function handleClearGuestResults(): Promise<void> {
+    if (gradebookMode !== 'guest') {
+      return
+    }
+
+    try {
+      // Reset stored guest results and clear the current UI state.
+      localStorage.removeItem(GUEST_BATCHGRADE_STUDENTS_KEY)
+      await clearGradebookRecords('guest')
+
+      setStudents([])
+      setCurrentStudentIndex(null)
+      setExpandedStudentIndex(null)
+      setBatchError(null)
+      setBatchMessage('Guest BatchGrade results have been cleared.')
+    } catch (error) {
+      console.error('Error clearing Guest BatchGrade results:', error)
+      setBatchError('Could not clear Guest BatchGrade results.')
+    }
+  }
+
+  /**
+   * Expands or collapses a student's detailed grading results.
+   */
   function handleToggleStudentDetails(index: number): void {
     setExpandedStudentIndex((currentIndex) => (currentIndex === index ? null : index))
   }
 
+  /**
+   * Counts students that have finished grading, including failed compile/judge runs.
+   */
   const completedCount = students.filter(
     (student) => student.status === 'done' || student.status === 'failed'
   ).length
@@ -728,14 +893,18 @@ export function GradingPlusPanel({
         <p className="grading-plus-description">{description}</p>
 
         <p className="grading-plus-note">
-          Completed batch grading runs save to the {gradebookDestinationLabel}.
+          {gradebookMode === 'guest'
+            ? 'Completed batch grading runs remain on this page until cleared.'
+            : `Completed batch grading runs save to the ${gradebookDestinationLabel}.`}
         </p>
       </div>
 
+      {/* Shows error and success messages for grading/setup actions. */}
       {batchError && <div className="grading-plus-error-alert">{batchError}</div>}
 
       {batchMessage && <div className="grading-plus-success-alert">{batchMessage}</div>}
 
+      {/* Main setup area for assignments, files, grading mode, and batch actions. */}
       <div className="grading-plus-setup-card">
         <div className="grading-plus-setup-header">
           <h2 className="grading-plus-section-title">Batch Setup</h2>
@@ -745,6 +914,7 @@ export function GradingPlusPanel({
           </p>
         </div>
 
+        {/* Server mode lets instructors select an assignment and view saved test-case status. */}
         {isServerMode && (
           <div className="grading-plus-assignment-card">
             <label htmlFor="batch-assignment-select" className="grading-plus-label">
@@ -850,8 +1020,9 @@ export function GradingPlusPanel({
           <button onClick={() => void handleImportSubmissionFolder()} className="primary-button">
             Import Submission Folder
           </button>
+          {/* officially hiding server submission loading for now since it's not fully polished and may cause confusion - can re-enable later when it's more robust */}
 
-          {isServerMode && (
+          {isServerMode && showServerSubmissionsButton && (
             <button
               onClick={() => void handleLoadServerSubmissions()}
               className="primary-button"
@@ -946,9 +1117,98 @@ export function GradingPlusPanel({
           >
             {isBatchGrading ? 'Grading...' : 'Grade All Students'}
           </button>
+
+          {gradebookMode === 'guest' && (
+            <button
+              onClick={() => void handleClearGuestResults()}
+              disabled={isBatchGrading || students.length === 0}
+              className={
+                isBatchGrading || students.length === 0 ? 'cancel-button' : 'secondary-button'
+              }
+            >
+              Clear Guest Results
+            </button>
+          )}
         </div>
 
         <div className="grading-plus-alert-group">
+          <div className="grading-plus-warning-alert">
+            <details className="grading-plus-structure-details">
+              <summary className="grading-plus-structure-summary">
+                Folder Structure Example for Import Submission Folder
+              </summary>
+
+              <p className="grading-plus-structure-copy">
+                Keep student folders at the submission root, then include input and output folders
+                at that same root level. Alphabetical order is recommended for consistency.
+              </p>
+
+              <div
+                className="grading-plus-structure-tree"
+                aria-label="Submission folder structure example"
+              >
+                <ul className="grading-plus-tree-root">
+                  <li className="grading-plus-tree-node grading-plus-tree-node-folder">
+                    <span className="grading-plus-tree-label">submission-root</span>
+
+                    <ul className="grading-plus-tree-children">
+                      <li className="grading-plus-tree-node grading-plus-tree-node-folder">
+                        <span className="grading-plus-tree-label">Amelia Baker</span>
+                        <ul className="grading-plus-tree-children">
+                          <li className="grading-plus-tree-node grading-plus-tree-node-file">
+                            <span className="grading-plus-tree-label">helloworld.cpp</span>
+                          </li>
+                        </ul>
+                      </li>
+
+                      <li className="grading-plus-tree-node grading-plus-tree-node-folder">
+                        <span className="grading-plus-tree-label">Brian Campbell</span>
+                        <ul className="grading-plus-tree-children">
+                          <li className="grading-plus-tree-node grading-plus-tree-node-file">
+                            <span className="grading-plus-tree-label">helloworld.cpp</span>
+                          </li>
+                        </ul>
+                      </li>
+
+                      <li className="grading-plus-tree-node grading-plus-tree-node-folder">
+                        <span className="grading-plus-tree-label">John Doe</span>
+                        <ul className="grading-plus-tree-children">
+                          <li className="grading-plus-tree-node grading-plus-tree-node-file">
+                            <span className="grading-plus-tree-label">helloworld.cpp</span>
+                          </li>
+                        </ul>
+                      </li>
+
+                      <li className="grading-plus-tree-node grading-plus-tree-node-folder">
+                        <span className="grading-plus-tree-label">input</span>
+                        <ul className="grading-plus-tree-children">
+                          <li className="grading-plus-tree-node grading-plus-tree-node-file">
+                            <span className="grading-plus-tree-label">input1.txt</span>
+                          </li>
+                          <li className="grading-plus-tree-node grading-plus-tree-node-file">
+                            <span className="grading-plus-tree-label">input2.txt</span>
+                          </li>
+                        </ul>
+                      </li>
+
+                      <li className="grading-plus-tree-node grading-plus-tree-node-folder">
+                        <span className="grading-plus-tree-label">output</span>
+                        <ul className="grading-plus-tree-children">
+                          <li className="grading-plus-tree-node grading-plus-tree-node-file">
+                            <span className="grading-plus-tree-label">output1.txt</span>
+                          </li>
+                          <li className="grading-plus-tree-node grading-plus-tree-node-file">
+                            <span className="grading-plus-tree-label">output2.txt</span>
+                          </li>
+                        </ul>
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+              </div>
+            </details>
+          </div>
+
           <div className="grading-plus-warning-alert">
             If the program requires user input, add input files before grading. Otherwise, test
             cases may fail due to missing input.
@@ -1056,6 +1316,7 @@ export function GradingPlusPanel({
         })}
       </div>
 
+      {/* Optional navigation button used by Guest Mode to return to the dashboard. */}
       {showHomeButton && onGoHome && (
         <button onClick={onGoHome} className="primary-button grading-plus-home-button">
           Go to Home
