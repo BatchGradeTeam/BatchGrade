@@ -106,16 +106,6 @@ export function SignUp(): React.JSX.Element {
           <header className="header">
             <h1 className="title hover-underline">BatchGrade</h1>
           </header>
-
-          {/*-----------------------------------------------------------
-            System Actions
-              Used for development/testing utilities
-            -----------------------------------------------------------*/}
-          <div className="actions">
-            <div className="action">
-              <IpcPing />
-            </div>
-          </div>
         </div>
 
         <div className="signup-item">
