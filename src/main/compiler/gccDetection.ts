@@ -1,4 +1,3 @@
-/* eslint-disable prettier/prettier */
 // Compiler Detection Service
 
 import { execFile } from 'node:child_process'
@@ -10,7 +9,8 @@ import type { GccInstallationInfo, SupportedPlatform } from '../../shared/compil
 const execFileAsync = promisify(execFile)
 
 async function gccCommand(command: string): Promise<string | null> {
-  try { // Need error handling -> If command fails, it returns null safely
+  try {
+    // Need error handling -> If command fails, it returns null safely
     const res = await execFileAsync(command, ['--version'], {
       windowsHide: true,
       timeout: 8000 // 8000 ms or 8 sec
@@ -18,12 +18,10 @@ async function gccCommand(command: string): Promise<string | null> {
 
     if (res.stdout || res.stderr) {
       return command
-    }
-    else {
+    } else {
       return null
     }
-  }
-  catch {
+  } catch {
     return null
   }
 }
@@ -63,32 +61,30 @@ async function validateGccPath(filePath: string): Promise<boolean> {
   }
 
   try {
-    const res = await execFileAsync(filePath, ['--version'], { // We have to confirm that it works
+    const res = await execFileAsync(filePath, ['--version'], {
+      // We have to confirm that it works
       windowsHide: true,
       timeout: 8000
     })
 
     if (res.stdout || res.stderr) {
       return true
-    }
-    else {
+    } else {
       return false
     }
-  }
-
-  catch {
+  } catch {
     return false
   }
 }
 
 async function detectGccInstallation(): Promise<GccInstallationInfo> {
-  let platform : SupportedPlatform = 'unknown'
+  let platform: SupportedPlatform = 'unknown'
   if (process.platform === 'win32') {
     platform = 'win32'
-  }                                                                                                       
+  }
   if (process.platform === 'darwin') {
     platform = 'darwin'
-  }                                                                                                  
+  }
   if (process.platform === 'linux') {
     platform = 'linux'
   }
@@ -96,8 +92,7 @@ async function detectGccInstallation(): Promise<GccInstallationInfo> {
   let detectCompilerCommand: string | null = null
   if (platform === 'win32') {
     detectCompilerCommand = await gccCommand('g++.exe')
-  }
-  else {
+  } else {
     detectCompilerCommand =
       (await gccCommand('g++')) ?? (await gccCommand('c++')) ?? (await gccCommand('clang++'))
   }
@@ -112,8 +107,7 @@ async function detectGccInstallation(): Promise<GccInstallationInfo> {
       installInstruction: null,
       source: 'auto'
     }
-  }
-  else {
+  } else {
     return {
       compilerId: 'gcc',
       status: 'missing',

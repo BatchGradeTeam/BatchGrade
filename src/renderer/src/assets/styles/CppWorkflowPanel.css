@@ -267,12 +267,7 @@
   line-height: 1.6;
   color: var(--ev-c-gray-1);
   background: transparent;
-  font-family:
-    'JetBrains Mono',
-    'Fira Code',
-    'Cascadia Code',
-    Consolas,
-    monospace;
+  font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', Consolas, monospace;
   white-space: pre-wrap;
   overflow-wrap: anywhere;
 }

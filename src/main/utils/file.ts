@@ -1,5 +1,3 @@
-// Potentially Temporary File: May be deleted in the future.
-/* TEST ONLY DELETE WHEN DONE */
 // This info was more or less copied from: https://www.electronjs.org/docs/latest/tutorial/ipc
 // Fitted to our project needs
 import { app, dialog } from 'electron'
@@ -32,7 +30,6 @@ async function stringifyFile(filePath: string): Promise<string> {
   const fileContent = await fs.readFile(filePath, 'utf-8')
   return fileContent
 }
-/* TEST ONLY DELETE WHEN DONE */
 
 // @ Issue 9: For compiling files
 async function selectCppFiles(): Promise<string[]> {

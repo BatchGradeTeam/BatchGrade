@@ -16,7 +16,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { INSTRUCTOR_ROLE, STUDENT_ROLE } from '../../../shared/types'
-import { IpcPing } from '../components/IpcPing'
 import { useAuth } from '../components/AuthContext'
 
 /**
@@ -106,16 +105,6 @@ export function SignUp(): React.JSX.Element {
           <header className="header">
             <h1 className="title hover-underline">BatchGrade</h1>
           </header>
-
-          {/*-----------------------------------------------------------
-            System Actions
-              Used for development/testing utilities
-            -----------------------------------------------------------*/}
-          <div className="actions">
-            <div className="action">
-              <IpcPing />
-            </div>
-          </div>
         </div>
 
         <div className="signup-item">

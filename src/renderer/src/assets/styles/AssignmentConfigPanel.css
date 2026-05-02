@@ -216,12 +216,7 @@
   line-height: 1.5;
   white-space: pre-wrap;
   overflow-wrap: anywhere;
-  font-family:
-    'JetBrains Mono',
-    'Fira Code',
-    'Cascadia Code',
-    Consolas,
-    monospace;
+  font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', Consolas, monospace;
 }
 
 .assignment-config-panel .test-case-list {
