@@ -14,9 +14,9 @@
 
 ---
 
-BatchGrade is a locally hosted automated grading platform designed to streamline the evaluation of source code in academia. It also has server-based functionality that conveniently hosts instructor-defined assignments for student submissions and an automated gradebook. 
+BatchGrade is a locally hosted automated grading platform designed to streamline the evaluation of source code in academia. It also has server-based functionality that conveniently hosts instructor-defined assignments for student submissions and an automated gradebook.
 
-The system enables educators to batch test submissions, manage grades through an integrated database, and provide structured feedback, while students can receive immediate results to improve their work. 
+The system enables educators to batch test submissions, manage grades through an integrated database, and provide structured feedback, while students can receive immediate results to improve their work.
 
 Built with a web-based frontend, backend services, and database support, BatchGrade prioritizes affordability and institutional flexibility by allowing deployment on existing infrastructure or local machines. By reducing grading time and improving feedback quality, the project aims to increase instructional efficiency and student confidence without reliance on costly third-party software as a service (SaaS) solutions.
 
