@@ -527,6 +527,8 @@ export function GradingPlusPanel({
         sortFilesAlphabetically(appendUniqueFile(currentFiles, file))
       )
 
+      setTestCaseMode('manual')
+
       setBatchError(null)
       setBatchMessage(null)
     } catch (error) {
@@ -542,6 +544,7 @@ export function GradingPlusPanel({
     try {
       const files = await window.api.file.selectFilesFromFolder()
       setSelectedInputFiles(sortFilesAlphabetically(files))
+      setTestCaseMode('manual')
       setBatchError(null)
       setBatchMessage(null)
     } catch (error) {
@@ -561,6 +564,8 @@ export function GradingPlusPanel({
         sortFilesAlphabetically(appendUniqueFile(currentFiles, file))
       )
 
+      setTestCaseMode('manual')
+
       setBatchError(null)
       setBatchMessage(null)
     } catch (error) {
@@ -576,6 +581,7 @@ export function GradingPlusPanel({
     try {
       const files = await window.api.file.selectFilesFromFolder()
       setSelectedOutputFiles(sortFilesAlphabetically(files))
+      setTestCaseMode('manual')
       setBatchError(null)
       setBatchMessage(null)
     } catch (error) {
