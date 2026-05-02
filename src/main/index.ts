@@ -158,9 +158,6 @@ app.whenReady().then(() => {
     // Detect GCC during startup
     refreshGccStatus() // For renderers (Front-end developers): Use this to query a ready-made status object.
 
-    // IPC test
-    ipcMain.on('ping', () => console.log('pong'))
-
     // Users CRUD
     ipcMain.handle('users:getAll', () => getAllUsers())
     ipcMain.handle('users:create', (_e, data: NewUser) => createUser(data))
