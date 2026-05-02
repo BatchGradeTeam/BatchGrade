@@ -22,6 +22,7 @@ Built with a web-based frontend, backend services, and database support, BatchGr
 
 ## Table of Contents
 
+- [Using Releases](#using-releases)
 - [Recommended IDE Setup](#recommended-ide-setup)
 - [Project Setup](#project-setup)
 - [Docker-Based Grading](#docker-based-grading)
@@ -29,6 +30,18 @@ Built with a web-based frontend, backend services, and database support, BatchGr
 - [Testing (Vitest)](#testing-vitest)
 - [Database + IPC Wiring Guide](#database--ipc-wiring-guide)
 - [Tech Stack Documentation](#tech-stack-documentation)
+
+---
+
+## Using Releases
+
+For normal use, download the latest release instead of building the project from source.
+
+1. Open the repository's [Releases](https://github.com/UNLV-CS472-672/2026-S-GROUP3-BatchGrade/releases) page.
+2. Download the release for your operating system.
+3. Run the downloaded installer or executable.
+
+Use the setup and build instructions below only if you are developing the project or need to build a local version from the repository.
 
 ---
 
