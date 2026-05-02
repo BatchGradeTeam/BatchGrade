@@ -35,11 +35,16 @@ Built with a web-based frontend, backend services, and database support, BatchGr
 
 ## Using Releases
 
-For normal use, download the latest release instead of building the project from source.
+For normal use, download the latest release instead of building the project from source. Releases are the easiest option for instructors, students, or anyone who only wants to run BatchGrade.
 
 1. Open the repository's [Releases](https://github.com/UNLV-CS472-672/2026-S-GROUP3-BatchGrade/releases) page.
-2. Download the release for your operating system.
-3. Run the downloaded installer or executable.
+2. Open the newest release at the top of the page.
+3. Download the file for your operating system. Use `.exe` for Windows, `.dmg` for macOS, and `.AppImage` or `.deb` for Linux.
+4. Run the downloaded installer or executable.
+
+You do not need to install Node.js, npm, or clone the repository when using a release.
+
+If you want to use Docker-based grading, install Docker Desktop before opening BatchGrade. See [Docker-Based Grading](#docker-based-grading) for details.
 
 Use the setup and build instructions below only if you are developing the project or need to build a local version from the repository.
 
@@ -154,6 +159,10 @@ Use `npm run clean` to remove `dist/`, `out/`, and `node_modules/`.
 ## Docker-Based Grading
 
 BatchGrade can compile and run submitted code inside Docker containers. Make sure Docker Desktop or Docker Engine is installed and running before using the Docker grading workflow.
+
+Docker-based grading helps run submissions in a more consistent, isolated environment, which reduces differences between instructor machines and helps keep student code separated from the host system.
+
+If you want to use Docker-based grading, download and install Docker Desktop from <https://www.docker.com/get-started/> before running BatchGrade.
 
 The current Docker compiler images are:
 
