@@ -44,7 +44,7 @@ For normal use, download the latest release instead of building the project from
 
 You do not need to install Node.js, npm, or clone the repository when using a release.
 
-If you want to use Docker-based grading, install Docker Desktop before opening BatchGrade. See [Docker-Based Grading](#docker-based-grading) for details.
+If you want to use Docker-based grading, install Docker Desktop and keep it running in the background while using BatchGrade. See [Docker-Based Grading](#docker-based-grading) for details.
 
 Use the setup and build instructions below only if you are developing the project or need to build a local version from the repository.
 
@@ -162,7 +162,7 @@ BatchGrade can compile and run submitted code inside Docker containers. Make sur
 
 Docker-based grading helps run submissions in a more consistent, isolated environment, which reduces differences between instructor machines and helps keep student code separated from the host system.
 
-If you want to use Docker-based grading, download and install Docker Desktop from <https://www.docker.com/get-started/> before running BatchGrade.
+If you want to use Docker-based grading, download and install Docker Desktop from <https://www.docker.com/get-started/> before running BatchGrade. Docker Desktop must stay open and running in the background while Docker-based grading is being used.
 
 The current Docker compiler images are:
 
