@@ -20,6 +20,7 @@
     "build:win": "npm run build && npm run rebuild:native && electron-builder --config electron-builder.yml --win",
     "build:mac": "npm run build && npm run rebuild:native && electron-builder --config electron-builder.yml --mac",
     "build:linux": "npm run build && npm run rebuild:native && electron-builder --config electron-builder.yml --linux",
+    "build:linux:ci": "npm run build && npm run rebuild:native && electron-builder --config electron-builder.yml --linux AppImage deb --publish=never",
     "studio": "electron ./node_modules/drizzle-kit/bin.cjs studio",
     "clean": "rimraf dist out node_modules",
     "pretest": "npm run rebuild:native",

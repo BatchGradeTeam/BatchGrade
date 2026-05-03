@@ -80,7 +80,7 @@ jobs:
             build_script: build:mac
             artifact_name: batchgrade-macos
           - os: ubuntu-latest
-            build_script: build:linux
+            build_script: build:linux:ci
             artifact_name: batchgrade-linux
     runs-on: ${{ matrix.os }}
     env:
