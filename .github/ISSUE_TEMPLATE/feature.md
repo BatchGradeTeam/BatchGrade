@@ -1,23 +1,35 @@
 ---
 name: Feature
-about: Suggest an implementation for an MVP feature
-title: "[<MVP-1>] <Description in present tense>"
+about: Propose a large feature and break it into functional requirements
+title: "[<FEATURE>] <Description in present tense>"
 labels: enhancement
-assignees: ''
 
 ---
 
-**Sub-issue(s):** <TBA or [#1](link to sub-issue 1), ...>
-**Related issue(s):** <N/A, TBA, or [#1](link to related issue 1), ...>
+## Summary
 
-**Describe the feature:**
-<A clear and concise description of the enhancement. What should it do?>
+<What capability should be added, and why is it useful?>
 
-**Describe your proposed solution:**
-<A clear and concise description of the proposed code implementation for the enhancement>
+## Functional Requirements
 
-**Describe alternatives you've considered:**
-<N/A or a clear and concise description of any alternative solutions that may be implemented instead>
+<Break this feature into smaller FRs that can become separate issues.
 
-**Additional context:**
-<N/A or add any other context or screenshots about the enhancement here>
+Each FR should be specific, testable, and small enough for its own PR.
+
+Example:
+- [x] FR-1: Compile student submissions
+- [ ] FR-2: Execute compiled programs
+- [ ] FR-3: Display grading results
+>
+
+## Proposed Solution
+
+<N/A or briefly describe a possible implementation approach.>
+
+## Done When
+
+<How will we know this feature is complete?>
+
+## Additional Context
+
+<N/A or include screenshots, diagrams, mockups, references, etc.>
