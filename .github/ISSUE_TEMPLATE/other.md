@@ -2,8 +2,6 @@
 name: Other
 about: Request documentation, tests, CI workflows, etc.
 title: "[<DOC/TEST/CI/OTHER>] <Description in present tense>"
-labels:
-assignees: ''
 
 ---
 

@@ -1,9 +1,9 @@
 ---
 name: Refactor
 about: Propose a code or architecture refactor
-title: "[REFACTOR] <Description>"
+title: "[<REFACTOR>] <Description>"
 labels: refactor
-assignees: ''
+
 ---
 
 ## Summary

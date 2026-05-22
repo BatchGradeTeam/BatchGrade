@@ -1,4 +1,4 @@
-Resolves 
+Resolves <#Issue-Number>
 
 **PR Type:**
 - [x] Feature

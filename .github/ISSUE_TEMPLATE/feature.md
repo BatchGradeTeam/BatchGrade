@@ -1,23 +1,16 @@
 ---
 name: Feature
 about: Propose a large feature and break it into functional requirements
-title: "[FEATURE] <Description in present tense>"
+title: "[<FEATURE>] <Description in present tense>"
 labels: enhancement
-assignees: ''
 
 ---
 
-## Feature Description
+## Summary
 
-<Describe the feature at a high level.
+<What capability should be added, and why is it useful?>
 
-Focus on:
-- what capability is being added
-- why it is needed
-- who benefits from it
->
-
-## Functional Requirement Breakdown
+## Functional Requirements
 
 <Break this feature into smaller FRs that can become separate issues.
 
@@ -26,17 +19,16 @@ Each FR should be specific, testable, and small enough for its own PR.
 Example:
 - [x] FR-1: Compile student submissions
 - [ ] FR-2: Execute compiled programs
-- [ ] FR-3: Compare actual output against expected output
-- [ ] FR-4: Display grading results
+- [ ] FR-3: Display grading results
 >
 
 ## Proposed Solution
 
-<Describe the intended implementation approach at a high level.>
+<N/A or briefly describe a possible implementation approach.>
 
-## Alternatives Considered
+## Done When
 
-<N/A or describe alternative implementations that were considered.>
+<How will we know this feature is complete?>
 
 ## Additional Context
 

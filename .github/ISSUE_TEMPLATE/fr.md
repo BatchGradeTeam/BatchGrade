@@ -3,7 +3,6 @@ name: Functional Requirement
 about: Track a specific implementation requirement from a larger feature
 title: "[FR-1] <Description in present tense>"
 labels: enhancement
-assignees: ''
 
 ---
 
@@ -11,7 +10,7 @@ assignees: ''
 
 <TBA or link the parent feature issue.>
 
-## Requirement Description
+## Summary
 
 <Describe the specific functionality this FR must implement.>
 
@@ -27,7 +26,7 @@ Example:
 
 ## Proposed Solution
 
-<Describe the intended implementation approach.>
+<N/A or briefly describe a possible implementation approach.>
 
 ## Additional Context
 

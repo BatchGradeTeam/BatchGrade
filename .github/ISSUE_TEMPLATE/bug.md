@@ -3,13 +3,12 @@ name: Bug
 about: Report a bug that needs to be fixed
 title: "[<CRITICAL or MINOR> BUG] <Description>"
 labels: bug
-assignees: ''
 
 ---
 
-## Describe the Bug
+## Summary
 
-<A clear and concise description of what the bug is.>
+<What is broken, and what happens when the bug appears?>
 
 ## Steps to Reproduce
 
@@ -22,17 +21,13 @@ assignees: ''
 
 ## Expected Behavior
 
-<A clear and concise description of what should happen instead.>
+<What should happen instead?>
 
-## Configurations
+## Environment
 
-- OS: <OS used when encountering the bug>
-- Code Version: <version used when encountering the bug>
-
-## Screenshots
-
-<If applicable, add screenshots to help explain the problem. They should include error messages, etc.>
+- OS: <if relevant>
+- Version/branch: <if relevant>
 
 ## Additional Context
 
-<N/A or add any other context about the problem here. For example: link a PR or code segment that could have caused the bug.>
+<N/A or add screenshots, logs, error messages, or related links.>
