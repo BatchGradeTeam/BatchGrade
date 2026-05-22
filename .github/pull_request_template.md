@@ -1,4 +1,4 @@
-**Addresses the Issue:** 
+Resolves 
 
 **PR Type:**
 - [x] Feature
@@ -10,7 +10,7 @@
 - [ ] Documentation
 - [ ] Security
 
-**Requirement Description:**
+## Requirement Description
 
 <A clear & concise description of what changes were made
 AND why those changes were made/needed>
