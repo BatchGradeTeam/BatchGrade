@@ -1,25 +1,52 @@
 **Addresses the Issue:** 
 
 **PR Type:**
-- [X] Feature/functional requirement
-- [ ] Bug fix
-- [ ] Code quality improvement
-- [ ] Test-only
-- [ ] CI/config
+- [x] Feature
+- [ ] Bug Fix
+- [ ] Refactor
+- [ ] Performance
+- [ ] Test
+- [ ] CI/Infrastructure
 - [ ] Documentation
+- [ ] Security
 
 **Requirement Description:**
 
 <A clear & concise description of what changes were made
 AND why those changes were made/needed>
 
-**Structural Design Changes:**
+## Architecture Changes
 
-<A clear & concise description of what part of the system was affected structurally>
+<Describe any structural changes to the system architecture or code organization.
 
-**Behavioral Changes:**
+Examples:
+- Added/removed classes, components, services, or modules
+- Changed responsibilities between components
+- Modified database/schema structure
+- Refactored IPC/API boundaries
+- Introduced new design patterns or abstractions
+- Reorganized folders, layers, or dependency flow
+- Updated Docker, CI, or infrastructure structure
 
-<A clear & concise description of what part of the system was affected behaviorally>
+If no structural changes were made, write N/A.
+>
+
+## Behavior Changes
+
+<Describe how the runtime behavior or user-visible behavior changed.
+
+Examples:
+- Changed grading logic or execution flow
+- Modified UI interactions or workflows
+- Added/changed validation rules
+- Updated program execution behavior
+- Changed error handling or logging behavior
+- Modified input/output handling
+- Added new user functionality
+- Changed performance characteristics or async behavior
+
+If no behavioral changes were made, write N/A.
+>
 
 **Diagrams:**
 
@@ -39,15 +66,32 @@ or
 
 <A clear & concise description of how the changes were tested>
 
-**PR Review Checklist:**
-If a box cannot be checked, **explain why there should be an exception**.
-- [ ] Does the PR properly link a relevant, **open issue**?
-- [ ] Does the PR contribute to closing the issue? Does it work as intended?
-- [ ] If the PR is for a feature/FR, does it include the most up-to-date **design diagrams**?
-- [ ] If the PR adds source code, does it include **unit tests** with the proper naming convention?
-- - No, the PR refactors code that already has relevant tests (example of an exception)
-- [ ] If the PR adds code, is it well-documented? (**useful, descriptive names & comments, function & class documentation**)
-- [ ] If the PR includes **AI generated code**, is it properly documented? (TODOs don’t count)
-- [ ] Does the PR uphold >= 90% **statement coverage** & pass CI?
-- [ ] After testing the PR branch, does the app still work as intended?
-- [ ] Is the PR **small** and focused?
+## PR Review Checklist
+
+If a box cannot be checked, explain why an exception should be made.
+
+### Issue & Scope
+- [ ] PR links to a relevant open issue
+- [ ] PR contributes toward resolving the linked issue
+- [ ] PR is small, focused, and limited in scope
+
+### Design & Architecture
+- [ ] Relevant design diagrams were updated if structure or behavior changed
+- [ ] Structural and behavioral changes are documented in this PR
+
+### Testing & Validation
+- [ ] New or modified code includes appropriate unit tests
+- [ ] Existing tests still pass
+- [ ] CI passes successfully
+- [ ] The application was tested manually after changes
+- [ ] Test coverage was maintained or improved
+
+### Code Quality
+- [ ] Added code uses clear naming and appropriate documentation
+- [ ] Comments and documentation are accurate and useful
+- [ ] AI-assisted/generated code was reviewed, validated, and documented appropriately
+
+### Exceptions
+If any checklist item could not be completed, explain why below.
+
+<Explain exceptions here>

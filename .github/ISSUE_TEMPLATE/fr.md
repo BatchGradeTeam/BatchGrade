@@ -1,23 +1,34 @@
 ---
 name: Functional Requirement
-about: Suggest an implementation for a functional requirement
-title: "[<FR-1>] <Description in present tense>"
+about: Track a specific implementation requirement from a larger feature
+title: "[FR-1] <Description in present tense>"
 labels: enhancement
 assignees: ''
 
 ---
 
-**Parent issue:** <TBA or [#1](link to parent issue)>
-**Related issue(s):** <N/A, TBA, or [#1](link to related issue 1), ...>
+## Parent Feature
 
-**Describe the FR:**
-<A clear and concise description of the enhancement. What should it do?>
+<TBA or link the parent feature issue.>
 
-**Describe your proposed solution:**
-<A clear and concise description of the proposed code implementation for the enhancement>
+## Requirement Description
 
-**Describe alternatives you've considered:**
-<N/A or a clear and concise description of any alternative solutions that may be implemented instead>
+<Describe the specific functionality this FR must implement.>
 
-**Additional context:**
-<N/A or add any other context or screenshots about the enhancement here>
+## Acceptance Criteria
+
+<Define what must be true for this FR to be complete.
+
+Example:
+- [ ] Student program can be compiled successfully
+- [ ] Compilation errors are captured and displayed
+- [ ] Unit tests cover success and failure cases
+>
+
+## Proposed Solution
+
+<Describe the intended implementation approach.>
+
+## Additional Context
+
+<N/A or include screenshots, diagrams, references, related PRs, etc.>

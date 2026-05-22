@@ -7,15 +7,19 @@ assignees: ''
 
 ---
 
-**Describe the request:**
+## Describe the Request
+
 <A clear and concise description of your request. What needs to be done?
-Do not forget to add the appropriate label(s)>
+Do not forget to add the appropriate label(s).>
 
-**Describe your proposed solution:**
-<A clear and concise description of the proposed implementation>
+## Proposed Solution
 
-**Describe alternatives you've considered:**
-<N/A or a clear and concise description of any alternative solutions that may be implemented instead>
+<A clear and concise description of the proposed implementation.>
 
-**Additional context:**
-<N/A or add any other context or screenshots about the request here>
+## Alternatives Considered
+
+<N/A or a clear and concise description of any alternative solutions that may be implemented instead.>
+
+## Additional Context
+
+<N/A or add any other context or screenshots about the request here.>
