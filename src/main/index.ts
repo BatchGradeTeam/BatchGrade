@@ -153,6 +153,9 @@ app.whenReady().then(() => {
     // Initialize the database
     initDb()
 
+    // IPC test
+    ipcMain.on('ping', () => console.log('pong'))
+
     // Detect GCC during startup
     refreshGccStatus() // For renderers (Front-end developers): Use this to query a ready-made status object.
 
