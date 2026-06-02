@@ -13,16 +13,9 @@
   --ev-c-gray-2: #414853;
   --ev-c-gray-3: #32363f;
 
-  --ev-c-blue-1: #81c3d7;
-  --ev-c-blue-1-dark: #75afc1;
-  --ev-c-blue-2: #3a7ca5;
-  --ev-c-blue-3: #2f6690;
-  --ev-c-blue-4: #16425b;
-  --ev-c-blue-4-dark: #152c3a;
-
-  --ev-c-text-1: #d3d3d3;
-  --ev-c-text-2: #a9a9a9;
-  --ev-c-text-3: #818589;
+  --ev-c-text-1: rgba(255, 255, 245, 0.86);
+  --ev-c-text-2: rgba(235, 235, 245, 0.6);
+  --ev-c-text-3: rgba(235, 235, 245, 0.38);
 
   --ev-button-alt-border: transparent;
   --ev-button-alt-text: var(--ev-c-text-1);
@@ -33,11 +26,11 @@
 }
 
 :root {
-  --color-background: var(--ev-c-white);
-  --color-background-soft: var(--ev-c-white-soft);
-  --color-background-mute: var(--ev-c-white-mute);
+  --color-background: var(--ev-c-black);
+  --color-background-soft: var(--ev-c-black-soft);
+  --color-background-mute: var(--ev-c-black-mute);
 
-  --color-text: var(--ev-c-text-3);
+  --color-text: var(--ev-c-text-1);
 }
 
 *,
@@ -54,8 +47,8 @@ ul {
 
 body {
   min-height: 100vh;
-  color: var(--ev-c-gray-1);
-  background: var(--ev-c-white-mute);
+  color: var(--color-text);
+  background: var(--color-background);
   line-height: 1.6;
   font-family:
     Inter,
