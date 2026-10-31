@@ -1,33 +1,24 @@
 ---
-name: Bug
-about: Report a bug that needs to be fixed
-title: "[<CRITICAL or MINOR> BUG] <Description>"
+name: Bug report
+about: Report a defect or unexpected behavior
+title: 'fix: '
 labels: bug
-
 ---
 
 ## Summary
+<!-- What is broken, and what is the impact? -->
 
-<What is broken, and what happens when the bug appears?>
+## Steps to reproduce
+1. 
+2. 
+3. 
 
-## Steps to Reproduce
+## Expected behavior
+<!-- What should happen instead? -->
 
-<Numbered steps to reproduce the behavior.
-1. Go to '...'
-2. Click on '....'
-3. Scroll down to '....'
-4. See error
->
+## Acceptance criteria
+- [ ] The issue no longer reproduces.
+- [ ] Appropriate regression coverage is added or updated.
 
-## Expected Behavior
-
-<What should happen instead?>
-
-## Environment
-
-- OS: <if relevant>
-- Version/branch: <if relevant>
-
-## Additional Context
-
-<N/A or add screenshots, logs, error messages, or related links.>
+## Additional context
+<!-- Optional: OS, app version, screenshots, logs, or related issues. -->
