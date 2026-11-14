@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:is(.dark *));
+
 .logo.vite:hover {
   filter: drop-shadow(0 0 2em #747bff);
 }
@@ -21,6 +23,21 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   -webkit-text-size-adjust: 100%;
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.145 0 0);
+  --primary: oklch(0.205 0 0);
+  --primary-foreground: oklch(0.985 0 0);
+  --secondary: oklch(0.97 0 0);
+  --secondary-foreground: oklch(0.205 0 0);
+  --muted: oklch(0.97 0 0);
+  --muted-foreground: oklch(0.556 0 0);
+  --accent: oklch(0.97 0 0);
+  --accent-foreground: oklch(0.205 0 0);
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: oklch(0.922 0 0);
+  --input: oklch(0.922 0 0);
+  --ring: oklch(0.708 0 0);
+  --radius: 0.625rem;
 }
 
 .container {
@@ -63,7 +80,7 @@ h1 {
 }
 
 input,
-button {
+button:not([data-slot="button"]) {
   border-radius: 8px;
   border: 1px solid transparent;
   padding: 0.6em 1.2em;
@@ -76,21 +93,22 @@ button {
   box-shadow: 0 2px 2px rgba(0, 0, 0, 0.2);
 }
 
-button {
+input,
+button:not([data-slot="button"]) {
+  outline: none;
+}
+
+button:not([data-slot="button"]) {
   cursor: pointer;
 }
 
-button:hover {
+button:not([data-slot="button"]):hover {
   border-color: #396cd8;
-}
-button:active {
-  border-color: #396cd8;
-  background-color: #e8e8e8;
 }
 
-input,
-button {
-  outline: none;
+button:not([data-slot="button"]):active {
+  border-color: #396cd8;
+  background-color: #e8e8e8;
 }
 
 #greet-input {
@@ -108,11 +126,48 @@ button {
   }
 
   input,
-  button {
+  button:not([data-slot="button"]) {
     color: #ffffff;
     background-color: #0f0f0f98;
   }
-  button:active {
+
+  button:not([data-slot="button"]):active {
     background-color: #0f0f0f69;
   }
+}
+
+@theme inline {
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-foreground: var(--foreground);
+  --color-background: var(--background);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+}
+
+.dark {
+  --background: oklch(0.145 0 0);
+  --foreground: oklch(0.985 0 0);
+  --primary: oklch(0.922 0 0);
+  --primary-foreground: oklch(0.205 0 0);
+  --secondary: oklch(0.269 0 0);
+  --secondary-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.269 0 0);
+  --muted-foreground: oklch(0.708 0 0);
+  --accent: oklch(0.269 0 0);
+  --accent-foreground: oklch(0.985 0 0);
+  --destructive: oklch(0.704 0.191 22.216);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.556 0 0);
 }
