@@ -1,0 +1,92 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [v2]
+
+permissions:
+  contents: read
+
+concurrency:
+  # One group per pull request, so newer commits cancel older runs.
+  # Pushes to v2 get a unique group per commit, so each one runs to completion.
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    name: Quality (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, ubuntu-latest, macos-latest]
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
+        with:
+          run_install: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+
+      - name: Set up stable Rust
+        # This action publishes a stable branch rather than versioned releases.
+        # Hosted runners already include rustup; no bootstrap installer is needed.
+        uses: dtolnay/rust-toolchain@39008827e6b4319a349e9a42dfc90579dd25f1ca # stable
+        with:
+          toolchain: stable
+          components: rustfmt, clippy
+
+      - name: Cache Rust dependencies
+        uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
+        with:
+          workspaces: src-tauri -> target
+
+      - name: Install frontend dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Check Rust formatting
+        if: matrix.os == 'ubuntu-latest'
+        working-directory: src-tauri
+        run: cargo fmt --all -- --check
+
+      - name: Lint frontend
+        if: matrix.os == 'ubuntu-latest'
+        run: pnpm lint
+
+      - name: Update Linux package index
+        if: matrix.os == 'ubuntu-latest'
+        run: sudo apt-get update
+
+      - name: Install Tauri 2 build prerequisites
+        if: matrix.os == 'ubuntu-latest'
+        # WebKit pulls in GTK; no tray, X automation, or bundling tools are needed.
+        # See https://v2.tauri.app/start/prerequisites/#linux
+        run: sudo apt-get install --no-install-recommends -y build-essential libwebkit2gtk-4.1-dev libssl-dev
+
+      - name: Build frontend
+        # Must precede the Rust steps: Tauri embeds the frontend output at compile time.
+        run: pnpm build
+
+      - name: Lint Rust
+        working-directory: src-tauri
+        run: cargo clippy --all-targets --locked -- -D warnings
+
+      - name: Test frontend
+        run: pnpm test
+
+      - name: Test Rust
+        working-directory: src-tauri
+        run: cargo test --locked
