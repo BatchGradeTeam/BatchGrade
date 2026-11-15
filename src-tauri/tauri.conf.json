@@ -1,6 +1,6 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "batchgrade-starter",
+  "productName": "BatchGrade",
   "version": "0.1.0",
   "identifier": "com.batchgrade.desktop",
   "build": {
@@ -12,7 +12,7 @@
   "app": {
     "windows": [
       {
-        "title": "batchgrade-starter",
+        "title": "BatchGrade V2",
         "width": 800,
         "height": 600
       }
@@ -22,6 +22,7 @@
     }
   },
   "bundle": {
+    "shortDescription": "A local-first desktop application for grading programming assignments.",
     "active": true,
     "targets": "all",
     "icon": [

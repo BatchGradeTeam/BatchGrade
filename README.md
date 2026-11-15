@@ -3,7 +3,7 @@
 
 # BatchGrade V2
 
-A local-first desktop application for programming assignments.
+A local-first desktop application for grading programming assignments.
 
 [![Status](https://img.shields.io/badge/Status-Early_Development-D97706?style=flat-square)](#status)
 [![Platforms](https://img.shields.io/badge/Target-Windows_%7C_macOS_%7C_Linux-334155?style=flat-square)](#status)

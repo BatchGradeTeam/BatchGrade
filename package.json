@@ -1,5 +1,6 @@
 {
-  "name": "batchgrade-starter",
+  "name": "batchgrade",
+  "description": "A local-first desktop application for grading programming assignments.",
   "private": true,
   "version": "0.1.0",
   "type": "module",

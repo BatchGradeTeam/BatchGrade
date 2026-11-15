@@ -1,19 +1,19 @@
-import { fireEvent, render, screen } from "@testing-library/react";
-import { expect, it, vi } from "vitest";
-import { invoke } from "@tauri-apps/api/core";
+import { render, screen } from "@testing-library/react";
+import { expect, it } from "vitest";
 import App from "./App";
 
-vi.mock("@tauri-apps/api/core", () => ({ invoke: vi.fn() }));
-
-it("submits the entered name and displays the greeting", async () => {
-  vi.mocked(invoke).mockResolvedValueOnce("Hello, Ada!");
+it("displays the BatchGrade branding and development status", () => {
   render(<App />);
 
-  fireEvent.change(screen.getByPlaceholderText("Enter a name..."), {
-    target: { value: "Ada" },
-  });
-  fireEvent.click(screen.getByRole("button", { name: "Greet" }));
-
-  expect(invoke).toHaveBeenCalledWith("greet", { name: "Ada" });
-  expect(await screen.findByText("Hello, Ada!")).toBeInTheDocument();
+  expect(
+    screen.getByRole("heading", { level: 1, name: "BatchGrade V2" }),
+  ).toBeInTheDocument();
+  expect(
+    screen.getByText(
+      "A local-first desktop application for grading programming assignments.",
+    ),
+  ).toBeInTheDocument();
+  expect(screen.getByText("Application in development.")).toBeInTheDocument();
+  expect(screen.queryByRole("textbox")).not.toBeInTheDocument();
+  expect(screen.queryByRole("button")).not.toBeInTheDocument();
 });
