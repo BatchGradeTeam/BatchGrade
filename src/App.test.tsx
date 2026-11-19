@@ -1,12 +1,34 @@
-import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react";
+import { invoke } from "@tauri-apps/api/core";
 import { open } from "@tauri-apps/plugin-dialog";
 import { beforeEach, expect, it, vi } from "vitest";
 import App from "./App";
 
+vi.mock("@tauri-apps/api/core", () => ({ invoke: vi.fn() }));
 vi.mock("@tauri-apps/plugin-dialog", () => ({ open: vi.fn() }));
 
 beforeEach(() => {
   vi.resetAllMocks();
+  // Keep the Docker check pending so it does not update state during file picker tests.
+  vi.mocked(invoke).mockReturnValue(new Promise(() => {}));
+});
+
+it("checks Docker when the app opens", () => {
+  render(<App />);
+
+  expect(
+    within(screen.getByRole("region", { name: "Docker" })).getByText(
+      "Checking Docker…",
+    ),
+  ).toBeInTheDocument();
+  expect(invoke).toHaveBeenCalledWith("check_docker_status");
 });
 
 it("displays the BatchGrade branding and development status", () => {

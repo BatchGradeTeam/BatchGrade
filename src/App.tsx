@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { open } from "@tauri-apps/plugin-dialog";
 import { Button } from "@/components/ui/button";
+import { DockerPreflight } from "@/components/docker-preflight";
 import "./App.css";
 
 function App() {
@@ -48,6 +49,7 @@ function App() {
         </p>
       )}
       {error && <p role="alert">{error}</p>}
+      <DockerPreflight />
     </main>
   );
 }
