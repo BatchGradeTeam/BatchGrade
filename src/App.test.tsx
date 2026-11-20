@@ -7,12 +7,15 @@ import {
   within,
 } from "@testing-library/react";
 import { invoke } from "@tauri-apps/api/core";
-import { open } from "@tauri-apps/plugin-dialog";
+import { runCppSource, selectCppSource as open } from "@/lib/cpp";
 import { beforeEach, expect, it, vi } from "vitest";
 import App from "./App";
 
 vi.mock("@tauri-apps/api/core", () => ({ invoke: vi.fn() }));
-vi.mock("@tauri-apps/plugin-dialog", () => ({ open: vi.fn() }));
+vi.mock("@/lib/cpp", () => ({
+  selectCppSource: vi.fn(),
+  runCppSource: vi.fn(),
+}));
 
 beforeEach(() => {
   vi.resetAllMocks();
@@ -44,9 +47,7 @@ it("displays the BatchGrade branding and development status", () => {
   ).toBeInTheDocument();
   expect(screen.getByText("Application in development.")).toBeInTheDocument();
   expect(screen.queryByRole("textbox")).not.toBeInTheDocument();
-  expect(
-    screen.getByRole("button", { name: "Select C++ file" }),
-  ).toBeEnabled();
+  expect(screen.getByRole("button", { name: "Select C++ file" })).toBeEnabled();
 });
 
 it("selects a single C++ file and displays its path", async () => {
@@ -55,15 +56,70 @@ it("selects a single C++ file and displays its path", async () => {
 
   fireEvent.click(screen.getByRole("button", { name: "Select C++ file" }));
 
-  expect(open).toHaveBeenCalledWith({
-    title: "Select C++ file",
-    multiple: false,
-    directory: false,
-    filters: [{ name: "C++ source files", extensions: ["cpp"] }],
-  });
+  expect(open).toHaveBeenCalledWith();
   expect(await screen.findByRole("status")).toHaveTextContent(
     "Selected file: C:\\submissions\\main.cpp",
   );
+});
+
+it("compiles the selection and shows program output and exit status", async () => {
+  vi.mocked(open).mockResolvedValue("/submissions/main.cpp");
+  vi.mocked(runCppSource).mockResolvedValue({
+    compilation: {
+      status: "success",
+      exitCode: 0,
+      stdout: "",
+      stderr: "",
+      durationMs: 123,
+    },
+    execution: {
+      status: "success",
+      exitCode: 0,
+      stdout: "Hello C++\n",
+      stderr: "diagnostic\n",
+      durationMs: 20,
+    },
+  });
+  render(<App />);
+  const run = screen.getByRole("button", { name: "Compile and run" });
+  expect(run).toBeDisabled();
+  fireEvent.click(screen.getByRole("button", { name: "Select C++ file" }));
+  await waitFor(() => expect(run).toBeEnabled());
+  fireEvent.click(run);
+  expect(runCppSource).toHaveBeenCalledWith();
+  const results = within(
+    await screen.findByRole("region", { name: "C++ results" }),
+  );
+  expect(results.getByText("Hello C++")).toBeInTheDocument();
+  expect(results.getByText("diagnostic")).toBeInTheDocument();
+  expect(
+    results.getByText("Succeeded · Exit code 0 · 20 ms"),
+  ).toBeInTheDocument();
+});
+
+it("shows compiler errors without claiming that the program ran", async () => {
+  vi.mocked(open).mockResolvedValue("/submissions/broken.cpp");
+  vi.mocked(runCppSource).mockResolvedValue({
+    compilation: {
+      status: "compileError",
+      exitCode: 1,
+      stdout: "",
+      stderr: "error: expected declaration",
+      durationMs: 20,
+    },
+    execution: null,
+  });
+  render(<App />);
+  fireEvent.click(screen.getByRole("button", { name: "Select C++ file" }));
+  const run = screen.getByRole("button", { name: "Compile and run" });
+  await waitFor(() => expect(run).toBeEnabled());
+  fireEvent.click(run);
+  expect(
+    await screen.findByText("error: expected declaration"),
+  ).toBeInTheDocument();
+  expect(
+    screen.queryByRole("heading", { name: "Program output" }),
+  ).not.toBeInTheDocument();
 });
 
 it("keeps the previous selection on cancel and allows replacing it", async () => {
@@ -84,7 +140,9 @@ it("keeps the previous selection on cancel and allows replacing it", async () =>
 
   fireEvent.click(button);
   await waitFor(() =>
-    expect(screen.getByRole("status")).toHaveTextContent("/submissions/other.cpp"),
+    expect(screen.getByRole("status")).toHaveTextContent(
+      "/submissions/other.cpp",
+    ),
   );
 });
 
@@ -140,7 +198,9 @@ it("shows picker errors, preserves the selection, and allows retrying", async ()
 
   fireEvent.click(button);
   await waitFor(() =>
-    expect(screen.getByRole("status")).toHaveTextContent("/submissions/other.cpp"),
+    expect(screen.getByRole("status")).toHaveTextContent(
+      "/submissions/other.cpp",
+    ),
   );
   expect(screen.queryByRole("alert")).not.toBeInTheDocument();
 });

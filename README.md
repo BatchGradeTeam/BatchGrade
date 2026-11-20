@@ -48,3 +48,5 @@ Install the [Tauri 2 prerequisites](https://v2.tauri.app/start/prerequisites/), 
 pnpm install
 pnpm tauri dev
 ```
+
+See the [C++ compiler image guide](docker/cpp/README.md) for image releases, security updates, and Docker verification.

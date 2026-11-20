@@ -77,6 +77,16 @@ pub(super) fn local_host(host: String) -> Result<String, String> {
 /// Missing or refusing sockets are skipped. If no engine answers, the first
 /// failure is reported, so a permission problem is not hidden.
 pub(super) async fn probe_engine(hosts: &[String]) -> EngineProbe {
+    match connect_engine(hosts).await {
+        Ok((_, version)) => EngineProbe::Reachable { version },
+        Err(probe) => probe,
+    }
+}
+
+/// Returns the same local engine selected by the connectivity probe.
+pub(super) async fn connect_engine(
+    hosts: &[String],
+) -> Result<(Docker, Option<String>), EngineProbe> {
     let mut failure = None;
 
     for host in hosts {
@@ -86,18 +96,20 @@ pub(super) async fn probe_engine(hosts: &[String]) -> EngineProbe {
         let docker =
             Docker::connect_with_named_pipe(host, ENGINE_TIMEOUT_SECS, API_DEFAULT_VERSION);
         let probe = match docker {
-            Ok(docker) => classify_engine(docker.version().await),
+            Ok(docker) => match classify_engine(docker.version().await) {
+                EngineProbe::Reachable { version } => return Ok((docker, version)),
+                probe => probe,
+            },
             Err(error) => classify_engine(Err(error)),
         };
 
         match probe {
-            EngineProbe::Reachable { .. } => return probe,
             EngineProbe::Failed(_) if failure.is_none() => failure = Some(probe),
             _ => {}
         }
     }
 
-    failure.unwrap_or(EngineProbe::Unreachable)
+    Err(failure.unwrap_or(EngineProbe::Unreachable))
 }
 
 /// Maps the engine's `/version` response or error to a probe result.

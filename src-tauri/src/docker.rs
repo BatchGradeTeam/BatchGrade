@@ -6,7 +6,11 @@
 //! Docker Desktop.
 
 mod cli;
+mod compiler;
 mod engine;
+
+pub use compiler::CppEnvironmentStatus;
+pub(crate) use compiler::{CppRunResult, compile_and_run};
 
 use std::ffi::OsString;
 use std::future::Future;
@@ -48,12 +52,7 @@ pub async fn start_docker_desktop() -> DockerStatus {
 
 async fn check() -> DockerStatus {
     let cli = cli::find_docker_cli_from_env();
-    let hosts = resolve_hosts(
-        |name| std::env::var_os(name),
-        |args| cli::context_output(cli.as_deref(), args),
-    )
-    .await;
-    let hosts = match hosts {
+    let hosts = match selected_hosts(cli.as_deref()).await {
         Ok(hosts) => hosts,
         Err(detail) => return DockerStatus::Error { detail },
     };
@@ -69,6 +68,24 @@ async fn check() -> DockerStatus {
         None => None,
     };
     resolve(engine, desktop)
+}
+
+async fn selected_hosts(cli: Option<&std::path::Path>) -> Result<Vec<String>, String> {
+    resolve_hosts(
+        |name| std::env::var_os(name),
+        |args| cli::context_output(cli, args),
+    )
+    .await
+}
+
+#[tauri::command]
+pub async fn check_cpp_environment() -> CppEnvironmentStatus {
+    compiler::check(false).await
+}
+
+#[tauri::command]
+pub async fn provision_cpp_environment() -> CppEnvironmentStatus {
+    compiler::check(true).await
 }
 
 /// Returns one selected endpoint, or the platform fallback list if discovery is unavailable.

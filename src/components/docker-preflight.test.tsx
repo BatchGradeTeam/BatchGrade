@@ -1,23 +1,27 @@
 import { act, fireEvent, render, screen, within } from "@testing-library/react";
 import { invoke } from "@tauri-apps/api/core";
 import { beforeEach, expect, it, vi } from "vitest";
-import type { DockerStatus } from "@/lib/docker";
+import type { CppEnvironmentStatus, DockerStatus } from "@/lib/docker";
 import { DockerPreflight } from "./docker-preflight";
 
 vi.mock("@tauri-apps/api/core", () => ({ invoke: vi.fn() }));
 
 beforeEach(() => {
   vi.resetAllMocks();
+  vi.mocked(invoke).mockImplementation(async (command) => {
+    if (command === "check_cpp_environment") return { status: "ready" };
+    throw new Error(`Unexpected command: ${command}`);
+  });
 });
 
 function panel() {
   return within(screen.getByRole("region", { name: "Docker" }));
 }
 
-function pending() {
-  let resolve!: (status: DockerStatus) => void;
+function pending<T = DockerStatus>() {
+  let resolve!: (status: T) => void;
   let reject!: (reason: unknown) => void;
-  const promise = new Promise<DockerStatus>((res, rej) => {
+  const promise = new Promise<T>((res, rej) => {
     resolve = res;
     reject = rej;
   });
@@ -26,7 +30,7 @@ function pending() {
 
 it("checks Docker on open and disables refreshing until the check finishes", async () => {
   const check = pending();
-  vi.mocked(invoke).mockReturnValue(check.promise);
+  vi.mocked(invoke).mockReturnValueOnce(check.promise);
   render(<DockerPreflight />);
 
   expect(panel().getByText("Checking Docker…")).toBeInTheDocument();
@@ -42,6 +46,7 @@ it("checks Docker on open and disables refreshing until the check finishes", asy
     panel().getByText("Docker is available (Engine 29.9.3)."),
   ).toBeInTheDocument();
   expect(panel().getByRole("button", { name: "Refresh" })).toBeEnabled();
+  expect(invoke).toHaveBeenLastCalledWith("check_cpp_environment");
 });
 
 it.each<[DockerStatus, string, boolean]>([
@@ -72,10 +77,12 @@ it.each<[DockerStatus, string, boolean]>([
     false,
   ],
 ])("shows %o as %j", async (status, message, canStart) => {
-  vi.mocked(invoke).mockResolvedValue(status);
+  vi.mocked(invoke).mockResolvedValueOnce(status);
   render(<DockerPreflight />);
 
   expect(await panel().findByText(message)).toBeInTheDocument();
+  if (status.status === "available")
+    await panel().findByText("The C++ compiler is ready.");
   expect(panel().getByRole("button", { name: "Refresh" })).toBeEnabled();
   expect(
     panel().queryByRole("button", { name: "Start Docker Desktop" }) !== null,
@@ -179,4 +186,73 @@ it("shows start errors and keeps the start button for retrying", async () => {
     panel().getByRole("button", { name: "Start Docker Desktop" }),
   ).toBeEnabled();
   expect(panel().getByRole("button", { name: "Refresh" })).toBeEnabled();
+});
+
+it("checks for the image without downloading until requested", async () => {
+  const pull = pending<CppEnvironmentStatus>();
+  vi.mocked(invoke)
+    .mockResolvedValueOnce({ status: "available", version: null })
+    .mockResolvedValueOnce({ status: "imageMissing" })
+    .mockReturnValueOnce(pull.promise);
+  render(<DockerPreflight />);
+
+  const button = await panel().findByRole("button", {
+    name: "Download compiler",
+  });
+  expect(vi.mocked(invoke).mock.calls).toEqual([
+    ["check_docker_status"],
+    ["check_cpp_environment"],
+  ]);
+  fireEvent.click(button);
+  expect(invoke).toHaveBeenLastCalledWith("provision_cpp_environment");
+  expect(button).toBeDisabled();
+  expect(panel().getByRole("button", { name: "Refresh" })).toBeDisabled();
+  expect(
+    panel().getByText("Downloading the C++ compiler…"),
+  ).toBeInTheDocument();
+
+  await act(async () => pull.resolve({ status: "ready" }));
+  expect(panel().getByText("The C++ compiler is ready.")).toBeInTheDocument();
+  expect(
+    panel().queryByRole("button", { name: "Download compiler" }),
+  ).not.toBeInTheDocument();
+});
+
+it("offers a retry after a failed download", async () => {
+  vi.mocked(invoke)
+    .mockResolvedValueOnce({ status: "available", version: null })
+    .mockResolvedValueOnce({ status: "imageMissing" })
+    .mockResolvedValueOnce({ status: "error", detail: "Registry unavailable." })
+    .mockResolvedValueOnce({ status: "ready" });
+  render(<DockerPreflight />);
+
+  const button = await panel().findByRole("button", {
+    name: "Download compiler",
+  });
+  fireEvent.click(button);
+  expect(await panel().findByRole("alert")).toHaveTextContent(
+    "Registry unavailable.",
+  );
+  expect(button).toBeEnabled();
+  fireEvent.click(button);
+  expect(
+    await panel().findByText("The C++ compiler is ready."),
+  ).toBeInTheDocument();
+});
+
+it("explains unsupported environments without offering a download", async () => {
+  vi.mocked(invoke)
+    .mockResolvedValueOnce({ status: "available", version: null })
+    .mockResolvedValueOnce({
+      status: "unsupported",
+      detail: "Switch Docker to Linux containers.",
+    });
+  render(<DockerPreflight />);
+
+  expect(
+    await panel().findByText("Switch Docker to Linux containers."),
+  ).toBeInTheDocument();
+  expect(
+    panel().queryByRole("button", { name: "Download compiler" }),
+  ).not.toBeInTheDocument();
 });
