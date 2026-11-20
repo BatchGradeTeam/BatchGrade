@@ -1,7 +1,8 @@
-//! Docker CLI helpers for Docker Desktop: locating the `docker` executable and
-//! running `docker desktop` subcommands with timeouts.
+//! Docker CLI helpers for locating the `docker` executable and running
+//! context discovery and Docker Desktop subcommands with timeouts.
 
 use std::ffi::{OsStr, OsString};
+use std::future::Future;
 use std::io;
 use std::path::{Path, PathBuf};
 use std::process::{Output, Stdio};
@@ -10,7 +11,7 @@ use std::time::Duration;
 use serde::Deserialize;
 use tokio::process::Command;
 
-/// How long `docker desktop status` and `docker desktop version` may take.
+/// How long each context, Desktop status, or Desktop version command may take.
 const PROBE_TIMEOUT: Duration = Duration::from_secs(5);
 /// Seconds passed to `docker desktop start --timeout`.
 const START_TIMEOUT_SECS: u64 = 120;
@@ -95,10 +96,32 @@ pub(super) fn known_install_dirs(var: impl Fn(&str) -> Option<OsString>) -> Vec<
     dirs
 }
 
+/// Reads a Docker context command's stdout when it succeeds.
+pub(super) fn context_output(
+    cli: Option<&Path>,
+    args: &[&str],
+) -> impl Future<Output = Option<String>> + use<> {
+    let output = cli.map(|cli| {
+        let mut command = Command::new(cli);
+        // The default context's endpoint can otherwise pick up DOCKER_HOST.
+        command
+            .env_remove("DOCKER_HOST")
+            .env_remove("DOCKER_CONTEXT");
+        run_cli(command, args, PROBE_TIMEOUT)
+    });
+    async move {
+        let output = output?.await.ok()?;
+        if !output.status.success() {
+            return None;
+        }
+        String::from_utf8(output.stdout).ok()
+    }
+}
+
 /// Asks the Docker Desktop CLI plugin whether Desktop is running.
 pub(super) async fn probe_desktop(cli: &Path) -> DesktopProbe {
     let status = run_cli(
-        cli,
+        Command::new(cli),
         &["desktop", "status", "--format", "json"],
         PROBE_TIMEOUT,
     )
@@ -115,7 +138,7 @@ pub(super) async fn probe_desktop(cli: &Path) -> DesktopProbe {
 
     // A stopped Desktop makes `status` fail, but `version` still succeeds.
     match run_cli(
-        cli,
+        Command::new(cli),
         &["desktop", "version", "--format", "json"],
         PROBE_TIMEOUT,
     )
@@ -131,7 +154,7 @@ pub(super) async fn start_desktop(cli: &Path) -> Result<(), String> {
     let timeout = START_TIMEOUT_SECS.to_string();
     let args = ["desktop", "start", "--timeout", timeout.as_str()];
 
-    match run_cli(cli, &args, START_BACKSTOP).await {
+    match run_cli(Command::new(cli), &args, START_BACKSTOP).await {
         Ok(output) if output.status.success() => Ok(()),
         Ok(output) => Err(start_failure_detail(&output.stderr)),
         Err(error) => Err(format!("Docker Desktop did not start: {error}")),
@@ -139,24 +162,29 @@ pub(super) async fn start_desktop(cli: &Path) -> Result<(), String> {
 }
 
 /// Runs the Docker CLI without a console window and kills it after `limit`.
-pub(super) async fn run_cli(cli: &Path, args: &[&str], limit: Duration) -> io::Result<Output> {
-    let mut command = Command::new(cli);
+fn run_cli(
+    mut command: Command,
+    args: &[&str],
+    limit: Duration,
+) -> impl Future<Output = io::Result<Output>> + use<> {
     command.args(args).stdin(Stdio::null()).kill_on_drop(true);
     #[cfg(windows)]
     command.creation_flags(CREATE_NO_WINDOW);
 
-    tokio::time::timeout(limit, command.output())
-        .await
-        .unwrap_or_else(|_| {
-            Err(io::Error::new(
-                io::ErrorKind::TimedOut,
-                format!(
-                    "docker {} did not finish within {} seconds",
-                    args.join(" "),
-                    limit.as_secs()
-                ),
-            ))
-        })
+    let args = args.join(" ");
+    async move {
+        tokio::time::timeout(limit, command.output())
+            .await
+            .unwrap_or_else(|_| {
+                Err(io::Error::new(
+                    io::ErrorKind::TimedOut,
+                    format!(
+                        "docker {args} did not finish within {} seconds",
+                        limit.as_secs()
+                    ),
+                ))
+            })
+    }
 }
 
 /// Reads `docker desktop status --format json`. Returns `None` when the
@@ -371,7 +399,7 @@ mod tests {
     #[test]
     fn run_cli_reports_a_missing_executable() {
         let result = tauri::async_runtime::block_on(run_cli(
-            &missing_cli(),
+            Command::new(missing_cli()),
             &["version"],
             Duration::from_secs(5),
         ));

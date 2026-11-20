@@ -1,11 +1,15 @@
 //! Docker connectivity preflight.
 //!
-//! Reports whether the local Docker Engine can be reached. It never creates
-//! containers. When the engine is unreachable, the Docker CLI is consulted to
-//! tell "not installed" apart from "not running" and to start Docker Desktop.
+//! Resolves the selected Docker endpoint and reports whether the local engine
+//! can be reached. It never creates containers. When the engine is unreachable,
+//! the Docker CLI helps distinguish "not installed" from "not running" and start
+//! Docker Desktop.
 
 mod cli;
 mod engine;
+
+use std::ffi::OsString;
+use std::future::Future;
 
 use serde::Serialize;
 
@@ -43,17 +47,79 @@ pub async fn start_docker_desktop() -> DockerStatus {
 }
 
 async fn check() -> DockerStatus {
-    let engine = engine::probe_engine(&engine::candidate_hosts_from_env()).await;
+    let cli = cli::find_docker_cli_from_env();
+    let hosts = resolve_hosts(
+        |name| std::env::var_os(name),
+        |args| cli::context_output(cli.as_deref(), args),
+    )
+    .await;
+    let hosts = match hosts {
+        Ok(hosts) => hosts,
+        Err(detail) => return DockerStatus::Error { detail },
+    };
+
+    let engine = engine::probe_engine(&hosts).await;
     if engine != EngineProbe::Unreachable {
         return resolve(engine, None);
     }
 
     // The Engine API cannot tell a stopped Docker from a missing one, so ask the CLI.
-    let desktop = match cli::find_docker_cli_from_env() {
+    let desktop = match cli {
         Some(cli) => Some(cli::probe_desktop(&cli).await),
         None => None,
     };
     resolve(engine, desktop)
+}
+
+/// Returns one selected endpoint, or the platform fallback list if discovery is unavailable.
+async fn resolve_hosts<F: Future<Output = Option<String>>>(
+    var: impl Fn(&str) -> Option<OsString>,
+    context_output: impl Fn(&[&str]) -> F,
+) -> Result<Vec<String>, String> {
+    let explicit_context = var("DOCKER_CONTEXT").filter(|value| !value.is_empty());
+    if explicit_context.is_none()
+        && let Some(host) = var("DOCKER_HOST").filter(|value| !value.is_empty())
+    {
+        let host = host
+            .into_string()
+            .map_err(|_| "Set DOCKER_HOST to a valid local Docker endpoint.".to_owned())?;
+        return Ok(vec![engine::local_host(host)?]);
+    }
+
+    let context_error = if explicit_context.is_some() {
+        "Could not resolve DOCKER_CONTEXT. Make sure the Docker CLI is installed and check the context with docker context ls."
+    } else {
+        "Could not resolve the active Docker context. Run docker context ls and select a valid local context."
+    };
+    let context = match explicit_context {
+        Some(context) => context
+            .into_string()
+            .map_err(|_| context_error.to_owned())?,
+        None => {
+            let shown = context_output(&["context", "show"])
+                .await
+                .unwrap_or_default();
+            let context = shown.trim();
+            if context.is_empty() {
+                return Ok(engine::fallback_hosts(|name| var(name)?.into_string().ok()));
+            }
+            context.to_owned()
+        }
+    };
+
+    let inspected = context_output(&[
+        "context",
+        "inspect",
+        "--format",
+        "{{json .Endpoints.docker.Host}}",
+        "--",
+        &context,
+    ])
+    .await;
+    let host = inspected
+        .and_then(|output| serde_json::from_str::<String>(&output).ok())
+        .ok_or_else(|| context_error.to_owned())?;
+    Ok(vec![engine::local_host(host)?])
 }
 
 /// Combines the engine probe with the Docker Desktop probe.
@@ -65,7 +131,7 @@ fn resolve(engine: EngineProbe, desktop: Option<DesktopProbe>) -> DockerStatus {
         (EngineProbe::Failed(detail), _) => DockerStatus::Error { detail },
         (EngineProbe::Unreachable, None) => DockerStatus::NotInstalled,
         (EngineProbe::Unreachable, Some(DesktopProbe::Running)) => DockerStatus::Error {
-            detail: "Docker Desktop is running, but its engine did not respond. \
+            detail: "Docker Desktop is running, but the Docker Engine did not respond. \
                      Wait a moment, then refresh."
                 .into(),
         },
@@ -90,6 +156,136 @@ fn after_start(started: Result<(), String>, status: DockerStatus) -> DockerStatu
 mod tests {
     use super::*;
     use serde_json::json;
+    use std::future::{Ready, ready};
+
+    #[cfg(windows)]
+    const LOCAL_TEST_HOST: &str = "npipe:////./pipe/batchgrade_test";
+    #[cfg(unix)]
+    const LOCAL_TEST_HOST: &str = "unix:///tmp/batchgrade test.sock";
+
+    fn env<'a>(vars: &'a [(&str, &str)]) -> impl Fn(&str) -> Option<OsString> + 'a {
+        move |name| {
+            vars.iter()
+                .find(|(key, _)| *key == name)
+                .map(|(_, value)| OsString::from(value))
+        }
+    }
+
+    #[test]
+    fn docker_context_overrides_docker_host() {
+        let hosts = tauri::async_runtime::block_on(resolve_hosts(
+            env(&[
+                ("DOCKER_CONTEXT", "default"),
+                ("DOCKER_HOST", "tcp://remote:2375"),
+            ]),
+            |args| {
+                assert_eq!(
+                    args,
+                    [
+                        "context",
+                        "inspect",
+                        "--format",
+                        "{{json .Endpoints.docker.Host}}",
+                        "--",
+                        "default"
+                    ]
+                );
+                ready(Some(json!(LOCAL_TEST_HOST).to_string()))
+            },
+        ));
+
+        assert_eq!(hosts.unwrap(), [LOCAL_TEST_HOST]);
+    }
+
+    #[test]
+    fn docker_host_overrides_active_context_without_calling_cli() {
+        let hosts = tauri::async_runtime::block_on(resolve_hosts(
+            env(&[("DOCKER_CONTEXT", ""), ("DOCKER_HOST", LOCAL_TEST_HOST)]),
+            |_| -> Ready<Option<String>> { panic!("DOCKER_HOST should bypass context discovery") },
+        ));
+
+        assert_eq!(hosts.unwrap(), [LOCAL_TEST_HOST]);
+    }
+
+    #[test]
+    fn selects_only_the_active_context_endpoint() {
+        let hosts =
+            tauri::async_runtime::block_on(resolve_hosts(env(&[("DOCKER_HOST", "")]), |args| {
+                ready(match args {
+                    ["context", "show"] => Some("desktop-local\r\n".into()),
+                    ["context", "inspect", "--format", _, "--", "desktop-local"] => {
+                        Some(json!(LOCAL_TEST_HOST).to_string())
+                    }
+                    _ => panic!("unexpected arguments: {args:?}"),
+                })
+            }));
+
+        assert_eq!(hosts.unwrap(), [LOCAL_TEST_HOST]);
+    }
+
+    #[test]
+    fn missing_cli_uses_platform_fallback_without_an_override() {
+        let hosts = tauri::async_runtime::block_on(resolve_hosts(env(&[]), |args| {
+            assert_eq!(args, ["context", "show"]);
+            cli::context_output(None, args)
+        }));
+
+        assert_eq!(hosts.unwrap(), engine::fallback_hosts(|_| None));
+    }
+
+    #[test]
+    fn missing_cli_cannot_resolve_explicit_context() {
+        let result = tauri::async_runtime::block_on(resolve_hosts(
+            env(&[("DOCKER_CONTEXT", "work"), ("DOCKER_HOST", LOCAL_TEST_HOST)]),
+            |args| cli::context_output(None, args),
+        ));
+
+        assert!(result.unwrap_err().contains("DOCKER_CONTEXT"));
+    }
+
+    #[test]
+    fn invalid_context_does_not_use_fallback_hosts() {
+        for vars in [&[][..], &[("DOCKER_CONTEXT", "invalid")][..]] {
+            for inspect_output in [None, Some("null")] {
+                let result = tauri::async_runtime::block_on(resolve_hosts(env(vars), |args| {
+                    ready(match args {
+                        ["context", "show"] => Some("invalid\n".into()),
+                        ["context", "inspect", "--format", _, "--", "invalid"] => {
+                            inspect_output.map(str::to_owned)
+                        }
+                        _ => panic!("unexpected arguments: {args:?}"),
+                    })
+                }));
+
+                assert!(result.unwrap_err().contains("docker context ls"));
+            }
+        }
+    }
+
+    #[test]
+    fn rejects_remote_host_and_context_endpoints() {
+        for remote in ["tcp://build-server:2375", "ssh://user@build-server"] {
+            let host = tauri::async_runtime::block_on(resolve_hosts(
+                env(&[("DOCKER_HOST", remote)]),
+                |_| -> Ready<Option<String>> {
+                    panic!("a remote DOCKER_HOST should bypass context discovery")
+                },
+            ));
+            let context = tauri::async_runtime::block_on(resolve_hosts(
+                env(&[
+                    ("DOCKER_CONTEXT", "remote"),
+                    ("DOCKER_HOST", LOCAL_TEST_HOST),
+                ]),
+                |_| ready(Some(json!(remote).to_string())),
+            ));
+
+            for result in [host, context] {
+                let detail = result.unwrap_err();
+                assert!(detail.contains("Select a local Docker context"), "{detail}");
+                assert!(!detail.contains(remote), "{detail}");
+            }
+        }
+    }
 
     fn to_json(status: DockerStatus) -> serde_json::Value {
         serde_json::to_value(status).unwrap()

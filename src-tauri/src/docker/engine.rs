@@ -11,11 +11,6 @@ use bollard::{API_DEFAULT_VERSION, Docker};
 const ENGINE_TIMEOUT_SECS: u64 = 5;
 
 #[cfg(windows)]
-const LOCAL_SCHEME: &str = "npipe://";
-#[cfg(unix)]
-const LOCAL_SCHEME: &str = "unix://";
-
-#[cfg(windows)]
 const DEFAULT_HOST: &str = "npipe:////./pipe/docker_engine";
 #[cfg(unix)]
 const DEFAULT_HOST: &str = "unix:///var/run/docker.sock";
@@ -31,21 +26,14 @@ pub(super) enum EngineProbe {
     Failed(String),
 }
 
-/// Lists local engine addresses to try, using the process environment.
-pub(super) fn candidate_hosts_from_env() -> Vec<String> {
-    candidate_hosts(|name| std::env::var(name).ok())
-}
-
-/// Lists local engine addresses to try, in order.
+/// Lists local engine addresses to try when context discovery is unavailable.
 ///
-/// A local `DOCKER_HOST` comes first, then the platform default, then the
-/// per-user sockets used by Docker Desktop and rootless Docker.
-pub(super) fn candidate_hosts(var: impl Fn(&str) -> Option<String>) -> Vec<String> {
-    let mut hosts: Vec<String> = var("DOCKER_HOST")
-        .filter(|host| host.starts_with(LOCAL_SCHEME))
-        .into_iter()
-        .collect();
-    hosts.push(DEFAULT_HOST.to_owned());
+/// The platform default comes first, then the per-user sockets used by Docker
+/// Desktop and rootless Docker or the Windows Docker Desktop pipe.
+pub(super) fn fallback_hosts(
+    #[cfg_attr(windows, allow(unused_variables))] var: impl Fn(&str) -> Option<String>,
+) -> Vec<String> {
+    let mut hosts = vec![DEFAULT_HOST.to_owned()];
 
     #[cfg(windows)]
     hosts.push("npipe:////./pipe/dockerDesktopLinuxEngine".to_owned());
@@ -62,6 +50,28 @@ pub(super) fn candidate_hosts(var: impl Fn(&str) -> Option<String>) -> Vec<Strin
     hosts
 }
 
+/// Accepts only addresses that Bollard can open with the platform's local transport.
+pub(super) fn local_host(host: String) -> Result<String, String> {
+    #[cfg(unix)]
+    let local = host
+        .strip_prefix("unix://")
+        .is_some_and(|path| path.starts_with('/') && !path.contains('\0'))
+        .then_some(host);
+
+    #[cfg(windows)]
+    let local = host.strip_prefix("npipe://").and_then(|path| {
+        let path = path.replace('\\', "/");
+        let name = path.strip_prefix("//./pipe/")?;
+        (!name.is_empty() && !name.contains(['/', '\0'])).then(|| format!("npipe://{path}"))
+    });
+
+    local.ok_or_else(|| {
+        "BatchGrade requires a local Docker socket or named pipe. Select a local Docker context \
+         and clear any unsupported DOCKER_CONTEXT or DOCKER_HOST override."
+            .into()
+    })
+}
+
 /// Checks each candidate address and returns the first answer from an engine.
 ///
 /// Missing or refusing sockets are skipped. If no engine answers, the first
@@ -70,11 +80,15 @@ pub(super) async fn probe_engine(hosts: &[String]) -> EngineProbe {
     let mut failure = None;
 
     for host in hosts {
-        let probe =
-            match Docker::connect_with_socket(host, ENGINE_TIMEOUT_SECS, API_DEFAULT_VERSION) {
-                Ok(docker) => classify_engine(docker.version().await),
-                Err(error) => classify_engine(Err(error)),
-            };
+        #[cfg(unix)]
+        let docker = Docker::connect_with_unix(host, ENGINE_TIMEOUT_SECS, API_DEFAULT_VERSION);
+        #[cfg(windows)]
+        let docker =
+            Docker::connect_with_named_pipe(host, ENGINE_TIMEOUT_SECS, API_DEFAULT_VERSION);
+        let probe = match docker {
+            Ok(docker) => classify_engine(docker.version().await),
+            Err(error) => classify_engine(Err(error)),
+        };
 
         match probe {
             EngineProbe::Reachable { .. } => return probe,
@@ -164,11 +178,6 @@ mod tests {
     #[cfg(unix)]
     const DEFAULT_HOST: &str = "unix:///var/run/docker.sock";
 
-    #[cfg(windows)]
-    const CUSTOM_LOCAL_HOST: &str = "npipe:////./pipe/custom_engine";
-    #[cfg(unix)]
-    const CUSTOM_LOCAL_HOST: &str = "unix:///tmp/custom-docker.sock";
-
     fn missing_host(name: &str) -> String {
         let unique = format!("batchgrade-{name}-{}", std::process::id());
         #[cfg(windows)]
@@ -177,29 +186,20 @@ mod tests {
         return format!("unix://{}", std::env::temp_dir().join(unique).display());
     }
 
+    #[cfg(windows)]
     #[test]
-    fn candidate_hosts_start_with_local_docker_host() {
-        let hosts = candidate_hosts(env(&[("DOCKER_HOST", CUSTOM_LOCAL_HOST)]));
-
-        assert_eq!(hosts[0], CUSTOM_LOCAL_HOST);
-        assert!(hosts.contains(&DEFAULT_HOST.to_owned()), "{hosts:?}");
-    }
-
-    #[test]
-    fn candidate_hosts_ignore_remote_docker_host() {
-        let hosts = candidate_hosts(env(&[("DOCKER_HOST", "tcp://build-server:2375")]));
-
-        assert_eq!(hosts[0], DEFAULT_HOST);
-        assert!(
-            !hosts.iter().any(|host| host.starts_with("tcp://")),
-            "{hosts:?}"
+    fn validates_local_windows_pipe_paths() {
+        assert_eq!(
+            local_host(r"npipe://\\.\pipe\docker_engine".into()).unwrap(),
+            DEFAULT_HOST
         );
+        assert!(local_host("npipe:////remote/pipe/docker_engine".into()).is_err());
     }
 
     #[cfg(windows)]
     #[test]
-    fn candidate_hosts_include_docker_desktop_pipe() {
-        let hosts = candidate_hosts(env(&[]));
+    fn fallback_hosts_include_docker_desktop_pipe() {
+        let hosts = fallback_hosts(env(&[]));
 
         assert_eq!(
             hosts,
@@ -209,8 +209,8 @@ mod tests {
 
     #[cfg(target_os = "macos")]
     #[test]
-    fn candidate_hosts_include_docker_desktop_socket() {
-        let hosts = candidate_hosts(env(&[("HOME", "/Users/grader")]));
+    fn fallback_hosts_include_docker_desktop_socket() {
+        let hosts = fallback_hosts(env(&[("HOME", "/Users/grader")]));
 
         assert_eq!(
             hosts,
@@ -220,8 +220,8 @@ mod tests {
 
     #[cfg(target_os = "linux")]
     #[test]
-    fn candidate_hosts_include_rootless_and_docker_desktop_sockets() {
-        let hosts = candidate_hosts(env(&[
+    fn fallback_hosts_include_rootless_and_docker_desktop_sockets() {
+        let hosts = fallback_hosts(env(&[
             ("HOME", "/home/grader"),
             ("XDG_RUNTIME_DIR", "/run/user/1000"),
         ]));
