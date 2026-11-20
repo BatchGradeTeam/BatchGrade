@@ -70,7 +70,7 @@ result=$(docker run --rm -i --pull=never --user 65534:65534 --cap-drop ALL \
         /usr/bin/g++-14 -std=c++17 -O0 -Wall -Wextra -pedantic -x c++ - -o /tmp/smoke
         /tmp/smoke
     ' < "$recipe/tests/test.cpp")
-test "$result" = "BatchGrade C++17 ready"
+test "$result" = "BatchGrade Compiler Ready"
 
 docker run --rm --pull=never --network none --read-only --entrypoint /usr/bin/dpkg-query \
     "$image" -W -f='${binary:Package}\t${Version}\n' | LC_ALL=C sort > "$output/packages.tsv"
