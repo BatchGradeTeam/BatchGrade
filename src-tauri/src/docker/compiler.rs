@@ -1,5 +1,7 @@
 //! Provisioning and isolation checks for the BatchGrade C++ toolchain.
 
+#[cfg(debug_assertions)]
+mod local;
 mod runner;
 pub(crate) use runner::{CppRunResult, compile_and_run};
 
@@ -40,8 +42,14 @@ static OPERATION: Mutex<()> = Mutex::const_new(());
 pub enum CppEnvironmentStatus {
     Ready,
     ImageMissing,
-    Unsupported { detail: String },
-    Error { detail: String },
+    #[cfg(debug_assertions)]
+    LocalImageMissing,
+    Unsupported {
+        detail: String,
+    },
+    Error {
+        detail: String,
+    },
 }
 
 impl CppEnvironmentStatus {
@@ -102,11 +110,11 @@ fn is_sha256_digest(value: &str) -> bool {
     })
 }
 
-pub(super) async fn check(download: bool) -> CppEnvironmentStatus {
+pub(super) async fn check(provision: bool) -> CppEnvironmentStatus {
     // Finishing this task independently of the invoke keeps cleanup running if its caller leaves.
     tauri::async_runtime::spawn(async move {
         let _operation = OPERATION.lock().await;
-        readiness(download).await.unwrap_or_else(|status| status)
+        readiness(provision).await.unwrap_or_else(|status| status)
     })
     .await
     .unwrap_or_else(|_| {
@@ -114,20 +122,20 @@ pub(super) async fn check(download: bool) -> CppEnvironmentStatus {
     })
 }
 
-async fn selected_engine() -> Result<Docker, String> {
+async fn selected_engine() -> Result<(Docker, String), String> {
     let cli = super::cli::find_docker_cli_from_env();
     let hosts = super::selected_hosts(cli.as_deref()).await?;
     super::engine::connect_engine(&hosts)
         .await
-        .map(|(docker, _)| docker)
+        .map(|(docker, _, host)| (docker, host.to_owned()))
         .map_err(|probe| match probe {
             super::engine::EngineProbe::Failed(detail) => detail,
             _ => "The selected Docker Engine is unavailable. Start Docker and refresh.".into(),
         })
 }
 
-async fn readiness(download: bool) -> Result<CppEnvironmentStatus, CppEnvironmentStatus> {
-    let docker = selected_engine()
+async fn readiness(provision: bool) -> Result<CppEnvironmentStatus, CppEnvironmentStatus> {
+    let (docker, _host) = selected_engine()
         .await
         .map_err(CppEnvironmentStatus::error)?;
     let info = docker.info().await.map_err(|error| {
@@ -138,15 +146,14 @@ async fn readiness(download: bool) -> Result<CppEnvironmentStatus, CppEnvironmen
     if let Some(reference) =
         image_reference(IMAGE_DIGESTS, architecture).map_err(CppEnvironmentStatus::error)?
     {
-        return check_image(&docker, &reference, architecture, download)
+        return check_image(&docker, &reference, architecture, provision)
             .await
             .map_err(CppEnvironmentStatus::error);
     }
 
     #[cfg(debug_assertions)]
     {
-        let image_id = local_image_id().map_err(CppEnvironmentStatus::error)?;
-        check_local_image(&docker, &image_id, architecture)
+        local::check(&docker, &_host, architecture, provision)
             .await
             .map_err(CppEnvironmentStatus::error)
     }
@@ -154,62 +161,6 @@ async fn readiness(download: bool) -> Result<CppEnvironmentStatus, CppEnvironmen
     Err(CppEnvironmentStatus::error(
         "A compiler image has not been published for this BatchGrade build.",
     ))
-}
-
-#[cfg(debug_assertions)]
-fn local_image_id() -> Result<String, String> {
-    let path =
-        std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("../docker/cpp/compiler-image.local");
-    let contents = match std::fs::read_to_string(path) {
-        Ok(contents) => contents,
-        Err(error) if error.kind() == std::io::ErrorKind::NotFound => {
-            return Err(
-                "Build the local compiler image using docker/cpp/README.md, then refresh.".into(),
-            );
-        }
-        Err(error) => {
-            return Err(format!(
-                "Could not read the local compiler image ID: {error}"
-            ));
-        }
-    };
-    let id = contents.trim();
-    if !is_sha256_digest(id) {
-        return Err("The local compiler pin must contain a full SHA-256 image ID.".into());
-    }
-    Ok(id.to_owned())
-}
-
-#[cfg(debug_assertions)]
-async fn check_local_image(
-    docker: &Docker,
-    image_id: &str,
-    architecture: Architecture,
-) -> Result<CppEnvironmentStatus, String> {
-    inspect_local_image(docker, image_id, architecture).await?;
-    run_probe(docker, architecture, probe_config(image_id)).await?;
-    Ok(CppEnvironmentStatus::Ready)
-}
-
-#[cfg(debug_assertions)]
-async fn inspect_local_image(
-    docker: &Docker,
-    image_id: &str,
-    architecture: Architecture,
-) -> Result<(), String> {
-    let image = docker.inspect_image(image_id).await.map_err(|error| {
-        if is_missing(&error) {
-            "The pinned local compiler image is missing from the selected Docker Engine. Build it again and refresh.".into()
-        } else {
-            format!("Could not inspect the local compiler image: {error}")
-        }
-    })?;
-    if !matches_platform(&image, architecture) || image.id.as_deref() != Some(image_id) {
-        return Err(
-            "Docker returned a local compiler image with an unexpected ID or platform.".into(),
-        );
-    }
-    Ok(())
 }
 
 fn capabilities(info: &SystemInfo) -> Result<Architecture, String> {
@@ -682,6 +633,11 @@ mod tests {
             to_json(CppEnvironmentStatus::ImageMissing),
             json!({ "status": "imageMissing" })
         );
+        #[cfg(debug_assertions)]
+        assert_eq!(
+            to_json(CppEnvironmentStatus::LocalImageMissing),
+            json!({ "status": "localImageMissing" })
+        );
         assert_eq!(
             to_json(CppEnvironmentStatus::Unsupported {
                 detail: "Linux required.".into()
@@ -756,7 +712,17 @@ mod tests {
     #[ignore = "requires a local compiler image pinned in docker/cpp/compiler-image.local"]
     fn cpp_development_readiness_real_docker() {
         tauri::async_runtime::block_on(async {
-            assert!(local_image_id().is_ok());
+            assert_eq!(check(false).await, CppEnvironmentStatus::Ready);
+        });
+    }
+
+    #[cfg(debug_assertions)]
+    #[test]
+    #[ignore = "builds and pins the compiler image on a Linux Docker Engine"]
+    fn cpp_development_setup_real_docker() {
+        tauri::async_runtime::block_on(async {
+            assert_eq!(check(false).await, CppEnvironmentStatus::LocalImageMissing);
+            assert_eq!(check(true).await, CppEnvironmentStatus::Ready);
             assert_eq!(check(false).await, CppEnvironmentStatus::Ready);
         });
     }
@@ -765,7 +731,7 @@ mod tests {
     #[ignore = "requires a Linux Docker Engine and a built or published compiler image"]
     fn cpp_environment_real_docker() {
         tauri::async_runtime::block_on(async {
-            let docker = selected_engine().await.unwrap();
+            let (docker, _) = selected_engine().await.unwrap();
             let architecture = capabilities(&docker.info().await.unwrap()).unwrap();
             let before = owned_containers(&docker).await;
             let reference = if let Ok(local_image) = std::env::var("BATCHGRADE_TEST_COMPILER_IMAGE")
