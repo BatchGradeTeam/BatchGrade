@@ -12,7 +12,9 @@ The image contains Debian stable and the packages required to compile and link C
 
 ## Local development before publication
 
-Debug builds can use a locally built image when there is no published digest for the selected engine. Build from the same pinned inputs as CI and record the full ID that Docker reports. From the repository root in PowerShell:
+When there is no published digest for the selected engine, debug builds check for the pinned local image after Docker becomes available. If the image is missing, select **Build compiler** in the Docker panel. BatchGrade uses Docker Buildx and the same pinned inputs as CI, runs the isolation probe, and records the verified image ID in the gitignored `compiler-image.local` file.
+
+To build and pin the image manually, run these commands from the repository root in PowerShell:
 
 ```powershell
 $inputs = Get-Content docker/cpp/build-inputs.json -Raw | ConvertFrom-Json
