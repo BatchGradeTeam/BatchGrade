@@ -162,7 +162,7 @@ pub(super) async fn start_desktop(cli: &Path) -> Result<(), String> {
 }
 
 /// Runs the Docker CLI without a console window and kills it after `limit`.
-fn run_cli(
+pub(super) fn run_cli(
     mut command: Command,
     args: &[&str],
     limit: Duration,

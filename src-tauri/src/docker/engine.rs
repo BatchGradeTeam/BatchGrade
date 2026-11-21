@@ -78,7 +78,7 @@ pub(super) fn local_host(host: String) -> Result<String, String> {
 /// failure is reported, so a permission problem is not hidden.
 pub(super) async fn probe_engine(hosts: &[String]) -> EngineProbe {
     match connect_engine(hosts).await {
-        Ok((_, version)) => EngineProbe::Reachable { version },
+        Ok((_, version, _)) => EngineProbe::Reachable { version },
         Err(probe) => probe,
     }
 }
@@ -86,7 +86,7 @@ pub(super) async fn probe_engine(hosts: &[String]) -> EngineProbe {
 /// Returns the same local engine selected by the connectivity probe.
 pub(super) async fn connect_engine(
     hosts: &[String],
-) -> Result<(Docker, Option<String>), EngineProbe> {
+) -> Result<(Docker, Option<String>, &str), EngineProbe> {
     let mut failure = None;
 
     for host in hosts {
@@ -97,7 +97,7 @@ pub(super) async fn connect_engine(
             Docker::connect_with_named_pipe(host, ENGINE_TIMEOUT_SECS, API_DEFAULT_VERSION);
         let probe = match docker {
             Ok(docker) => match classify_engine(docker.version().await) {
-                EngineProbe::Reachable { version } => return Ok((docker, version)),
+                EngineProbe::Reachable { version } => return Ok((docker, version, host)),
                 probe => probe,
             },
             Err(error) => classify_engine(Err(error)),

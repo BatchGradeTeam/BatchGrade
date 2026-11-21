@@ -101,7 +101,7 @@ pub(crate) async fn compile_and_run(source: Vec<u8>) -> Result<CppRunResult, Str
     let _operation = OPERATION
         .try_lock()
         .map_err(|_| "Another compiler operation is in progress. Try again shortly.")?;
-    let docker = selected_engine().await?;
+    let (docker, _) = selected_engine().await?;
     let architecture = capabilities(
         &docker
             .info()
@@ -148,9 +148,9 @@ async fn selected_image(docker: &Docker, architecture: Architecture) -> Result<S
     }
     #[cfg(debug_assertions)]
     {
-        let id = super::local_image_id()?;
-        super::inspect_local_image(docker, &id, architecture).await?;
-        Ok(id)
+        super::local::available_image(docker, architecture)
+            .await?
+            .ok_or_else(|| "Build the compiler image in the Docker panel first.".into())
     }
     #[cfg(not(debug_assertions))]
     Err("A compiler image has not been published for this BatchGrade build.".into())
@@ -331,7 +331,7 @@ mod tests {
     #[ignore = "requires the configured compiler image and a Linux Docker Engine"]
     fn cpp_run_real_docker() {
         tauri::async_runtime::block_on(async {
-            let docker = selected_engine().await.unwrap();
+            let (docker, _) = selected_engine().await.unwrap();
             let before = super::super::tests::owned_containers(&docker).await;
             let compiled =
                 compile_and_run(include_bytes!("../../../../docker/cpp/tests/test.cpp").to_vec())
@@ -344,7 +344,7 @@ mod tests {
             );
             let executed = compiled.execution.unwrap();
             assert_eq!(executed.status, StageStatus::Success, "{executed:?}");
-            assert_eq!(executed.stdout, "BatchGrade C++17 ready\n");
+            assert_eq!(executed.stdout, "BatchGrade Compiler Ready\n");
             assert_eq!(executed.exit_code, Some(0));
 
             let failed = compile_and_run(b"int main( {\n".to_vec()).await.unwrap();
