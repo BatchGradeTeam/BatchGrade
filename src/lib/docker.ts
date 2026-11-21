@@ -10,6 +10,7 @@ export type DockerStatus =
 export type CppEnvironmentStatus =
   | { status: "ready" }
   | { status: "imageMissing" }
+  | { status: "localImageMissing" }
   | { status: "unsupported"; detail: string }
   | { status: "error"; detail: string };
 

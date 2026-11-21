@@ -188,57 +188,67 @@ it("shows start errors and keeps the start button for retrying", async () => {
   expect(panel().getByRole("button", { name: "Refresh" })).toBeEnabled();
 });
 
-it("checks for the image without downloading until requested", async () => {
-  const pull = pending<CppEnvironmentStatus>();
-  vi.mocked(invoke)
-    .mockResolvedValueOnce({ status: "available", version: null })
-    .mockResolvedValueOnce({ status: "imageMissing" })
-    .mockReturnValueOnce(pull.promise);
-  render(<DockerPreflight />);
+it.each([
+  ["imageMissing", "Download compiler", "Downloading"],
+  ["localImageMissing", "Build compiler", "Building"],
+] as const)(
+  "waits for the setup action when the status is %s",
+  async (status, label, activity) => {
+    const setup = pending<CppEnvironmentStatus>();
+    vi.mocked(invoke)
+      .mockResolvedValueOnce({ status: "available", version: null })
+      .mockResolvedValueOnce({ status })
+      .mockReturnValueOnce(setup.promise);
+    render(<DockerPreflight />);
 
-  const button = await panel().findByRole("button", {
-    name: "Download compiler",
-  });
-  expect(vi.mocked(invoke).mock.calls).toEqual([
-    ["check_docker_status"],
-    ["check_cpp_environment"],
-  ]);
-  fireEvent.click(button);
-  expect(invoke).toHaveBeenLastCalledWith("provision_cpp_environment");
-  expect(button).toBeDisabled();
-  expect(panel().getByRole("button", { name: "Refresh" })).toBeDisabled();
-  expect(
-    panel().getByText("Downloading the C++ compiler…"),
-  ).toBeInTheDocument();
+    const button = await panel().findByRole("button", {
+      name: label,
+    });
+    expect(vi.mocked(invoke).mock.calls).toEqual([
+      ["check_docker_status"],
+      ["check_cpp_environment"],
+    ]);
+    fireEvent.click(button);
+    expect(invoke).toHaveBeenLastCalledWith("provision_cpp_environment");
+    expect(button).toBeDisabled();
+    expect(panel().getByRole("button", { name: "Refresh" })).toBeDisabled();
+    expect(
+      panel().getByText(`${activity} the C++ compiler…`),
+    ).toBeInTheDocument();
 
-  await act(async () => pull.resolve({ status: "ready" }));
-  expect(panel().getByText("The C++ compiler is ready.")).toBeInTheDocument();
-  expect(
-    panel().queryByRole("button", { name: "Download compiler" }),
-  ).not.toBeInTheDocument();
-});
+    await act(async () => setup.resolve({ status: "ready" }));
+    expect(panel().getByText("The C++ compiler is ready.")).toBeInTheDocument();
+    expect(
+      panel().queryByRole("button", { name: label }),
+    ).not.toBeInTheDocument();
+  },
+);
 
-it("offers a retry after a failed download", async () => {
-  vi.mocked(invoke)
-    .mockResolvedValueOnce({ status: "available", version: null })
-    .mockResolvedValueOnce({ status: "imageMissing" })
-    .mockResolvedValueOnce({ status: "error", detail: "Registry unavailable." })
-    .mockResolvedValueOnce({ status: "ready" });
-  render(<DockerPreflight />);
+it.each([
+  ["imageMissing", "Download compiler", "Registry unavailable."],
+  ["localImageMissing", "Build compiler", "Buildx unavailable."],
+] as const)(
+  "offers a retry when setup fails for %s",
+  async (status, label, detail) => {
+    vi.mocked(invoke)
+      .mockResolvedValueOnce({ status: "available", version: null })
+      .mockResolvedValueOnce({ status })
+      .mockResolvedValueOnce({ status: "error", detail })
+      .mockResolvedValueOnce({ status: "ready" });
+    render(<DockerPreflight />);
 
-  const button = await panel().findByRole("button", {
-    name: "Download compiler",
-  });
-  fireEvent.click(button);
-  expect(await panel().findByRole("alert")).toHaveTextContent(
-    "Registry unavailable.",
-  );
-  expect(button).toBeEnabled();
-  fireEvent.click(button);
-  expect(
-    await panel().findByText("The C++ compiler is ready."),
-  ).toBeInTheDocument();
-});
+    const button = await panel().findByRole("button", {
+      name: label,
+    });
+    fireEvent.click(button);
+    expect(await panel().findByRole("alert")).toHaveTextContent(detail);
+    expect(button).toBeEnabled();
+    fireEvent.click(button);
+    expect(
+      await panel().findByText("The C++ compiler is ready."),
+    ).toBeInTheDocument();
+  },
+);
 
 it("explains unsupported environments without offering a download", async () => {
   vi.mocked(invoke)

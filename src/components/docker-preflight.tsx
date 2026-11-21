@@ -10,14 +10,12 @@ import {
 } from "@/lib/docker";
 
 type Activity = "checking" | "starting";
+type CompilerAction = "build" | "download";
 
 const CHECK_FAILED = "Could not check Docker. Please try again.";
 const START_FAILED = "Could not start Docker Desktop. Please try again.";
 const COMPILER_CHECK_FAILED =
   "Could not check the C++ compiler. Refresh to retry.";
-const COMPILER_DOWNLOAD_FAILED =
-  "Could not download the C++ compiler. Please try again.";
-
 const ACTIVITY_MESSAGES: Record<Activity, string> = {
   checking: "Checking Docker…",
   starting: "Starting Docker Desktop… This can take a minute.",
@@ -46,6 +44,8 @@ function describeCompiler(status: CppEnvironmentStatus | null): string {
       return "The C++ compiler is ready.";
     case "imageMissing":
       return "Download the compiler image to set up C++ compilation.";
+    case "localImageMissing":
+      return "Build the local compiler image to set up C++ compilation.";
     case "unsupported":
     case "error":
       return status.detail;
@@ -68,8 +68,8 @@ export function DockerPreflight() {
   const [activity, setActivity] = useState<Activity | null>("checking");
   const [failure, setFailure] = useState<string | null>(null);
   const [compiler, setCompiler] = useState<CppEnvironmentStatus | null>(null);
-  const [downloadFailure, setDownloadFailure] = useState<string | null>(null);
-  const [downloading, setDownloading] = useState(false);
+  const [setupFailure, setSetupFailure] = useState<string | null>(null);
+  const [settingUp, setSettingUp] = useState<CompilerAction | null>(null);
 
   useEffect(() => {
     let ignore = false;
@@ -105,7 +105,7 @@ export function DockerPreflight() {
     setActivity(nextActivity);
     setFailure(null);
     setCompiler(null);
-    setDownloadFailure(null);
+    setSetupFailure(null);
 
     try {
       const result = await action();
@@ -126,20 +126,22 @@ export function DockerPreflight() {
     return run("starting", startDockerDesktop, START_FAILED);
   }
 
-  async function download() {
-    setDownloading(true);
-    setDownloadFailure(null);
+  async function setupCompiler(action: CompilerAction) {
+    setSettingUp(action);
+    setSetupFailure(null);
     try {
       const result = await provisionCppEnvironment();
       if (result.status === "error") {
-        setDownloadFailure(result.detail);
+        setSetupFailure(result.detail);
       } else {
         setCompiler(result);
       }
     } catch {
-      setDownloadFailure(COMPILER_DOWNLOAD_FAILED);
+      setSetupFailure(
+        `Could not ${action} the C++ compiler. Please try again.`,
+      );
     } finally {
-      setDownloading(false);
+      setSettingUp(null);
     }
   }
 
@@ -148,7 +150,13 @@ export function DockerPreflight() {
       ? ACTIVITY_MESSAGES[activity]
       : (failure ?? (status ? describeStatus(status) : CHECK_FAILED));
   const canStart = status?.status === "notRunning" && status.canStart;
-  const busy = activity !== null || downloading;
+  const busy = activity !== null || settingUp !== null;
+  const compilerAction =
+    compiler?.status === "localImageMissing"
+      ? "build"
+      : compiler?.status === "imageMissing"
+        ? "download"
+        : null;
 
   return (
     <section aria-labelledby="docker-preflight-heading" className="mt-6">
@@ -172,14 +180,20 @@ export function DockerPreflight() {
         <section aria-labelledby="cpp-environment-heading" className="mt-4">
           <h3 id="cpp-environment-heading">C++ compiler</h3>
           <p className="px-4" aria-live="polite">
-            {downloading
-              ? "Downloading the C++ compiler…"
-              : describeCompiler(compiler)}
+            {settingUp === "build" && "Building the C++ compiler…"}
+            {settingUp === "download" && "Downloading the C++ compiler…"}
+            {!settingUp && describeCompiler(compiler)}
           </p>
-          {downloadFailure && <p role="alert">{downloadFailure}</p>}
-          {compiler?.status === "imageMissing" && (
-            <Button variant="outline" onClick={download} disabled={busy}>
-              Download compiler
+          {setupFailure && <p role="alert">{setupFailure}</p>}
+          {compilerAction && (
+            <Button
+              variant="outline"
+              onClick={() => setupCompiler(compilerAction)}
+              disabled={busy}
+            >
+              {compilerAction === "build"
+                ? "Build compiler"
+                : "Download compiler"}
             </Button>
           )}
         </section>
